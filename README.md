@@ -15,7 +15,6 @@ of this project is to develop a new version of LOMAP based on free
 avalaible APIs such as RDKit offering the scientific community a 
 free tool to plan in advance binding free energy calculations.
 
-
 ## Prerequisites
 * RDKit Release > 2021
 * NetworkX
@@ -33,6 +32,11 @@ Authors
 * Jenke Scheen
 
 ## Installation
+
+`conda install -c conda-forge lomap2`
+
+Alternatively, you can install the prerequisites and then install from source
+with:
 
 `python setup.py install`
 
