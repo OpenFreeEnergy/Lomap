@@ -101,3 +101,8 @@ strict, loose = db_mol.build_matrices()
 nx_graph = db_mol.build_graph() 
 ```
 
+## History
+
+Open Free Energy took over maintenance of LOMAP in 2022. The original
+development repository has since been archived, but can be found at
+https://github.com/MobleyLab/Lomap.
