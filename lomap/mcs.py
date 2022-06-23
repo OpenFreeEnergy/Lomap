@@ -71,7 +71,8 @@ class MCS(object):
 
     """
 
-    def __init__(self, moli, molj, time=20, verbose='info', max3d=1000, threed=False):
+    def __init__(self, moli, molj, time=20, verbose='info', max3d=1000,
+                 threed=False, element_change=True):
         """
         Initialization function
 
@@ -90,6 +91,11 @@ class MCS(object):
             ???, default 1,000
         threed : bool, optional
             ???, default False
+        element_change : bool, optional
+            whether to allow elemental changes in mappings, default True
+
+        ..versionchanged:: 2.0.0
+           Added element_change kwarg
         """
         self.options = {
             'time': time,
@@ -580,9 +586,14 @@ class MCS(object):
         # MCS calculation. In RDKit the MCS is a smart string. Ring atoms are
         # always mapped in ring atoms.
         # Don't add the mcs result as a member variable as it can't be pickled
+        if element_change:
+            atom_compare = rdFMCS.AtomCompare.CompareAny
+        else:
+            atom_compare = rdFMCS.AtomCompare.CompareElements
+
         __mcs = rdFMCS.FindMCS([self._moli_noh, self._molj_noh],
                                timeout=time,
-                               atomCompare=rdFMCS.AtomCompare.CompareAny,
+                               atomCompare=atom_compare,
                                bondCompare=rdFMCS.BondCompare.CompareAny,
                                matchValences=False,
                                ringMatchesRingOnly=True,
@@ -1067,8 +1078,10 @@ class MCS(object):
         is_bad=False
 
         for i in range(0,len(moli_sub)):
-            edge_bondsi = [ b.GetBeginAtomIdx() for b in moli.GetBonds() if (b.GetEndAtomIdx()==moli_sub[i] and not b.GetBeginAtomIdx() in moli_sub) ]
-            edge_bondsi += [ b.GetEndAtomIdx() for b in moli.GetBonds() if (b.GetBeginAtomIdx()==moli_sub[i] and not b.GetEndAtomIdx() in moli_sub) ]
+            edge_bondsi = [b.GetBeginAtomIdx() for b in moli.GetBonds()
+                           if (b.GetEndAtomIdx()==moli_sub[i]
+                               and not b.GetBeginAtomIdx() in moli_sub) ]
+            edge_bondsi += [b.GetEndAtomIdx() for b in moli.GetBonds() if (b.GetBeginAtomIdx()==moli_sub[i] and not b.GetEndAtomIdx() in moli_sub) ]
             edge_bondsj = [ b.GetBeginAtomIdx() for b in molj.GetBonds() if (b.GetEndAtomIdx()==molj_sub[i] and not b.GetBeginAtomIdx() in molj_sub) ]
             edge_bondsj += [ b.GetEndAtomIdx() for b in molj.GetBonds() if (b.GetBeginAtomIdx()==molj_sub[i] and not b.GetEndAtomIdx() in molj_sub) ]
             #print("Atom",i,"index",moli_sub[i],"edge atoms on mol 1 are",edge_bondsi);
