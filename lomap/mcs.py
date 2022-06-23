@@ -94,7 +94,7 @@ class MCS(object):
         element_change : bool, optional
             whether to allow elemental changes in mappings, default True
 
-        ..versionchanged:: 2.0.0
+        ..versionchanged:: 2.1.0
            Added element_change kwarg
         """
         self.options = {
