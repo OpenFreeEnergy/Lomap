@@ -71,7 +71,9 @@ class MCS(object):
 
     """
 
-    def __init__(self, moli, molj, time=20, verbose='info', max3d=1000, threed=False):
+    def __init__(self, moli, molj, time: int = 20, verbose: str = 'info',
+                 max3d: float = 1000.0, threed: bool = False,
+                 element_change: bool = True):
         """
         Initialization function
 
@@ -86,16 +88,24 @@ class MCS(object):
             timeout on MCS, default 20
         verbose : str, optional
             logging level, default 'info'
-        max3d : int, optional
-            ???, default 1,000
+        max3d : float, optional
+            The MCS is trimmed to remove atoms which are further apart than
+            this distance (in units of Angstrom), default 1,000.0
         threed : bool, optional
-            ???, default False
+            Use the input 3D coordinates to guide the preferred MCS mappings,
+            default False
+        element_change : bool, optional
+            whether to allow elemental changes in mappings, default True
+
+        .. versionchanged:: 2.1.0
+           Added element_change kwarg
         """
         self.options = {
             'time': time,
             'verbose': verbose,
             'max3d': max3d,
             'threed': threed,
+            'element_change': element_change,
         }
 
         def substructure_centre(mol, mol_sub):
@@ -580,9 +590,14 @@ class MCS(object):
         # MCS calculation. In RDKit the MCS is a smart string. Ring atoms are
         # always mapped in ring atoms.
         # Don't add the mcs result as a member variable as it can't be pickled
+        if element_change:
+            atom_compare = rdFMCS.AtomCompare.CompareAny
+        else:
+            atom_compare = rdFMCS.AtomCompare.CompareElements
+
         __mcs = rdFMCS.FindMCS([self._moli_noh, self._molj_noh],
                                timeout=time,
-                               atomCompare=rdFMCS.AtomCompare.CompareAny,
+                               atomCompare=atom_compare,
                                bondCompare=rdFMCS.BondCompare.CompareAny,
                                matchValences=False,
                                ringMatchesRingOnly=True,
@@ -1067,8 +1082,10 @@ class MCS(object):
         is_bad=False
 
         for i in range(0,len(moli_sub)):
-            edge_bondsi = [ b.GetBeginAtomIdx() for b in moli.GetBonds() if (b.GetEndAtomIdx()==moli_sub[i] and not b.GetBeginAtomIdx() in moli_sub) ]
-            edge_bondsi += [ b.GetEndAtomIdx() for b in moli.GetBonds() if (b.GetBeginAtomIdx()==moli_sub[i] and not b.GetEndAtomIdx() in moli_sub) ]
+            edge_bondsi = [b.GetBeginAtomIdx() for b in moli.GetBonds()
+                           if (b.GetEndAtomIdx()==moli_sub[i]
+                               and not b.GetBeginAtomIdx() in moli_sub) ]
+            edge_bondsi += [b.GetEndAtomIdx() for b in moli.GetBonds() if (b.GetBeginAtomIdx()==moli_sub[i] and not b.GetEndAtomIdx() in moli_sub) ]
             edge_bondsj = [ b.GetBeginAtomIdx() for b in molj.GetBonds() if (b.GetEndAtomIdx()==molj_sub[i] and not b.GetBeginAtomIdx() in molj_sub) ]
             edge_bondsj += [ b.GetEndAtomIdx() for b in molj.GetBonds() if (b.GetBeginAtomIdx()==molj_sub[i] and not b.GetEndAtomIdx() in molj_sub) ]
             #print("Atom",i,"index",moli_sub[i],"edge atoms on mol 1 are",edge_bondsi);

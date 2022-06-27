@@ -291,3 +291,23 @@ def test_toluene_to_other_explicit(regression_mappings_explicit):
     mapping = [tuple(map(int, row.split(':'))) for row in mapping.split(',')]
 
     assert sorted(mapping) == ref_mapping
+
+
+@pytest.mark.parametrize('element_change', [True, False])
+def test_no_element_change(naphthol_explicit, methylnaphthalene_explicit,
+                           element_change):
+    # map naphthol to methylnaphthalene with and without element changes
+    # the -OH to -CH3 shouldn't get mapped when element changes not allowed
+    mapper = mcs.MCS(naphthol_explicit,
+                     methylnaphthalene_explicit,
+                     element_change=element_change)
+
+    expected_heavy = 11 if element_change else 10
+    expected_all = expected_heavy + (8 if element_change else 7)
+
+    assert len(mapper.heavy_atom_mcs_map()) == expected_heavy
+    assert len(mapper.all_atom_match_list().split(',')) == expected_all
+    # paranoid, check the oxygen didn't get mapped
+    saw_oxygen = any(naphthol_explicit.GetAtomWithIdx(i).GetAtomicNum() == 8
+                     for (i, _) in mapper.heavy_atom_mcs_map())
+    assert saw_oxygen == element_change
