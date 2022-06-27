@@ -93,7 +93,8 @@ class DBMolecules(object):
 
     # Initialization function
     def __init__(self, directory, parallel=1, verbose='off',
-                 time=20, ecrscore=0.0, threed=False, max3d=1000.0, output=False,
+                 time=20, ecrscore=0.0, threed=False, max3d=1000.0,
+                 element_change=True, output=False,
                  name='out', output_no_images=False, output_no_graph=False, display=False,
                  allow_tree=False, max=6, cutoff=0.4, radial=False, hub=None, fast=False,
                  links_file=None, known_actives_file=None, max_dist_from_actives=2):
@@ -112,12 +113,17 @@ class DBMolecules(object):
         time : int
            the maximum time in seconds used to perform the MCS search
         ecrscore: float
-           the electrostatic score to be used (if != 0) if two molecule have diffrent charges
+           the electrostatic score to be used (if != 0) if two molecule have
+           different charges
         threed: bool
-           If true, symmetry-equivalent MCSes are filtered to prefer the one with the best real-space alignment
+           If true, symmetry-equivalent MCSes are filtered to prefer the one
+           with the best real-space alignment
         max3d: float
-           The MCS is filtered to remove atoms which are further apart than this threshold. The default of 1000 is
-           effectively "no filter"
+           The MCS is filtered to remove atoms which are further apart than
+           this threshold. The default of 1000 is effectively "no filter"
+        element_change: bool
+           Whether to allow changes in elements between two mappings.
+           Defaults to True
         output : bool
            a flag used to generate or not the output files
         name : str
@@ -125,11 +131,13 @@ class DBMolecules(object):
         output_no_images : bool
            a flag used to disable the generation of the output image files
         output_no_graph : bool
-           a flag used to disable the generation of the output graph (.dot) file
+           a flag used to disable the generation of the output graph (.dot)
+           file
         display : bool
            a flag used to display or not a network made by using matplotlib
         allow_tree: bool
-           if set, then the final graph does not need a cycle covering and will be a tree
+           if set, then the final graph does not need a cycle covering and will
+           be a tree
         max : int
            the maximum diameter of the resulting graph
         cutoff : float
@@ -176,6 +184,7 @@ class DBMolecules(object):
         self.options['ecrscore'] = ecrscore
         self.options['threed'] = bool(threed)
         self.options['max3d'] = max3d
+        self.options['element_change'] = bool(element_change)
 
         # Output settings
         self.options['output'] = bool(output)
@@ -516,8 +525,12 @@ class DBMolecules(object):
                             logging.info(f'MCS molecules: {self[i].getName()} - {self[j].getName()}')
 
                         # Maximum Common Subgraph (MCS) calculation
-                        MC = mcs.MCS(moli, molj, time=self.options['time'], verbose=self.options['verbose'],
-                                     threed=self.options['threed'], max3d=self.options['max3d'])
+                        MC = mcs.MCS(
+                            moli, molj, time=self.options['time'],
+                            verbose=self.options['verbose'],
+                            threed=self.options['threed'],
+                            max3d=self.options['max3d'],
+                            element_change=self.options['element_change'])
                         ml = MC.all_atom_match_list()
                         self.set_MCSmap(i, j, ml)
                         MCS_map[(i, j)] = ml
@@ -1026,6 +1039,7 @@ def startup():
 
     _startup_inner(directory=ops.directory, parallel=ops.parallel, verbose=ops.verbose, time=ops.time,
                    ecrscore=ops.ecrscore, threed=ops.threed, max3d=ops.max3d,
+                   element_change=ops.element_change,
                    output=ops.output, name=ops.name, output_no_images=ops.output_no_images,
                    output_no_graph=ops.output_no_graph, display=ops.display,
                    allow_tree=ops.allow_tree, max=ops.max, max_dist_from_actives=ops.max_dist_from_actives,
@@ -1042,6 +1056,7 @@ def _startup_inner(
         ecrscore=0.0,
         threed=False,
         max3d=1000,
+        element_change=True,
         output=True,
         name='out',
         output_no_images=False,
@@ -1059,9 +1074,10 @@ def _startup_inner(
     # Inside function of CLI interface, for start of "library" like calling
 
     # Molecule DataBase initialized with the passed user options
-    db_mol = DBMolecules(directory, parallel, verbose, time, ecrscore, threed, max3d,
-                         output, name, output_no_images, output_no_graph, display,
-                         allow_tree, max, cutoff, radial, hub, fast, links_file,
+    db_mol = DBMolecules(directory, parallel, verbose, time, ecrscore, threed,
+                         max3d, element_change, output, name, output_no_images,
+                         output_no_graph, display, allow_tree, max, cutoff,
+                         radial, hub, fast, links_file,
                          known_actives_file, max_dist_from_actives)
     # Similarity score linear array generation
     strict, loose = db_mol.build_matrices()
@@ -1099,6 +1115,8 @@ mcs_group.add_argument('-3', '--threed', default=False, action='store_true', \
                        help='Use the input 3D coordinates to guide the preferred MCS mappings')
 mcs_group.add_argument('-x', '--max3d', default=1000, type=float, \
                        help='The MCS is trimmed to remove atoms which are further apart than this distance')
+mcs_group.add_argument('-L', '--element_change', default=True, type=bool,
+                       help="Whether to allow element changes in mappings")
 
 out_group = parser.add_argument_group('Output setting')
 out_group.add_argument('-o', '--output', default=True, action='store_true', \
