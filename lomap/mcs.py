@@ -90,7 +90,7 @@ class MCS(object):
             logging level, default 'info'
         max3d : float, optional
             The MCS is trimmed to remove atoms which are further apart than
-            this distance, default 1,000.0
+            this distance (in units of Angstrom), default 1,000.0
         threed : bool, optional
             Use the input 3D coordinates to guide the preferred MCS mappings,
             default False
