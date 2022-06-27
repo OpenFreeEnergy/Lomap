@@ -71,8 +71,9 @@ class MCS(object):
 
     """
 
-    def __init__(self, moli, molj, time=20, verbose='info', max3d=1000,
-                 threed=False, element_change=True):
+    def __init__(self, moli, molj, time: int = 20, verbose: str = 'info',
+                 max3d: float = 1000.0, threed: bool = False,
+                 element_change: bool = True):
         """
         Initialization function
 
@@ -87,10 +88,12 @@ class MCS(object):
             timeout on MCS, default 20
         verbose : str, optional
             logging level, default 'info'
-        max3d : int, optional
-            ???, default 1,000
+        max3d : float, optional
+            The MCS is trimmed to remove atoms which are further apart than
+            this distance, default 1,000.0
         threed : bool, optional
-            ???, default False
+            Use the input 3D coordinates to guide the preferred MCS mappings,
+            default False
         element_change : bool, optional
             whether to allow elemental changes in mappings, default True
 
@@ -102,6 +105,7 @@ class MCS(object):
             'verbose': verbose,
             'max3d': max3d,
             'threed': threed,
+            'element_change': element_change,
         }
 
         def substructure_centre(mol, mol_sub):
