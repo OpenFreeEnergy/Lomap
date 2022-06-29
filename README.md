@@ -23,13 +23,9 @@ free tool to plan in advance binding free energy calculations.
 
 Authors
 -------
-* Gaetano Calabro' <gcalabro@uci.edu>
-* David Mobley <dmobley@uci.edu>
 
-* Mark Mackey
-* Lester Hedges
-* Antonia S J S Mey
-* Jenke Scheen
+See [AUTHORS.md](https://github.com/OpenFreeEnergy/Lomap/blob/main/AUTHORS.md)
+
 
 ## Installation
 
