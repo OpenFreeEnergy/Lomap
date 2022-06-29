@@ -311,3 +311,20 @@ def test_no_element_change(naphthol_explicit, methylnaphthalene_explicit,
     saw_oxygen = any(naphthol_explicit.GetAtomWithIdx(i).GetAtomicNum() == 8
                      for (i, _) in mapper.heavy_atom_mcs_map())
     assert saw_oxygen == element_change
+
+
+@pytest.mark.parametrize('element_change', [True, False])
+def test_no_element_change_hydrogen_to_heavy(toluene_explicit,
+                                             dimethylnaphthalene_explicit,
+                                             element_change):
+    """
+    Checks that hydrogens in toluene are not matches to carbons in
+    dimethylnaphthalene
+    """
+    mapper = mcs.MCS(toluene_explicit, dimethylnaphthalene_explicit,
+                     threed=True, element_change=element_change)
+    expected_heavy = 7  # 7 + 2 heavy to hydrogen
+    expected_all = 15 if element_change else 13
+
+    assert len(mapper.heavy_atom_mcs_map()) == expected_heavy
+    assert len(mapper.all_atom_match_list().split(',')) == expected_all

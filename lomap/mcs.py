@@ -1234,7 +1234,7 @@ class MCS(object):
                                     hidx_i=ai
                                     hidx_j=aj
                                     best_dist=dist
-                if (hidx_i<0):
+                if (hidx_i < 0) and self.options['element_change']:
                     # OK, no hydrogen-hydrogen matches left. Try to match a hydrogen to a non-hydrogen
                     for ai in attached_i:
                         for aj in attached_j:
