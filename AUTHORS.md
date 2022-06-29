@@ -11,4 +11,4 @@ Lomap is developed by:
 - Irfan Alibay
 - David Swenson
 - Nigel Palmer
-
+- Shuai Liu
