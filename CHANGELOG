@@ -2,6 +2,12 @@
 CHANGELOG
 *********
 
+2.1.0
+=====
+- Added "element_change" keyword to MCS class. This toggles if elemental changes are allowed
+  within a mapping.  Defaults to True (this was previous behaviour)
+- Added "-L" switch to command line usage to toggle element changes
+
 2.0.0
 =====
 - Breaking changes: replaced usage of argparse.Namespace as input to class inits (e.g. MCS) in favour of dicts.
