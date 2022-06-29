@@ -323,7 +323,7 @@ def test_no_element_change_hydrogen_to_heavy(toluene_explicit,
     """
     mapper = mcs.MCS(toluene_explicit, dimethylnaphthalene_explicit,
                      threed=True, element_change=element_change)
-    expected_heavy = 7 # 7 + 2 heavy to hydrogen
+    expected_heavy = 7  # 7 + 2 heavy to hydrogen
     expected_all = 15 if element_change else 13
 
     assert len(mapper.heavy_atom_mcs_map()) == expected_heavy
