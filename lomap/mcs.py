@@ -1036,11 +1036,11 @@ class MCS(object):
         def adds_heterocycle(mol):
             """
             Returns true if the removal of the MCS from the provided molecule
-            leaves a sulfonamide
+            leaves a heterocycle
             """
 
             if not mol.HasSubstructMatch(self.mcs_mol):
-                raise ValueError('RDkit MCS Subgraph molecule search failed in sulfonamide check')
+                raise ValueError('RDkit MCS Subgraph molecule search failed in heterocycle check')
 
 
             rwm=rdmolops.DeleteSubstructs(mol, self.mcs_mol)
