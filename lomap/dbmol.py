@@ -399,7 +399,7 @@ class DBMolecules(object):
         try:
             with open(links_file, "r") as lf:
                 for line in lf:
-                    mols = line.split();
+                    mols = line.split()
                     if (len(mols) < 2 or len(mols) > 4):
                         raise IOError('Syntax error in links file parsing line:' + line)
                     indexa = self.inv_dic_mapping[mols[0]]
