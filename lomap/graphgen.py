@@ -844,24 +844,16 @@ class GraphGen(object):
                     # 2, change the graph size to get better resolution
                     try:
                         mol = AllChem.RemoveHs(mol)
-                        AllChem.Compute2DCoords(mol)
-                        from rdkit.Chem.Draw.MolDrawing import DrawingOptions
-                        DrawingOptions.bondLineWidth = 2.5
-                        Draw.MolToFile(mol, fname, size=(200, 200), kekulize=False, fitimage=True, imageType='png',
-                                       #options=DrawingOptions
-                                       )
                     except:
                         ###### need to ask RDKit to fix this if possible, see the code
                         # issue tracker for more details######
                         logging.info(
                             "Error attempting to remove hydrogens for molecule %s using RDKit. RDKit cannot kekulize the molecule" %
                             self.dbase[id_mol].getName())
-                        AllChem.Compute2DCoords(mol)
-                        from rdkit.Chem.Draw.MolDrawing import DrawingOptions
-                        DrawingOptions.bondLineWidth = 2.5
-                        Draw.MolToFile(mol, fname, size=(200, 200), kekulize=False, fitimage=True, imageType='png',
-                                       #options=DrawingOptions
-                                       )
+                    AllChem.Compute2DCoords(mol)
+                    from rdkit.Chem.Draw.MolDrawing import DrawingOptions
+                    DrawingOptions.bondLineWidth = 2.5
+                    Draw.MolToFile(mol, fname, size=(200, 200), kekulize=False, fitimage=True, imageType='png')
                     temp_graph.nodes[n]['image'] = fname
                     # self.resultGraph.nodes[n]['label'] = ''
                     temp_graph.nodes[n]['labelloc'] = 't'
