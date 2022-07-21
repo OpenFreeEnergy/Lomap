@@ -254,7 +254,10 @@ class DBMolecules(object):
         """
         return self
 
-    def next(self):  # Python 3: def __next__(self)
+    def __next__(self):
+        return self.next()
+
+    def next(self):
         """
         Select the molecule during an iteration
         """
