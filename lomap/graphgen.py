@@ -980,6 +980,7 @@ class GraphGen(object):
         if not output_no_images:
             log += f'\n{self.dbase.options["name"]}.png\tPng file'
         log += f'\n{self.dbase.options["name"]}.txt\tMapping Text file'
+        logging.info(log)
 
         logging.info(30 * '-')
 
