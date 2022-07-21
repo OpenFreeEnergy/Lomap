@@ -535,7 +535,6 @@ class DBMolecules(object):
                             max3d=self.options['max3d'],
                             element_change=self.options['element_change'])
                         ml = MC.all_atom_match_list()
-                        self.set_MCSmap(i, j, ml)
                         MCS_map[(i, j)] = ml
 
                     except Exception as e:
