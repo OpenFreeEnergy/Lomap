@@ -893,8 +893,8 @@ class GraphGen(object):
             morph_data = "morph_pairs = "
         with open(self.dbase.options['name'] + "_score_with_connection.txt", "w") as info_txt:
             all_key_id = self.dbase.dic_mapping.keys()
-            data = ["%-10s,%-10s,%-25s,%-25s,%-15s,%-15s,%-15s,%-10s,%s\n" % (
-            "Index_1", "Index_2", "Filename_1", "Filename_2", "Str_sim", "Eff_sim", "Loose_sim", "Connect", "Map_str")]
+            data = ["%-10s,%-10s,%-25s,%-25s,%-15s,%-15s,%-15s,%-10s\n" % (
+            "Index_1", "Index_2", "Filename_1", "Filename_2", "Str_sim", "Eff_sim", "Loose_sim", "Connect")]
             for i in range(len(all_key_id) - 1):
                 for j in range(i + 1, len(all_key_id)):
                     morph_string = None
