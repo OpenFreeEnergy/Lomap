@@ -254,7 +254,10 @@ class DBMolecules(object):
         """
         return self
 
-    def next(self):  # Python 3: def __next__(self)
+    def __next__(self):
+        return self.next()
+
+    def next(self):
         """
         Select the molecule during an iteration
         """
@@ -396,7 +399,7 @@ class DBMolecules(object):
         try:
             with open(links_file, "r") as lf:
                 for line in lf:
-                    mols = line.split();
+                    mols = line.split()
                     if (len(mols) < 2 or len(mols) > 4):
                         raise IOError('Syntax error in links file parsing line:' + line)
                     indexa = self.inv_dic_mapping[mols[0]]
@@ -532,7 +535,6 @@ class DBMolecules(object):
                             max3d=self.options['max3d'],
                             element_change=self.options['element_change'])
                         ml = MC.all_atom_match_list()
-                        self.set_MCSmap(i, j, ml)
                         MCS_map[(i, j)] = ml
 
                     except Exception as e:

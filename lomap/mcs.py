@@ -419,7 +419,7 @@ class MCS(object):
                 moli_idx = int(at.GetProp('to_moli'))
                 moli_at = self._moli_noh.GetAtomWithIdx(moli_idx)
                 molj_idx = int(at.GetProp('to_molj'))
-                molj_at = self._moli_noh.GetAtomWithIdx(moli_idx)
+                molj_at = self._molj_noh.GetAtomWithIdx(molj_idx)
 
                 # Testing moli and molj is redundant due to the way that the
                 # MCS is calculated, but I'd rather be paranoid here
@@ -1036,11 +1036,11 @@ class MCS(object):
         def adds_heterocycle(mol):
             """
             Returns true if the removal of the MCS from the provided molecule
-            leaves a sulfonamide
+            leaves a heterocycle
             """
 
             if not mol.HasSubstructMatch(self.mcs_mol):
-                raise ValueError('RDkit MCS Subgraph molecule search failed in sulfonamide check')
+                raise ValueError('RDkit MCS Subgraph molecule search failed in heterocycle check')
 
 
             rwm=rdmolops.DeleteSubstructs(mol, self.mcs_mol)
