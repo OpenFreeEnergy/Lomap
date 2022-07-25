@@ -51,7 +51,15 @@ setup(
     platforms            = ['Linux-64', 'Mac OSX-64', 'Unix-64'],
     packages             = find_packages()+['test'],
     include_package_data = True,
-
+    install_requires     = [
+            'matplotlib~=3.5.2',
+            'networkx~=2.6.3',
+            'pygraphviz~=1.7',
+            'rdkit-pypi~=2022.3.3'
+    ],
+    extras_require       = {
+            'test': ['pytest~=7.1.2']
+    },
     entry_points         = {'console_scripts':['lomap=lomap.dbmol:startup']},
     zip_safe             = False
 )
