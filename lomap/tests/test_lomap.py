@@ -14,8 +14,8 @@ import pytest
 
 def _rf(fn):
     # get path to file from inside lomap installation
-    f = pkg_resources.resource_filename('lomap', 'test/' + fn)
-    return f.replace('/lomap/test', '/test')
+    f = pkg_resources.resource_filename('lomap', 'tests/' + fn)
+    return f
 
 
 @pytest.mark.parametrize('fn1, fn2, max3d_arg, threed_arg, exp_mcsr', [

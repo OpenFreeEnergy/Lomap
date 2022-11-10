@@ -1,3 +1,4 @@
+graft lomap
 recursive-include lomap/tests  *sdf
 recursive-include lomap/tests  *mol2
 recursive-include lomap/tests  *gpickle
