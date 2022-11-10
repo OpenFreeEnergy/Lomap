@@ -1,4 +1,10 @@
-recursive-include test  *
+graft lomap
+recursive-include lomap/tests  *sdf
+recursive-include lomap/tests  *mol2
+recursive-include lomap/tests  *gpickle
+recursive-include lomap/tests  *pickle
+recursive-include lomap/tests  *txt
+
 
 include MANIFEST.in
 include README.md

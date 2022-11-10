@@ -12,8 +12,8 @@ from lomap import mcs
 
 def _rf(fn):
     # get path to file from inside lomap installation
-    f = pkg_resources.resource_filename('lomap', 'test/' + fn)
-    return f.replace('/lomap/test', '/test')
+    f = pkg_resources.resource_filename('lomap', 'tests/' + fn)
+    return f
 
 
 @pytest.fixture(scope='session')
