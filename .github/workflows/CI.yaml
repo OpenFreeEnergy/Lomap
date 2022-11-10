@@ -57,7 +57,7 @@ jobs:
           show-channel-urls: true
           channel-priority: true
       - name: Refine test environment
-        if: ${{ matrix.rdkit-version != "latest" }}
+        if: ${{ matrix.rdkit-version != 'latest' }}
         run: mamba install rdkit=${{ matrix.rdkit-version }}
 
       - name: Install package
