@@ -50,7 +50,7 @@ def test_mcsr(fn1, fn2, threed_arg, max3d_arg, exp_mcsr):
 
     assert mcsr == pytest.approx(exp_mcsr)
 
-@pytest.mark.parametrize('fn1, fn2, max3d_arg, threed_arg, exp_atnum', [
+@pytest.mark.parametrize('fn1, fn2, threed_arg, max3d_arg, exp_atnum', [
     (_rf('transforms/phenyl.sdf'), _rf('transforms/toluyl.sdf'), False, 1000, 1),
     (_rf('transforms/phenyl.sdf'), _rf('transforms/chlorophenyl.sdf'), False, 1000, 1),
     (_rf('transforms/toluyl.sdf'), _rf('transforms/chlorophenyl.sdf'), False, 1000, math.exp(-0.1 * 0.5)),
@@ -68,8 +68,7 @@ def test_mcsr(fn1, fn2, threed_arg, max3d_arg, exp_mcsr):
    (_rf('transforms/chlorotoluyl1.sdf'), _rf('transforms/chlorotoluyl2.sdf'), False, 1000, 1),
    (_rf('transforms/chlorotoluyl1.sdf'), _rf('transforms/chlorotoluyl2.sdf'), True, 1000, math.exp(-0.05 * 2))
 ])
-@pytest.mark.skip('atnum issue')
-def test_atnum_rule(fn1, fn2, max3d_arg, threed_arg, exp_atnum):
+def test_atnum_rule(fn1, fn2, threed_arg, max3d_arg, exp_atnum):
     # MolA, molB, 3D?, max3d, mcsr, atomic_number_rule
     logging.basicConfig(format='%(message)s', level=logging.CRITICAL)
 
@@ -77,7 +76,7 @@ def test_atnum_rule(fn1, fn2, max3d_arg, threed_arg, exp_atnum):
     lg.setLevel(RDLogger.CRITICAL)
 
     mola = Chem.MolFromMolFile(fn1, sanitize=False, removeHs=False)
-    molb = Chem.MolFromMolFile(fn1, sanitize=False, removeHs=False)
+    molb = Chem.MolFromMolFile(fn2, sanitize=False, removeHs=False)
     MC = MCS(mola, molb, time=20, verbose='info', max3d=max3d_arg, threed=threed_arg)
 
     atnum = MC.atomic_number_rule()
