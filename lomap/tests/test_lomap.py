@@ -36,16 +36,17 @@ def _rf(fn):
    (_rf('transforms/chlorotoluyl1.sdf'), _rf('transforms/chlorotoluyl2.sdf'), False, 1000, 1),
    (_rf('transforms/chlorotoluyl1.sdf'), _rf('transforms/chlorotoluyl2.sdf'), True, 1000, 1)
 ])
-@pytest.mark.skip("mcsr issue")
+#@pytest.mark.skip("mcsr issue")
 def test_mcsr(fn1, fn2, max3d_arg, threed_arg, exp_mcsr):
     # MolA, molB, 3D?, max3d, mcsr, atomic_number_rule
-    logging.basicConfig(format='%(message)s', level=logging.CRITICAL)
+    #logging.basicConfig(format='%(message)s', level=logging.DEBUG)
 
     lg = RDLogger.logger()
     lg.setLevel(RDLogger.CRITICAL)
 
     mola = Chem.MolFromMolFile(fn1, sanitize=False, removeHs=False)
-    molb = Chem.MolFromMolFile(fn1, sanitize=False, removeHs=False)
+    molb = Chem.MolFromMolFile(fn2, sanitize=False, removeHs=False)
+
     MC = MCS(mola, molb, time=20, verbose='info', max3d=max3d_arg, threed=threed_arg)
     mcsr = MC.mcsr()
 
