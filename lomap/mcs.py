@@ -90,10 +90,12 @@ class MCS(object):
             logging level, default 'info'
         max3d : float, optional
             The MCS is trimmed to remove atoms which are further apart than
-            this distance (in units of Angstrom), default 1,000.0
+            this distance (in units of Angstrom), default 1,000.0 (i.e. do
+            not trim)
         threed : bool, optional
-            Use the input 3D coordinates to guide the preferred MCS mappings,
-            default False
+            When disambiguating the substructure found back to the original
+            molecules, if True 3D coordinates are used, otherwise the number
+            of elemental changes is minimised. default False.
         element_change : bool, optional
             whether to allow elemental changes in mappings, default True
 
