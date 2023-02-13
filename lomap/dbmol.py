@@ -897,11 +897,6 @@ class Molecule(object):
     and the total number of instantiated molecules
 
     """
-
-    # This variable is used to count the current total number of molecules
-    # The variable is defined as private
-    __total_molecules = 0
-
     def __init__(self, molecule, mol_id, molname):
         """
         Initialization class function
