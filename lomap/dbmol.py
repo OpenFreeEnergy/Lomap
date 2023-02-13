@@ -32,6 +32,7 @@ import multiprocessing
 import os
 import pickle
 from ._version import get_versions
+from typing import Optional
 
 import networkx as nx
 import numpy as np
@@ -92,12 +93,30 @@ class DBMolecules(object):
     """
 
     # Initialization function
-    def __init__(self, directory, parallel=1, verbose='off',
-                 time=20, ecrscore=0.0, threed=False, max3d=1000.0,
-                 element_change=True, output=False,
-                 name='out', output_no_images=False, output_no_graph=False, display=False,
-                 allow_tree=False, max=6, cutoff=0.4, radial=False, hub=None, fast=False,
-                 links_file=None, known_actives_file=None, max_dist_from_actives=2):
+    def __init__(self,
+                 directory: str,
+                 parallel: int = 1,
+                 verbose: str = 'off',
+                 time: int = 20,
+                 ecrscore: float = 0.0,
+                 threed: bool = False,
+                 max3d: float = 1000.0,
+                 element_change: bool = True,
+                 output: bool = False,
+                 name: str = 'out',
+                 output_no_images: bool = False,
+                 output_no_graph: bool = False,
+                 display: bool = False,
+                 allow_tree: bool = False,
+                 max: int = 6,
+                 cutoff: float = 0.4,
+                 radial: bool = False,
+                 hub: Optional[str] = None,
+                 fast: bool = False,
+                 links_file: Optional[str] = None,
+                 known_actives_file: Optional[str] = None,
+                 max_dist_from_actives: int = 2
+                 ):
 
         """
         Initialization of  the Molecule Database Class
