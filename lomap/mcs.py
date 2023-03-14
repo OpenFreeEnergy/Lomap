@@ -73,7 +73,7 @@ class MCS(object):
 
     def __init__(self, moli, molj, time: int = 20, verbose: str = 'info',
                  max3d: float = 1000.0, threed: bool = False,
-                 element_change: bool = True):
+                 element_change: bool = True, seed=''):
         """
         Initialization function
 
@@ -98,6 +98,8 @@ class MCS(object):
             of elemental changes is minimised. default False.
         element_change : bool, optional
             whether to allow elemental changes in mappings, default True
+        seed : string, optional
+            seed for MCS
 
         .. versionchanged:: 2.1.0
            Added element_change kwarg
@@ -604,7 +606,8 @@ class MCS(object):
                                matchValences=False,
                                ringMatchesRingOnly=True,
                                completeRingsOnly=True,
-                               matchChiralTag=False)
+                               matchChiralTag=False,
+                               seedSmarts=seed)
 
         # Note that we need matchChiralTag=False as we want to match chiral atoms with different
         # parities, we just need to trim the MCS to the largest possible match that doesn't have

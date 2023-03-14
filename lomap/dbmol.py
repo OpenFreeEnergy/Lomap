@@ -34,6 +34,7 @@ import pickle
 from ._version import get_versions
 from typing import Optional
 
+from rdkit.Chem import rdFMCS
 import networkx as nx
 import numpy as np
 from . import graphgen
@@ -85,6 +86,28 @@ def ecr(mol_i, mol_j):
     return scr_ecr
 
 
+def find_common_core(mols: list[Chem.Mol], element_change: bool) -> str:
+    # find common core among molecules to speed up future MCS searches
+    # strip hydrogens off
+    mols2 = [Chem.RemoveHs(m) for m in mols]
+
+    if element_change:
+        atom_compare = rdFMCS.AtomCompare.CompareAny
+    else:
+        atom_compare = rdFMCS.AtomCompare.CompareElements
+
+    res = rdFMCS.FindMCS(mols2,
+                       timeout=60,
+                       atomCompare=atom_compare,
+                       bondCompare=rdFMCS.BondCompare.CompareAny,
+                       matchValences=False,
+                       ringMatchesRingOnly=True,
+                       completeRingsOnly=True,
+                       matchChiralTag=False)
+
+    return res.smartsString
+
+
 class DBMolecules(object):
     """
 
@@ -115,7 +138,8 @@ class DBMolecules(object):
                  fast: bool = False,
                  links_file: Optional[str] = None,
                  known_actives_file: Optional[str] = None,
-                 max_dist_from_actives: int = 2
+                 max_dist_from_actives: int = 2,
+                 use_common_core=True,
                  ):
 
         """
@@ -228,6 +252,12 @@ class DBMolecules(object):
 
         # Internal list container used to store the loaded molecule objects
         self._list = self.read_molecule_files()
+
+        if use_common_core:
+            self.options['seed'] = find_common_core([m.getMolecule() for m in self._list],
+                                                    self.options['element_change'])
+        else:
+            self.options['seed'] = ''
 
         # Dictionary which holds the mapping between the generated molecule IDs and molecule file names
         self.dic_mapping = {}
@@ -552,7 +582,9 @@ class DBMolecules(object):
                             verbose=self.options['verbose'],
                             threed=self.options['threed'],
                             max3d=self.options['max3d'],
-                            element_change=self.options['element_change'])
+                            element_change=self.options['element_change'],
+                            seed=self.options['seed'],
+                        )
                         ml = MC.all_atom_match_list()
                         MCS_map[(i, j)] = ml
 
