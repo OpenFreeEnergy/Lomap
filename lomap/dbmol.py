@@ -86,8 +86,8 @@ def ecr(mol_i, mol_j):
     return scr_ecr
 
 
-def find_common_core(mols: list[Chem.Mol], element_change: bool) -> str:
-    # find common core among molecules to speed up future MCS searches
+def _find_common_core(mols: list[Chem.Mol], element_change: bool) -> str:
+    """Find common core among input molecules to speed up future MCS"""
     # strip hydrogens off
     mols2 = [Chem.RemoveHs(m) for m in mols]
 
@@ -139,7 +139,7 @@ class DBMolecules(object):
                  links_file: Optional[str] = None,
                  known_actives_file: Optional[str] = None,
                  max_dist_from_actives: int = 2,
-                 use_common_core=True,
+                 use_common_core: bool=True,
                  ):
 
         """
@@ -191,7 +191,9 @@ class DBMolecules(object):
            the name of a file containing mols whose activity is known
         max_dist_from_actives : int
             The maximum number of links from any molecule to an active
-
+        use_common_core: bool, optional
+            Whether to search among all input molecules for a common core to speed up pairwise MCS
+            calculations, default True
         """
         # Set the Logging
         if verbose == 'off':
@@ -254,8 +256,8 @@ class DBMolecules(object):
         self._list = self.read_molecule_files()
 
         if use_common_core:
-            self.options['seed'] = find_common_core([m.getMolecule() for m in self._list],
-                                                    self.options['element_change'])
+            self.options['seed'] = _find_common_core([m.getMolecule() for m in self._list],
+                                                     self.options['element_change'])
         else:
             self.options['seed'] = ''
 
@@ -1092,7 +1094,7 @@ def startup():
                    output_no_graph=ops.output_no_graph, display=ops.display,
                    allow_tree=ops.allow_tree, max=ops.max, max_dist_from_actives=ops.max_dist_from_actives,
                    cutoff=ops.cutoff, radial=ops.radial, hub=ops.hub, fast=ops.fast, links_file=ops.links_file,
-                   known_actives_file=ops.known_actives_file,
+                   known_actives_file=ops.known_actives_file, common_core=ops.common_core,
                    )
 
 
@@ -1118,7 +1120,8 @@ def _startup_inner(
         hub=None,
         fast=False,
         links_file='',
-        known_actives_file=''):
+        known_actives_file='',
+        common_core=True):
     # Inside function of CLI interface, for start of "library" like calling
 
     # Molecule DataBase initialized with the passed user options
@@ -1126,7 +1129,8 @@ def _startup_inner(
                          max3d, element_change, output, name, output_no_images,
                          output_no_graph, display, allow_tree, max, cutoff,
                          radial, hub, fast, links_file,
-                         known_actives_file, max_dist_from_actives)
+                         known_actives_file, max_dist_from_actives,
+                         use_common_core=common_core)
     # Similarity score linear array generation
     strict, loose = db_mol.build_matrices()
 
@@ -1203,6 +1207,8 @@ graph_group.add_argument('-l', '--links-file', type=str, default='', \
                               'should use the provided score and force this link to be used in the final graph.')
 graph_group.add_argument('-k', '--known-actives-file', type=str, default='', \
                          help='Specify a filename listing the molecule files that should be initialised as "known actives", one per line')
+graph_group.add_argument('-C', '--common-core', type=bool, default=True,
+                         help='Calculate a common core among all input molecules before calculations pairwise')
 
 # ------------------------------------------------------------------
 
