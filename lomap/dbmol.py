@@ -34,6 +34,7 @@ import pickle
 from ._version import get_versions
 from typing import Optional
 
+from rdkit.Chem import rdFMCS
 import networkx as nx
 import numpy as np
 from . import graphgen
@@ -85,6 +86,31 @@ def ecr(mol_i, mol_j):
     return scr_ecr
 
 
+def _find_common_core(mols, element_change: bool) -> str:
+    """Find common core among input molecules to speed up future MCS"""
+    # strip hydrogens off
+    mols2 = [Chem.RemoveHs(m) for m in mols]
+
+    if element_change:
+        atom_compare = rdFMCS.AtomCompare.CompareAny
+    else:
+        atom_compare = rdFMCS.AtomCompare.CompareElements
+
+    res = rdFMCS.FindMCS(mols2,
+                       timeout=60,
+                       atomCompare=atom_compare,
+                       bondCompare=rdFMCS.BondCompare.CompareAny,
+                       matchValences=False,
+                       ringMatchesRingOnly=True,
+                       completeRingsOnly=True,
+                       matchChiralTag=False)
+
+    if res.canceled:  # timeout
+        return ""
+    else:
+        return res.smartsString
+
+
 class DBMolecules(object):
     """
 
@@ -115,7 +141,8 @@ class DBMolecules(object):
                  fast: bool = False,
                  links_file: Optional[str] = None,
                  known_actives_file: Optional[str] = None,
-                 max_dist_from_actives: int = 2
+                 max_dist_from_actives: int = 2,
+                 use_common_core: bool=True,
                  ):
 
         """
@@ -167,7 +194,9 @@ class DBMolecules(object):
            the name of a file containing mols whose activity is known
         max_dist_from_actives : int
             The maximum number of links from any molecule to an active
-
+        use_common_core: bool, optional
+            Whether to search among all input molecules for a common core to speed up pairwise MCS
+            calculations, default True
         """
         # Set the Logging
         if verbose == 'off':
@@ -228,6 +257,12 @@ class DBMolecules(object):
 
         # Internal list container used to store the loaded molecule objects
         self._list = self.read_molecule_files()
+
+        if use_common_core:
+            self.options['seed'] = _find_common_core([m.getMolecule() for m in self._list],
+                                                     self.options['element_change'])
+        else:
+            self.options['seed'] = ''
 
         # Dictionary which holds the mapping between the generated molecule IDs and molecule file names
         self.dic_mapping = {}
@@ -552,7 +587,9 @@ class DBMolecules(object):
                             verbose=self.options['verbose'],
                             threed=self.options['threed'],
                             max3d=self.options['max3d'],
-                            element_change=self.options['element_change'])
+                            element_change=self.options['element_change'],
+                            seed=self.options['seed'],
+                        )
                         ml = MC.all_atom_match_list()
                         MCS_map[(i, j)] = ml
 
@@ -1060,7 +1097,7 @@ def startup():
                    output_no_graph=ops.output_no_graph, display=ops.display,
                    allow_tree=ops.allow_tree, max=ops.max, max_dist_from_actives=ops.max_dist_from_actives,
                    cutoff=ops.cutoff, radial=ops.radial, hub=ops.hub, fast=ops.fast, links_file=ops.links_file,
-                   known_actives_file=ops.known_actives_file,
+                   known_actives_file=ops.known_actives_file, common_core=ops.common_core,
                    )
 
 
@@ -1086,7 +1123,8 @@ def _startup_inner(
         hub=None,
         fast=False,
         links_file='',
-        known_actives_file=''):
+        known_actives_file='',
+        common_core=True):
     # Inside function of CLI interface, for start of "library" like calling
 
     # Molecule DataBase initialized with the passed user options
@@ -1094,7 +1132,8 @@ def _startup_inner(
                          max3d, element_change, output, name, output_no_images,
                          output_no_graph, display, allow_tree, max, cutoff,
                          radial, hub, fast, links_file,
-                         known_actives_file, max_dist_from_actives)
+                         known_actives_file, max_dist_from_actives,
+                         use_common_core=common_core)
     # Similarity score linear array generation
     strict, loose = db_mol.build_matrices()
 
@@ -1171,6 +1210,8 @@ graph_group.add_argument('-l', '--links-file', type=str, default='', \
                               'should use the provided score and force this link to be used in the final graph.')
 graph_group.add_argument('-k', '--known-actives-file', type=str, default='', \
                          help='Specify a filename listing the molecule files that should be initialised as "known actives", one per line')
+graph_group.add_argument('-C', '--common-core', type=bool, default=True,
+                         help='Calculate a common core among all input molecules before calculations pairwise')
 
 # ------------------------------------------------------------------
 
