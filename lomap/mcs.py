@@ -99,7 +99,7 @@ class MCS(object):
         element_change : bool, optional
             whether to allow elemental changes in mappings, default True
         seed : string, optional
-            seed for MCS
+            Initial SMARTS seed for MCS search.
 
         .. versionchanged:: 2.1.0
            Added element_change kwarg
