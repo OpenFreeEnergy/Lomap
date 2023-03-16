@@ -86,7 +86,7 @@ def ecr(mol_i, mol_j):
     return scr_ecr
 
 
-def _find_common_core(mols: list[Chem.Mol], element_change: bool) -> str:
+def _find_common_core(mols, element_change: bool) -> str:
     """Find common core among input molecules to speed up future MCS"""
     # strip hydrogens off
     mols2 = [Chem.RemoveHs(m) for m in mols]
