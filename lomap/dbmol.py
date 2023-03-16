@@ -105,7 +105,10 @@ def _find_common_core(mols, element_change: bool) -> str:
                        completeRingsOnly=True,
                        matchChiralTag=False)
 
-    return res.smartsString
+    if res.canceled:  # timeout
+        return ""
+    else:
+        return res.smartsString
 
 
 class DBMolecules(object):
