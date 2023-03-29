@@ -2,6 +2,12 @@
 CHANGELOG
 *********
 
+2.2.0
+=====
+- Added use_common_core option to DBMolecules and -C --common-core option to CLI.
+  This is on by default and speeds up network creation by 10-50x (PR #25)
+- Fixed DBMolecules iteration in Python 3 (PR #18)
+	
 2.1.0
 =====
 - Added "element_change" keyword to MCS class. This toggles if elemental changes are allowed
