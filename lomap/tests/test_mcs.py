@@ -328,3 +328,130 @@ def test_no_element_change_hydrogen_to_heavy(toluene_explicit,
 
     assert len(mapper.heavy_atom_mcs_map()) == expected_heavy
     assert len(mapper.all_atom_match_list().split(',')) == expected_all
+
+
+@pytest.fixture
+def naphthalene_shift():
+    block = """\
+naphthalene
+     RDKit          3D
+
+ 18 19  0  0  0  0  0  0  0  0999 V2000
+   -0.0251   -0.6892   -0.0803 C   0  0  0  0  0  0  0  0  0  0  0  0
+    1.1579   -1.4195   -0.1275 C   0  0  0  0  0  0  0  0  0  0  0  0
+    2.3995   -0.8252   -0.0200 C   0  0  0  0  0  0  0  0  0  0  0  0
+    2.4400    0.5457    0.1394 C   0  0  0  0  0  0  0  0  0  0  0  0
+    1.2704    1.2774    0.1872 C   0  0  0  0  0  0  0  0  0  0  0  0
+    0.0223    0.6814    0.0793 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.1469    1.4130    0.1271 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -2.3984    0.8248    0.0200 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -2.4271   -0.5460   -0.1391 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.2650   -1.2897   -0.1885 C   0  0  0  0  0  0  0  0  0  0  0  0
+    1.1134   -2.5024   -0.2538 H   0  0  0  0  0  0  0  0  0  0  0  0
+    3.3168   -1.4007   -0.0576 H   0  0  0  0  0  0  0  0  0  0  0  0
+    3.4009    1.0420    0.2268 H   0  0  0  0  0  0  0  0  0  0  0  0
+    1.2696    2.3501    0.3110 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.0667    2.4757    0.2522 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.3195    1.4047    0.0580 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.4173   -1.0014   -0.2227 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.3249   -2.3407   -0.3116 H   0  0  0  0  0  0  0  0  0  0  0  0
+  1  2  2  0
+  2  3  1  0
+  3  4  2  0
+  4  5  1  0
+  5  6  2  0
+  6  7  1  0
+  7  8  2  0
+  8  9  1  0
+  9 10  2  0
+  6  1  1  0
+ 10  1  1  0
+  2 11  1  0
+  3 12  1  0
+  4 13  1  0
+  5 14  1  0
+  7 15  1  0
+  8 16  1  0
+  9 17  1  0
+ 10 18  1  0
+M  END
+    """
+
+    return Chem.MolFromMolBlock(block, removeHs=False)
+
+
+@pytest.fixture
+def benzoxazole_shift():
+    block = """\
+benzoxazole
+     RDKit          3D
+
+ 14 15  0  0  0  0  0  0  0  0999 V2000
+    1.1790   -1.1478   -0.0955 N   0  0  0  0  0  0  0  0  0  0  0  0
+   -0.0924   -0.6927   -0.0828 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.3456   -1.2599   -0.1876 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -2.5080   -0.5410   -0.1410 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -2.3899    0.8321    0.0211 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.1444    1.4227    0.1283 C   0  0  0  0  0  0  0  0  0  0  0  0
+    0.0254    0.6749    0.0787 C   0  0  0  0  0  0  0  0  0  0  0  0
+    1.3085    0.9716    0.1531 O   0  0  0  0  0  0  0  0  0  0  0  0
+    2.0357   -0.1154    0.0505 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.4354   -2.3353   -0.3144 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.4840   -1.0008   -0.2247 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.3142    1.4080    0.0586 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.0701    2.4861    0.2533 H   0  0  0  0  0  0  0  0  0  0  0  0
+    3.1347   -0.1915    0.0761 H   0  0  0  0  0  0  0  0  0  0  0  0
+  1  2  1  0
+  2  3  2  0
+  3  4  1  0
+  4  5  2  0
+  5  6  1  0
+  6  7  2  0
+  7  8  1  0
+  8  9  1  0
+  9  1  2  0
+  7  2  1  0
+  3 10  1  0
+  4 11  1  0
+  5 12  1  0
+  6 13  1  0
+  9 14  1  0
+M  END
+
+"""
+
+    return Chem.MolFromMolBlock(block, removeHs=False)
+
+
+def mismatch(m1, m2, shift, mapping) -> float:
+    """Total geometric mismatch in the mapping"""
+    total = 0
+
+    ci = m1.GetConformer()
+    cj = m2.GetConformer()
+
+    m1_idx, m2_idx = list(zip(*mapping))
+
+    if shift:
+        offset = mcs.substructure_centre(m1, m1_idx) - mcs.substructure_centre(m2, m2_idx)
+    else:
+        offset = mcs.Point3D(0.0, 0.0, 0.0)
+
+    for i, j in mapping:
+        total += (ci.GetAtomPosition(i) - cj.GetAtomPosition(j) - offset).Length()
+
+    return total
+
+
+@pytest.mark.parametrize('use_shift,refval1,refval2', [
+    (True, 0.24450728924894888, 14.749875486694247),  # distance mismatch values with and without CoG shift
+    (False, 0.2526494046771085, 0.263024457571414),
+    # the fact first case can be 0.24 when the second case is either 0.25 or 0.26 is the crux of issue #26
+])
+def test_shift_parameter(use_shift, refval1, refval2, naphthalene_shift, benzoxazole_shift):
+    mapper = mcs.MCS(naphthalene_shift, benzoxazole_shift, threed=True, shift=use_shift)
+    mapping = mapper.heavy_atom_mcs_map()
+
+    assert len(mapper.heavy_atom_mcs_map()) == 6
+    assert mismatch(naphthalene_shift, benzoxazole_shift, True, mapping) == pytest.approx(refval1)
+    assert mismatch(naphthalene_shift, benzoxazole_shift, False, mapping) == pytest.approx(refval2)
