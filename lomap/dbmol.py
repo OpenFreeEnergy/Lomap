@@ -142,7 +142,8 @@ class DBMolecules(object):
                  links_file: Optional[str] = None,
                  known_actives_file: Optional[str] = None,
                  max_dist_from_actives: int = 2,
-                 use_common_core: bool=True,
+                 use_common_core: bool = True,
+                 shift: bool = True,
                  ):
 
         """
@@ -197,6 +198,9 @@ class DBMolecules(object):
         use_common_core: bool, optional
             Whether to search among all input molecules for a common core to speed up pairwise MCS
             calculations, default True
+        shift: bool, optional
+            When using 'threed' option, if to translate the two molecules to superimpose before checking real space
+            alignment, default True
         """
         # Set the Logging
         if verbose == 'off':
@@ -231,6 +235,7 @@ class DBMolecules(object):
         CheckEcrscore._check(ecrscore)
         self.options['ecrscore'] = ecrscore
         self.options['threed'] = bool(threed)
+        self.options['shift'] = bool(shift)
         self.options['max3d'] = max3d
         self.options['element_change'] = bool(element_change)
 
@@ -589,6 +594,7 @@ class DBMolecules(object):
                             max3d=self.options['max3d'],
                             element_change=self.options['element_change'],
                             seed=self.options['seed'],
+                            shift=self.options['shift'],
                         )
                         ml = MC.all_atom_match_list()
                         MCS_map[(i, j)] = ml
@@ -1170,6 +1176,8 @@ mcs_group.add_argument('-3', '--threed', default=False, action='store_true', \
                        help='Use the input 3D coordinates to guide the preferred MCS mappings')
 mcs_group.add_argument('-x', '--max3d', default=1000, type=float, \
                        help='The MCS is trimmed to remove atoms which are further apart than this distance')
+mcs_group.add_argument('-s', '--shift', default=True, action='store_true',
+                       help="Translate molecules to maximise overlap before checking real space alignment for symmetry resolving")
 mcs_group.add_argument('-L', '--element_change', default=True, type=bool,
                        help="Whether to allow element changes in mappings")
 
