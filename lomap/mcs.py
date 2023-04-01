@@ -103,6 +103,8 @@ class MCS(object):
 
         .. versionchanged:: 2.1.0
            Added element_change kwarg
+        .. versionchanged:: 2.2.0
+           Added seed option
         """
         self.options = {
             'time': time,
