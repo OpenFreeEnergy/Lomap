@@ -63,6 +63,20 @@ def atom_hybridization(a):
     return 2  # sp2
 
 
+def substructure_centre(mol, mol_sub) -> Point3D:
+    """
+
+    This function takes a molecule and a list of atom indices
+    in that molecule and returns an RDKit Point3D representing
+    the geometric centre of the atoms in the list
+
+    """
+    s = Point3D()
+    for i in mol_sub:
+        s += mol.GetConformer().GetAtomPosition(i)
+    return s / len(mol_sub)
+
+
 class MCS(object):
     """
 
@@ -119,21 +133,6 @@ class MCS(object):
             'seed': seed,
             'shift': shift,
         }
-
-        def substructure_centre(mol, mol_sub):
-            """
-
-            This function takes a molecule and a list of atom indices
-            in that molecule and returns an RDKit Point3D representing
-            the geometric centre of the atoms in the list
-
-            """
-
-            sum = Point3D()
-            for i in mol_sub:
-                sum += mol.GetConformer().GetAtomPosition(i)
-            return sum / len(mol_sub)
-
 
         def best_substruct_match_to_mcs(moli, molj, by_rmsd: bool, use_shift: bool):
             """
