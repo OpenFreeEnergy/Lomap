@@ -63,6 +63,20 @@ def atom_hybridization(a):
     return 2  # sp2
 
 
+def substructure_centre(mol, mol_sub) -> Point3D:
+    """
+
+    This function takes a molecule and a list of atom indices
+    in that molecule and returns an RDKit Point3D representing
+    the geometric centre of the atoms in the list
+
+    """
+    s = Point3D()
+    for i in mol_sub:
+        s += mol.GetConformer().GetAtomPosition(i)
+    return s / len(mol_sub)
+
+
 class MCS(object):
     """
 
@@ -73,7 +87,7 @@ class MCS(object):
 
     def __init__(self, moli, molj, time: int = 20, verbose: str = 'info',
                  max3d: float = 1000.0, threed: bool = False,
-                 element_change: bool = True, seed=''):
+                 element_change: bool = True, seed: str = '', shift: bool = True):
         """
         Initialization function
 
@@ -100,9 +114,15 @@ class MCS(object):
             whether to allow elemental changes in mappings, default True
         seed : string, optional
             Initial SMARTS seed for MCS search.
+        shift : bool, optional
+            When using threed, if to shift the molecules coordinates to maximise overlap, default True
 
         .. versionchanged:: 2.1.0
            Added element_change kwarg
+        .. versionchanged:: 2.2.0
+           Added seed option
+        .. versionchanged:: 2.3.0
+           Added shift option
         """
         self.options = {
             'time': time,
@@ -110,31 +130,17 @@ class MCS(object):
             'max3d': max3d,
             'threed': threed,
             'element_change': element_change,
+            'seed': seed,
+            'shift': shift,
         }
 
-        def substructure_centre(mol, mol_sub):
+        def best_substruct_match_to_mcs(moli, molj, by_rmsd: bool, use_shift: bool):
             """
-
-            This function takes a molecule and a list of atom indices
-            in that molecule and returns an RDKit Point3D representing
-            the geometric centre of the atoms in the list
-
-            """
-
-            sum = Point3D()
-            for i in mol_sub:
-                sum += mol.GetConformer().GetAtomPosition(i)
-            return sum / len(mol_sub)
-
-
-        def best_substruct_match_to_mcs(moli,molj,by_rmsd=True):
-            """
-
             This function looks over all of the substructure matches and returns the one
             with the best 3D correspondence (if by_rmsd is true), or the fewest number
             of atomic number mismatches (if by_rmsd is false)
 
-            Note that the 3D correspondence does a translational centreing (but
+            If use_shift, the 3D correspondence does a translational centreing (but
             does not rotate).
 
             """
@@ -148,14 +154,15 @@ class MCS(object):
 
             moli_sub = moli.GetSubstructMatches(self.mcs_mol,uniquify=False)
             molj_sub = molj.GetSubstructMatches(self.mcs_mol,uniquify=False)
-            best_rmsd=1e8
+            best_rmsd= float('inf')
             for mapi in moli_sub:
                 for mapj in molj_sub:
                     # Compute the translation to bring molj's centre over moli
-                    coord_delta = 0
-                    if by_rmsd:
+                    if by_rmsd and use_shift:
                         coord_delta = (substructure_centre(moli,mapi)
                                  - substructure_centre(molj,mapj))
+                    else:
+                        coord_delta = Point3D(0.0, 0.0, 0.0)
                     rmsd=0
                     for pair in zip(mapi,mapj):
                         if by_rmsd:
@@ -170,29 +177,33 @@ class MCS(object):
                         bestj=mapj
                         best_rmsd=rmsd
 
-            return (besti,bestj)
+            return besti, bestj
 
-        def trim_mcs_mol(max_deviation=2.0):
+        def trim_mcs_mol(max_deviation: float, use_shift: bool):
             """
 
             This function is used to trim the MCS molecule to remove mismatched atoms i.e atoms
             where the topological mapping does not work in 3D coordinates.
 
-            The sets of mapped atoms are translated to bring their geometric centres
+            The sets of mapped atoms are optionally translated to bring their geometric centres
             into alignment before trimming
 
             Parameters
             ----------
-
-            max_deviation : the maximum difference in Angstroms between mapped atoms to allow
+            max_deviation : float
+              the maximum difference in Angstroms between mapped atoms to allow
+            use_shift : bool
+              if to translate the two molecules to maximise overlap before calculating distances
 
             """
 
             while True:
-                (mapi,mapj) = best_substruct_match_to_mcs(self._moli_noh, self._molj_noh, by_rmsd=True)
+                mapi, mapj = best_substruct_match_to_mcs(self._moli_noh, self._molj_noh, by_rmsd=True, use_shift=use_shift)
                 # Compute the translation to bring molj's centre over moli
-                coord_delta = (substructure_centre(self._moli_noh, mapi)
-                               - substructure_centre(self._molj_noh, mapj))
+                if shift:
+                    coord_delta = substructure_centre(self._moli_noh, mapi) - substructure_centre(self._molj_noh, mapj)
+                else:
+                    coord_delta = Point3D(0.0, 0.0, 0.0)
                 worstatomidx=-1
                 worstdist=0
                 atomidx=0
@@ -457,7 +468,7 @@ class MCS(object):
             # Get self-mapping for the MCS
             mcsi_sub = tuple(range(self.mcs_mol.GetNumAtoms()))
 
-            moli_sub, molj_sub = best_substruct_match_to_mcs(self._moli_noh, self._molj_noh, by_rmsd=threed)
+            moli_sub, molj_sub = best_substruct_match_to_mcs(self._moli_noh, self._molj_noh, by_rmsd=threed, use_shift=shift)
 
             # mcs to moli
             map_mcs_mol_to_moli_sub = list(zip(mcsi_sub, moli_sub))
@@ -649,7 +660,7 @@ class MCS(object):
         # Trim the MCS to remove atoms with too-large real-space deviations
         if max3d > 0:
             try:
-                trim_mcs_mol(max_deviation=max3d)
+                trim_mcs_mol(max_deviation=max3d, use_shift=shift)
             except Exception as e:
                 raise ValueError(str(e))
 
