@@ -142,7 +142,7 @@ class GraphGen(object):
         )
 
         # Make a new master list of subgraphs now that there may be more disconnected components
-        self.workingSubgraphsList = self.generate_working_subgraphs_list()
+        self.workingSubgraphsList = self.generate_working_subgraphs_list(self.initialSubgraphList)
 
         # Make a new sorted list of [edge, weights] for each subgraph now that there may be new subgraphs
         self.workingSubgraphScoresLists = self.generate_subgraph_scores_lists(self.workingSubgraphsList)
@@ -353,7 +353,8 @@ class GraphGen(object):
 
             totalEdges = totalEdges + subgraph.number_of_edges()
 
-    def generate_working_subgraphs_list(self):
+    @staticmethod
+    def generate_working_subgraphs_list(subgraph_list):
         """
         After the deletition of the edges that have a weigth less than the
         selected threshould the subgraph maybe disconnected and a new master
@@ -367,10 +368,9 @@ class GraphGen(object):
             similatiry as weigth
 
         """
-
         workingSubgraphsList = []
 
-        for subgraph in self.initialSubgraphList:
+        for subgraph in subgraph_list:
 
             newSubgraphList = [subgraph.subgraph(c).copy() for c in nx.connected_components(subgraph)]
 
