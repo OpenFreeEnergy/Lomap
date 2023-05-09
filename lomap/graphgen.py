@@ -395,7 +395,7 @@ class GraphGen(object):
             self.nonCycleNodesSet = self.find_non_cyclic_nodes(subgraph)
             self.nonCycleEdgesSet = self.find_non_cyclic_edges(subgraph)
             numberOfComponents = nx.number_connected_components(subgraph)
-            self.distanceToActiveFailures = self.count_distance_to_active_failures(subgraph)
+            self.distanceToActiveFailures = self.count_distance_to_active_failures(subgraph, self.maxDistFromActive)
 
             if len(subgraph.edges()) > 2:  # Graphs must have at least 3 edges to be minimzed
 
@@ -444,7 +444,8 @@ class GraphGen(object):
                                           similarity=self.dbase.strict_mtx[node, max_index_final], strict_flag=True)
                 return subgraph
 
-    def find_non_cyclic_nodes(self, subgraph):
+    @staticmethod
+    def find_non_cyclic_nodes(subgraph):
         """
         Generates a list of nodes of the subgraph that are not in a cycle
 
@@ -459,11 +460,6 @@ class GraphGen(object):
             the set of graph nodes that are not in a cycle
 
         """
-
-        missingNodesSet = set()
-
-        cycleNodes = []
-
         cycleList = nx.cycle_basis(subgraph)
 
         cycleNodes = [node for cycle in cycleList for node in cycle]
@@ -472,7 +468,8 @@ class GraphGen(object):
 
         return missingNodesSet
 
-    def find_non_cyclic_edges(self, subgraph):
+    @staticmethod
+    def find_non_cyclic_edges(subgraph):
         """
         Generates a set of edges of the subgraph that are not in a cycle (called
         "bridges" in networkX terminology).
@@ -488,7 +485,6 @@ class GraphGen(object):
             the set of edges that are not in a cycle
 
         """
-
         missingEdgesSet = set(nx.bridges(subgraph))
 
         return missingEdgesSet
@@ -523,7 +519,7 @@ class GraphGen(object):
                 constraintsMet = False
 
         if constraintsMet:
-            if not self.check_max_distance(subgraph):
+            if not self.check_max_distance(subgraph, max_path_length=self.maxPathLength):
                 constraintsMet = False
 
         if constraintsMet:
@@ -532,7 +528,8 @@ class GraphGen(object):
 
         return constraintsMet
 
-    def remains_connected(self, subgraph, numComponents):
+    @staticmethod
+    def remains_connected(subgraph, numComponents) -> bool:
         """
         Determine if the subgraph remains connected after an edge has been
         removed
@@ -591,7 +588,8 @@ class GraphGen(object):
 
         return hasCovering
 
-    def check_max_distance(self, subgraph):
+    @staticmethod
+    def check_max_distance(subgraph, max_path_length) -> bool:
         """
         Check to see if the graph has paths from all compounds to all other
         compounds within the specified limit
@@ -600,6 +598,7 @@ class GraphGen(object):
         ---------
         subgraph : NetworkX subgraph obj
             the subgraph to check for the max distance between nodes
+        max_path_length
 
         Returns
         -------
@@ -612,13 +611,14 @@ class GraphGen(object):
 
         for node in subgraph:
             eccentricity = nx.eccentricity(subgraph, node)
-            if eccentricity > self.maxPathLength:
+            if eccentricity > max_path_length:
                 withinMaxDistance = False
                 logging.info("Rejecting edge deletion on graph diameter for node %d" % (node))
 
         return withinMaxDistance
 
-    def count_distance_to_active_failures(self, subgraph):
+    @staticmethod
+    def count_distance_to_active_failures(subgraph, max_dist_from_active):
         """
         Count the number of compounds that don't have a minimum-length path to an active
         within the specified limit
@@ -627,6 +627,7 @@ class GraphGen(object):
         ---------
         subgraph : NetworkX subgraph obj
             the subgraph to check for the max distance between nodes
+        max_dist_from_active
 
         Returns
         -------
@@ -650,7 +651,8 @@ class GraphGen(object):
                 for node2 in subgraph.nodes():
                     if (subgraph.nodes[node2]["active"]):
                         pathlen = len(paths[node][node2]) - 1   # No. edges is 1 less than no. nodes
-                        if (pathlen <= self.maxDistFromActive): ok=True
+                        if pathlen <= max_dist_from_active:
+                            ok = True
                 if (not ok):
                     failures = failures + 1
 
@@ -671,12 +673,12 @@ class GraphGen(object):
             True if we have not increased the number of failed nodes
         """
 
-        count = self.count_distance_to_active_failures(subgraph)
-        failed =  (count > self.distanceToActiveFailures)
-        if (failed): logging.info("Rejecting edge deletion on distance-to-actives %d vs %d" % (count,self.distanceToActiveFailures))
+        count = self.count_distance_to_active_failures(subgraph, self.maxDistFromActive)
+        failed = count > self.distanceToActiveFailures
+        if failed:
+            logging.info("Rejecting edge deletion on distance-to-actives %d vs %d" % (count,self.distanceToActiveFailures))
         logging.info("Checking edge deletion on distance-to-actives %d vs %d" % (count,self.distanceToActiveFailures))
         return not failed
-
 
     def merge_all_subgraphs(self):
         """Generates a single networkx graph object from the subgraphs that have
