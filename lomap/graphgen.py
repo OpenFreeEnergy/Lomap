@@ -846,15 +846,6 @@ class GraphGen(object):
         else:
             return False
 
-    def get_graph(self):
-        """
-
-        Returns the final generated NetworkX graph
-
-        """
-
-        return self.resultGraph
-
     def generate_depictions(self):
 
         def max_dist_mol(mol):

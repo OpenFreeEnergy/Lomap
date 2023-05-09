@@ -733,7 +733,7 @@ class DBMolecules(object):
                 logging.error(str(e))
 
         # Handle to the the NetworkX generated graph
-        self.Graph = Gr.get_graph()
+        self.Graph = Gr.resultGraph
 
         # print self.Graph.nodes(data=True)
 
