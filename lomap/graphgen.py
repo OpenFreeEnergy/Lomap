@@ -50,6 +50,50 @@ import traceback
 __all__ = ['GraphGen']
 
 
+def find_non_cyclic_nodes(subgraph):
+    """
+    Generates a list of nodes of the subgraph that are not in a cycle
+
+    Parameters
+    ---------
+    subgraph : NetworkX subgraph obj
+        the subgraph to check for not cycle nodes
+
+    Returns
+    -------
+    missingNodesSet : set of graph nodes
+        the set of graph nodes that are not in a cycle
+
+    """
+    cycleList = nx.cycle_basis(subgraph)
+
+    cycleNodes = [node for cycle in cycleList for node in cycle]
+
+    missingNodesSet = set([node for node in subgraph.nodes() if node not in cycleNodes])
+
+    return missingNodesSet
+
+
+def find_non_cyclic_edges(subgraph):
+    """
+    Generates a set of edges of the subgraph that are not in a cycle (called
+    "bridges" in networkX terminology).
+
+    Parameters
+    ---------
+    subgraph : NetworkX subgraph obj
+        the subgraph to check for not cycle nodes
+
+    Returns
+    -------
+    missingEdgesSet : set of graph edges
+        the set of edges that are not in a cycle
+
+    """
+    missingEdgesSet = set(nx.bridges(subgraph))
+
+    return missingEdgesSet
+
 # *************************
 # Graph Class
 # *************************
@@ -392,8 +436,8 @@ class GraphGen(object):
             # weightsList = sorted(weightsList, key = itemgetter(1))
 
             # This part has been copied from the original code
-            self.nonCycleNodesSet = self.find_non_cyclic_nodes(subgraph)
-            self.nonCycleEdgesSet = self.find_non_cyclic_edges(subgraph)
+            self.nonCycleNodesSet = find_non_cyclic_nodes(subgraph)
+            self.nonCycleEdgesSet = find_non_cyclic_edges(subgraph)
             numberOfComponents = nx.number_connected_components(subgraph)
             self.distanceToActiveFailures = self.count_distance_to_active_failures(subgraph, self.maxDistFromActive)
 
@@ -426,8 +470,8 @@ class GraphGen(object):
             subgraph_nodes = subgraph.nodes()
             if self.lead_index in subgraph_nodes:
                 # here we only consider the subgraph with lead compound
-                self.nonCycleNodesSet = self.find_non_cyclic_nodes(subgraph)
-                self.nonCycleEdgesSet = self.find_non_cyclic_edges(subgraph)
+                self.nonCycleNodesSet = find_non_cyclic_nodes(subgraph)
+                self.nonCycleEdgesSet = find_non_cyclic_edges(subgraph)
                 for node in self.nonCycleNodesSet:
                     # for each node in the noncyclenodeset, find the similarity compare to all other surrounding nodes and pick the one with the max score and connect them
                     node_score_list = []
@@ -443,51 +487,6 @@ class GraphGen(object):
                         subgraph.add_edge(node, max_index_final,
                                           similarity=self.dbase.strict_mtx[node, max_index_final], strict_flag=True)
                 return subgraph
-
-    @staticmethod
-    def find_non_cyclic_nodes(subgraph):
-        """
-        Generates a list of nodes of the subgraph that are not in a cycle
-
-        Parameters
-        ---------
-        subgraph : NetworkX subgraph obj
-            the subgraph to check for not cycle nodes
-
-        Returns
-        -------
-        missingNodesSet : set of graph nodes
-            the set of graph nodes that are not in a cycle
-
-        """
-        cycleList = nx.cycle_basis(subgraph)
-
-        cycleNodes = [node for cycle in cycleList for node in cycle]
-
-        missingNodesSet = set([node for node in subgraph.nodes() if node not in cycleNodes])
-
-        return missingNodesSet
-
-    @staticmethod
-    def find_non_cyclic_edges(subgraph):
-        """
-        Generates a set of edges of the subgraph that are not in a cycle (called
-        "bridges" in networkX terminology).
-
-        Parameters
-        ---------
-        subgraph : NetworkX subgraph obj
-            the subgraph to check for not cycle nodes
-
-        Returns
-        -------
-        missingEdgesSet : set of graph edges
-            the set of edges that are not in a cycle
-
-        """
-        missingEdgesSet = set(nx.bridges(subgraph))
-
-        return missingEdgesSet
 
     def check_constraints(self, subgraph, numComp):
         """
