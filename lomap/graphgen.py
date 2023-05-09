@@ -85,7 +85,11 @@ class GraphGen(object):
         self.requireCycleCovering = not dbase.options['allow_tree']
 
         if dbase.options['radial']:
-            self.lead_index = self.pick_lead()
+            self.lead_index = self.pick_lead(
+                hub=dbase.options['hub'],
+                names=[m.getName() for m in dbase],
+                strict_mtx=dbase.strict_mtx
+            )
         else:
             self.lead_index = None
 
@@ -172,26 +176,42 @@ class GraphGen(object):
 
         return
 
-    def pick_lead(self):
-        if (self.dbase.nums() * (self.dbase.nums() - 1) / 2) != self.dbase.strict_mtx.size:
-            raise ValueError("There are errors in the similarity score matrices")
-        if not self.dbase.options['hub'] == "None":
+    @staticmethod
+    def pick_lead(hub: str, names: list[str], strict_mtx) -> int:
+        """Pick lead compount
+
+        Parameters
+        ----------
+        hub : str
+          input of desired hub
+        names: list[str]
+          names of each molecule
+        strict_mtx
+          scoring matrix
+
+        Returns
+        -------
+        index of lead compound
+        """
+        if not hub == "None":
             # hub radial option. Use the provided reference compound as a hub
             hub_index = None
-            for i in range(0, self.dbase.nums()):
-                if os.path.basename(self.dbase[i].getName()) == self.dbase.options['hub']:
+            for i, nm in enumerate(names):
+                if os.path.basename(nm) == hub:
                     hub_index = i
             if hub_index is None:
-                logging.info(f"Warning: the specified center ligand {self.dbase.options['hub']} is not in the "
+                logging.info(f"Warning: the specified center ligand {hub} is not in the "
                              "ligand database, will not use the radial option.")
             return hub_index
         else:
-            # complete radial option. Pick the compound with the highest total similarity to all other compounds to use as a hub
+            # complete radial option.
+            # Pick the compound with the highest total similarity to all other compounds to use as a hub
+            N = len(names)
             all_sum_i = []
-            for i in range(0, self.dbase.nums()):
+            for i in range(N):
                 sum_i = 0
-                for j in range(0, self.dbase.nums()):
-                    sum_i += self.dbase.strict_mtx[i, j]
+                for j in range(N):
+                    sum_i += strict_mtx[i, j]
                 all_sum_i.append(sum_i)
             max_value = max(all_sum_i)
             max_index = [i for i, x in enumerate(all_sum_i) if x == max_value]
