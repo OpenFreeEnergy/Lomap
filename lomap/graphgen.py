@@ -473,7 +473,8 @@ class GraphGen(object):
                 self.nonCycleNodesSet = find_non_cyclic_nodes(subgraph)
                 self.nonCycleEdgesSet = find_non_cyclic_edges(subgraph)
                 for node in self.nonCycleNodesSet:
-                    # for each node in the noncyclenodeset, find the similarity compare to all other surrounding nodes and pick the one with the max score and connect them
+                    # for each node in the noncyclenodeset:
+                    # find the similarity compare to all other surrounding nodes and pick the one with the max score and connect them
                     node_score_list = []
                     for i in range(0, self.dbase.nums()):
                         if i != node and i != self.lead_index:
@@ -522,7 +523,7 @@ class GraphGen(object):
                 constraintsMet = False
 
         if constraintsMet:
-            if not self.check_distance_to_active(subgraph, self.maxDistFromActive):
+            if not self.check_distance_to_active(subgraph, self.distanceToActiveFailures, self.maxDistFromActive):
                 constraintsMet = False
 
         return constraintsMet
@@ -536,27 +537,20 @@ class GraphGen(object):
         Parameters
         ---------
         subgraph : NetworkX subgraph obj
-            the subgraph to check for connection after the edge deletition
-
-        numComp : int
-            the number of connected componets
+            the subgraph to check for connection after the edge deletion
+        numComponents : int
+            the number of connected components
 
         Returns
         -------
         isConnected : bool
             True if the subgraph is connected, False otherwise
-            :param numComponents:
-
         """
-
-        isConnected = False
-
-        if numComponents == nx.number_connected_components(subgraph):
-            isConnected = True
-        else:
+        is_connected = (numComponents == nx.number_connected_components(subgraph))
+        if not is_connected:
             logging.info("Rejecting edge deletion on graph connectivity")
 
-        return isConnected
+        return is_connected
 
     @staticmethod
     def check_cycle_covering(subgraph, non_cycle_edges_set):
@@ -606,7 +600,6 @@ class GraphGen(object):
             True if the subgraph has all the nodes within the specified
             max distance
         """
-
         withinMaxDistance = True
 
         for node in subgraph:
@@ -637,28 +630,28 @@ class GraphGen(object):
 
         failures = 0
 
-        hasActives=False
+        hasActives = False
         for node in subgraph.nodes():
-            if (subgraph.nodes[node]["active"]):
-                hasActives=True
-        if (not hasActives):
+            if subgraph.nodes[node]["active"]:
+                hasActives = True
+        if not hasActives:
             return 0     # No actives, so don't bother checking
 
         paths = nx.shortest_path(subgraph)
         for node in subgraph.nodes():
-            if (not subgraph.nodes[node]["active"]):
-                ok=False
+            if not subgraph.nodes[node]["active"]:
+                ok = False
                 for node2 in subgraph.nodes():
-                    if (subgraph.nodes[node2]["active"]):
+                    if subgraph.nodes[node2]["active"]:
                         pathlen = len(paths[node][node2]) - 1   # No. edges is 1 less than no. nodes
                         if pathlen <= max_dist_from_active:
                             ok = True
-                if (not ok):
+                if not ok:
                     failures = failures + 1
 
         return failures
 
-    def check_distance_to_active(self, subgraph, max_distance_from_active):
+    def check_distance_to_active(self, subgraph, distance_to_active_failures, max_distance_from_active):
         """
         Check to see if we have increased the number of distance-to-active failures
 
@@ -666,6 +659,7 @@ class GraphGen(object):
         ---------
         subgraph : NetworkX subgraph obj
             the subgraph to check for the max distance between nodes
+        distance_to_active_failures
         max_distance_from_active
 
         Returns
@@ -674,10 +668,10 @@ class GraphGen(object):
             True if we have not increased the number of failed nodes
         """
         count = self.count_distance_to_active_failures(subgraph, max_distance_from_active)
-        failed = count > self.distanceToActiveFailures
+        failed = count > distance_to_active_failures
         if failed:
-            logging.info("Rejecting edge deletion on distance-to-actives %d vs %d" % (count,self.distanceToActiveFailures))
-        logging.info("Checking edge deletion on distance-to-actives %d vs %d" % (count,self.distanceToActiveFailures))
+            logging.info(f"Rejecting edge deletion on distance-to-actives {count} vs {distance_to_active_failures}")
+        logging.info(f"Checking edge deletion on distance-to-actives {count} vs {distance_to_active_failures}")
         return not failed
 
     @staticmethod
