@@ -105,34 +105,48 @@ class GraphGen(object):
     binding free energy calculation
     """
 
-    def __init__(self, dbase):
+    def __init__(self,
+                 score_matrix,
+                 ids,
+                 names,
+                 actives,
+                 max_path_length,
+                 max_dist_from_active,
+                 similarity_cutoff,
+                 require_cycle_covering,
+                 radial: bool,
+                 fast,
+                 hub=None,
+                 ):
 
         """
-        Inizialization function
 
         Parameters
         ----------
-
-        dbase : dbase object
-            the molecule container
-
+        score_matrix
+        ids
+        names
+        actives
+        max_path_length
+        max_dist_from_active
+        similarity_cutoff
+        require_cycle_covering
+        radial: bool
+        fast
+        hub : str, optional
         """
+        self.score_matrix = score_matrix
+        self.N = score_matrix.shape[0]
+        self.maxPathLength = max_path_length
+        self.maxDistFromActive = max_dist_from_active
+        self.similarityScoresLimit = similarity_cutoff
+        self.requireCycleCovering = require_cycle_covering
 
-        self.dbase = dbase
-
-        self.maxPathLength = dbase.options['max']
-
-        self.maxDistFromActive = dbase.options['max_dist_from_actives']
-
-        self.similarityScoresLimit = dbase.options['cutoff']
-
-        self.requireCycleCovering = not dbase.options['allow_tree']
-
-        if dbase.options['radial']:
+        if radial:
             self.lead_index = self.pick_lead(
-                hub=dbase.options['hub'],
-                names=[m.getName() for m in dbase],
-                strict_mtx=dbase.strict_mtx
+                hub=hub,
+                names=names,
+                strict_mtx=score_matrix
             )
         else:
             self.lead_index = None
@@ -165,13 +179,13 @@ class GraphGen(object):
         # The following Section has been strongly copied/adapted from the original implementation
 
         # Generate a list related to the disconnected graphs present in the initial graph
-        fast_map = dbase.options['fast'] and dbase.options['radial']
+        fast_map = fast and radial
         self.initialSubgraphList = self.generate_initial_subgraph_list(
             fast_map=fast_map,
-            strict_mtx=dbase.strict_mtx,
-            ids=[mol.getID() for mol in dbase],
-            names=[mol.getName() for mol in dbase],
-            is_active=[mol.isActive() for mol in dbase],
+            strict_mtx=score_matrix,
+            ids=ids,
+            names=names,
+            is_active=actives,
             lead_index=self.lead_index,
         )
 
@@ -182,7 +196,7 @@ class GraphGen(object):
         self.remove_edges_below_hard_limit(
             subgraphlist=self.initialSubgraphList,
             scores=self.subgraphScoresLists,
-            similarity_scores_limit=dbase.options['cutoff'],
+            similarity_scores_limit=similarity_cutoff,
         )
 
         # Make a new master list of subgraphs now that there may be more disconnected components
@@ -194,7 +208,7 @@ class GraphGen(object):
         # Remove edges, whose removal does not violate constraints, from the subgraphs,
         # starting with lowest similarity score first
 
-        if dbase.options['fast'] and dbase.options['radial']:
+        if fast and radial:
             # if we use the fast and radial option, just need to add the surrounding edges from the initial graph
             self.resultGraph = self.add_surrounding_edges()
             # after adding the surround edges, some subgraphs may merge into a larger graph and so need to update the
@@ -476,9 +490,9 @@ class GraphGen(object):
                     # for each node in the noncyclenodeset:
                     # find the similarity compare to all other surrounding nodes and pick the one with the max score and connect them
                     node_score_list = []
-                    for i in range(0, self.dbase.nums()):
+                    for i in range(self.N):
                         if i != node and i != self.lead_index:
-                            node_score_list.append(self.dbase.strict_mtx[node, i])
+                            node_score_list.append(self.score_matrix[node, i])
                         else:
                             node_score_list.append(0.0)
                     max_value = max(node_score_list)
@@ -486,7 +500,7 @@ class GraphGen(object):
                         max_index = [i for i, x in enumerate(node_score_list) if x == max_value]
                         max_index_final = max_index[0]
                         subgraph.add_edge(node, max_index_final,
-                                          similarity=self.dbase.strict_mtx[node, max_index_final], strict_flag=True)
+                                          similarity=self.score_matrix[node, max_index_final], strict_flag=True)
                 return subgraph
 
     def check_constraints(self, subgraph, numComp):
@@ -757,7 +771,7 @@ class GraphGen(object):
                         # I assumed that the score matrix is symmetric. In the Graph part this
                         # does not seems to be true:
 
-                        similarity = self.dbase.loose_mtx[nodesOfI[k]["ID"], nodesOfJ[l]["ID"]]
+                        similarity = self.score_matrix[nodesOfI[k]["ID"], nodesOfJ[l]["ID"]]
 
                         if similarity > 0.0:
                             edgesToCheck.append((nodesOfI[k]["ID"], nodesOfJ[l]["ID"], similarity))
@@ -818,7 +832,7 @@ class GraphGen(object):
                         # print 'Molecules (%d,%d)' % (nodesOfI[k],nodesOfJ[l])
                         # I assumed that the score matrix is symmetric. In the Graph part
                         # this does not seems to be true: <<<<<<<<<<<<<DEBUG>>>>>>>>>>>>>>>
-                        similarity = self.dbase.loose_mtx[nodesOfI[k]["ID"], nodesOfJ[l]["ID"]]
+                        similarity = self.score_matrix[nodesOfI[k]["ID"], nodesOfJ[l]["ID"]]
 
                         if similarity > 0.0:
                             edgesToCheck.append((nodesOfI[k]["ID"], nodesOfJ[l]["ID"], similarity))
@@ -841,7 +855,7 @@ class GraphGen(object):
         else:
             return False
 
-    def generate_depictions(self):
+    def generate_depictions(self, dbase):
 
         def max_dist_mol(mol):
 
@@ -872,11 +886,11 @@ class GraphGen(object):
             for n in temp_graph:
 
                 id_mol = temp_graph.nodes[n]['ID']
-                mol = self.dbase[id_mol].getMolecule()
+                mol = dbase[id_mol].getMolecule()
                 max_dist = max_dist_mol(mol)
 
                 if max_dist < self.max_mol_size:
-                    fname = os.path.join(directory_name, self.dbase[id_mol].getName() + ".png")
+                    fname = os.path.join(directory_name, dbase[id_mol].getName() + ".png")
                     # 1, modify here to calculate the 2D structure for ligands cannot remove Hydrogens by rdkit
                     # 2, change the graph size to get better resolution
                     try:
@@ -886,7 +900,7 @@ class GraphGen(object):
                         # issue tracker for more details######
                         logging.info(
                             "Error attempting to remove hydrogens for molecule %s using RDKit. RDKit cannot kekulize the molecule" %
-                            self.dbase[id_mol].getName())
+                            dbase[id_mol].getName())
                     AllChem.Compute2DCoords(mol)
                     from rdkit.Chem.Draw.MolDrawing import DrawingOptions
                     DrawingOptions.bondLineWidth = 2.5
@@ -906,30 +920,30 @@ class GraphGen(object):
             if self.edge_labels:
                 temp_graph[u][v]['label'] = round(d['similarity'],2)
 
-        nx.nx_agraph.write_dot(temp_graph, self.dbase.options['name'] + '_tmp.dot')
+        nx.nx_agraph.write_dot(temp_graph, dbase.options['name'] + '_tmp.dot')
 
-        cmd = 'dot -Tpng ' + self.dbase.options['name'] + '_tmp.dot -o ' + self.dbase.options['name'] + '.png'
-
-        os.system(cmd)
-        cmd = 'dot -Teps ' + self.dbase.options['name'] + '_tmp.dot -o ' + self.dbase.options['name'] + '.eps'
+        cmd = 'dot -Tpng ' + dbase.options['name'] + '_tmp.dot -o ' + dbase.options['name'] + '.png'
 
         os.system(cmd)
-        cmd = 'dot -Tpdf ' + self.dbase.options['name'] + '_tmp.dot -o ' + self.dbase.options['name'] + '.pdf'
+        cmd = 'dot -Teps ' + dbase.options['name'] + '_tmp.dot -o ' + dbase.options['name'] + '.eps'
 
         os.system(cmd)
-        os.remove(self.dbase.options['name'] + '_tmp.dot')
+        cmd = 'dot -Tpdf ' + dbase.options['name'] + '_tmp.dot -o ' + dbase.options['name'] + '.pdf'
+
+        os.system(cmd)
+        os.remove(dbase.options['name'] + '_tmp.dot')
         shutil.rmtree(directory_name, ignore_errors=True)
 
     # The function to output the score and connectivity txt file
 
-    def layout_info(self):
+    def layout_info(self, dbase):
         # pass the lead compound index if the radial option is on and generate the
         # morph type of output required by FESetup
         if self.lead_index is not None:
-            morph_txt = open(self.dbase.options['name'] + "_morph.txt", "w")
+            morph_txt = open(dbase.options['name'] + "_morph.txt", "w")
             morph_data = "morph_pairs = "
-        with open(self.dbase.options['name'] + "_score_with_connection.txt", "w") as info_txt:
-            all_key_id = self.dbase.dic_mapping.keys()
+        with open(dbase.options['name'] + "_score_with_connection.txt", "w") as info_txt:
+            all_key_id = dbase.dic_mapping.keys()
             data = ["%-10s,%-10s,%-25s,%-25s,%-15s,%-15s,%-15s,%-10s\n" % (
             "Index_1", "Index_2", "Filename_1", "Filename_2", "Str_sim", "Eff_sim", "Loose_sim", "Connect")]
             for i in range(len(all_key_id) - 1):
@@ -943,16 +957,16 @@ class GraphGen(object):
                         connected = True
                     except IndexError:
                         pass
-                    Filename_i = self.dbase.dic_mapping[i]
-                    Filename_j = self.dbase.dic_mapping[j]
-                    MCmap = self.dbase.get_MCSmap(i,j)
+                    Filename_i = dbase.dic_mapping[i]
+                    Filename_j = dbase.dic_mapping[j]
+                    MCmap = dbase.get_MCSmap(i,j)
                     mapString=""
                     if MCmap is not None:
                         mapString = MCmap
                     # print "Check the filename", Filename_i, Filename_j
-                    strict_similarity = self.dbase.strict_mtx[i, j]
-                    loose_similarity = self.dbase.loose_mtx[i, j]
-                    true_strict_similarity = self.dbase.true_strict_mtx[i, j]
+                    strict_similarity = dbase.strict_mtx[i, j]
+                    loose_similarity = dbase.loose_mtx[i, j]
+                    true_strict_similarity = dbase.true_strict_mtx[i, j]
                     if connected:
                         new_line = "%-10s,%-10s,%-25s,%-25s,%-15.5f,%-15.5f,%-15.5f,%-10s,%s\n" % (
                         i, j, Filename_i, Filename_j, true_strict_similarity, strict_similarity, loose_similarity, "Yes",mapString)
@@ -967,8 +981,8 @@ class GraphGen(object):
                             else:
                                 # compare i and j with the lead compound, and
                                 # pick the one with the higher similarity as the start ligand
-                                similarity_i = self.dbase.strict_mtx[self.lead_index, i]
-                                similarity_j = self.dbase.strict_mtx[self.lead_index, j]
+                                similarity_i = dbase.strict_mtx[self.lead_index, i]
+                                similarity_j = dbase.strict_mtx[self.lead_index, j]
                                 if similarity_i > similarity_j:
                                     morph_string = "%s > %s, " % (morph_i, morph_j)
                                 else:
@@ -982,8 +996,7 @@ class GraphGen(object):
             if self.lead_index is not None:
                 morph_txt.write(morph_data)
 
-
-    def write_graph(self, output_no_images, output_no_graph):
+    def write_graph(self, dbase, output_no_images, output_no_graph):
         """
 
         This function writes to a file the final generated NetworkX graph as
@@ -994,17 +1007,17 @@ class GraphGen(object):
         """
 
         try:
-            self.dbase.write_dic()
-            self.layout_info()
+            dbase.write_dic()
+            self.layout_info(dbase)
         except Exception as e:
             traceback.print_exc()
-            raise IOError("%s: %s.txt" % (str(e), self.dbase.options['name']))
+            raise IOError("%s: %s.txt" % (str(e), dbase.options['name']))
 
         try:
             if not output_no_images:
                 self.generate_depictions()
             if not output_no_graph:
-                nx.nx_agraph.write_dot(self.resultGraph, self.dbase.options['name'] + '.dot')
+                nx.nx_agraph.write_dot(self.resultGraph, dbase.options['name'] + '.dot')
         except Exception as e:
             traceback.print_exc()
             raise IOError('Problems during the file generation: %s' % str(e))
@@ -1013,19 +1026,17 @@ class GraphGen(object):
 
         log = 'The following files have been generated:'
         if not output_no_graph:
-            log += f'\n{self.dbase.options["name"]}.dot\tGraph file'
+            log += f'\n{dbase.options["name"]}.dot\tGraph file'
         if not output_no_images:
-            log += f'\n{self.dbase.options["name"]}.png\tPng file'
-        log += f'\n{self.dbase.options["name"]}.txt\tMapping Text file'
+            log += f'\n{dbase.options["name"]}.png\tPng file'
+        log += f'\n{dbase.options["name"]}.txt\tMapping Text file'
         logging.info(log)
 
         logging.info(30 * '-')
 
-        return
-
     ###### Still in developing stage ######
 
-    def draw(self):
+    def draw(self, dbase):
         """
         This function plots the NetworkX graph by using Matplotlib
 
@@ -1138,14 +1149,14 @@ class GraphGen(object):
                 id_mol = self.resultGraph.nodes[each_node]['ID']
                 # skip remove Hs by rdkit if Hs cannot be removed
                 try:
-                    mol = AllChem.RemoveHs(self.dbase[id_mol].getMolecule())
+                    mol = AllChem.RemoveHs(dbase[id_mol].getMolecule())
                 except:
                     ###### need to ask RDKit to fix this if possible, see the code
                     # issue tracker for more details######
-                    mol = self.dbase[id_mol].getMolecule()
+                    mol = dbase[id_mol].getMolecule()
                     logging.info(
                         "Error attempting to remove hydrogens for molecule %s using RDKit. RDKit cannot kekulize the molecule" %
-                        self.dbase[id_mol].getName())
+                        dbase[id_mol].getName())
 
                 # max_dist = max_dist_mol(mol)
                 # if max_dist > 7.0:
@@ -1179,5 +1190,3 @@ class GraphGen(object):
         # print 'Graph .png file has been generated...'
 
         plt.show()
-
-        return

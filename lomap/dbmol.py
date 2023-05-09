@@ -721,12 +721,24 @@ class DBMolecules(object):
 
         # The Graph is build from an instance of the Class GraphGen by passing
         # the selected user options
-        Gr = graphgen.GraphGen(self)
+        Gr = graphgen.GraphGen(
+            score_matrix=self.strict_mtx,
+            ids=[m.getID() for m in self],
+            names=[m.getName() for m in self],
+            actives=[m.isActive() for m in self],
+            max_path_length=self.options['max'],
+            max_dist_from_active=self.options['max_dist_from_actives'],
+            similarity_cutoff=self.options['cutoff'],
+            require_cycle_covering=not self.options['allow_tree'],
+            radial=self.options['radial'],
+            fast=self.options['fast'],
+            hub=self.options['hub'],
+        )
 
         # Writing the results is files
         if self.options['output']:
             try:
-                Gr.write_graph(self.options['output_no_images'], self.options['output_no_graph'])
+                Gr.write_graph(self, self.options['output_no_images'], self.options['output_no_graph'])
                 with open(self.options['name'] + ".pickle", "wb") as pickle_f:
                     pickle.dump(Gr, pickle_f)
             except Exception as e:
@@ -739,7 +751,7 @@ class DBMolecules(object):
 
         # Display the graph by using Matplotlib
         if self.options['display']:
-            Gr.draw()
+            Gr.draw(self)
 
         return self.Graph
 
