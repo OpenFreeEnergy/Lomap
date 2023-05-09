@@ -117,6 +117,7 @@ class DBMolecules(object):
     This class is used as a container for all the Molecules
 
     """
+    _list: list['Molecule']
 
     # Initialization function
     def __init__(self,
