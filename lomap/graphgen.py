@@ -211,7 +211,7 @@ class GraphGen(object):
             self.resultingSubgraphsList = copy.deepcopy(self.workingSubgraphsList)
 
             # Combine separate subgraphs into a single resulting graph
-            self.resultGraph = self.merge_all_subgraphs()
+            self.resultGraph = self.merge_all_subgraphs(self.workingSubgraphsList)
 
             # Make a copy of the resulting graph for later processing in connectResultingComponents()
             self.copyResultGraph = self.resultGraph.copy()
@@ -514,7 +514,7 @@ class GraphGen(object):
 
         # The requirement to keep a cycle covering is now optional
         if constraintsMet and self.requireCycleCovering:
-            if not self.check_cycle_covering(subgraph):
+            if not self.check_cycle_covering(subgraph, self.nonCycleEdgesSet):
                 constraintsMet = False
 
         if constraintsMet:
@@ -522,7 +522,7 @@ class GraphGen(object):
                 constraintsMet = False
 
         if constraintsMet:
-            if not self.check_distance_to_active(subgraph):
+            if not self.check_distance_to_active(subgraph, self.maxDistFromActive):
                 constraintsMet = False
 
         return constraintsMet
@@ -558,7 +558,8 @@ class GraphGen(object):
 
         return isConnected
 
-    def check_cycle_covering(self, subgraph):
+    @staticmethod
+    def check_cycle_covering(subgraph, non_cycle_edges_set):
         """
         Checks if the subgraph has a cycle covering. Note that this has been extended from
         the original algorithm: we not only care if the number of acyclic nodes has
@@ -570,6 +571,7 @@ class GraphGen(object):
         ---------
         subgraph : NetworkX subgraph obj
             the subgraph to check for connection after the edge deletion
+        non_cycle_edges_set
 
         Returns
         -------
@@ -577,11 +579,10 @@ class GraphGen(object):
             True if the subgraph has a cycle covering, False otherwise
 
         """
-
         hasCovering = True
 
         # Have we increased the number of non-cyclic edges?
-        if self.find_non_cyclic_edges(subgraph).difference(self.nonCycleEdgesSet):
+        if find_non_cyclic_edges(subgraph).difference(non_cycle_edges_set):
             hasCovering = False
             logging.info("Rejecting edge deletion on cycle covering")
 
@@ -657,7 +658,7 @@ class GraphGen(object):
 
         return failures
 
-    def check_distance_to_active(self, subgraph):
+    def check_distance_to_active(self, subgraph, max_distance_from_active):
         """
         Check to see if we have increased the number of distance-to-active failures
 
@@ -665,21 +666,22 @@ class GraphGen(object):
         ---------
         subgraph : NetworkX subgraph obj
             the subgraph to check for the max distance between nodes
+        max_distance_from_active
 
         Returns
         -------
         ok : bool
             True if we have not increased the number of failed nodes
         """
-
-        count = self.count_distance_to_active_failures(subgraph, self.maxDistFromActive)
+        count = self.count_distance_to_active_failures(subgraph, max_distance_from_active)
         failed = count > self.distanceToActiveFailures
         if failed:
             logging.info("Rejecting edge deletion on distance-to-actives %d vs %d" % (count,self.distanceToActiveFailures))
         logging.info("Checking edge deletion on distance-to-actives %d vs %d" % (count,self.distanceToActiveFailures))
         return not failed
 
-    def merge_all_subgraphs(self):
+    @staticmethod
+    def merge_all_subgraphs(working_subgraphs):
         """Generates a single networkx graph object from the subgraphs that have
         been processed
 
@@ -693,7 +695,7 @@ class GraphGen(object):
 
         finalGraph = nx.Graph()
 
-        for subgraph in self.workingSubgraphsList:
+        for subgraph in working_subgraphs:
             finalGraph = nx.union(finalGraph, subgraph)
 
         return finalGraph
