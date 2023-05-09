@@ -135,7 +135,11 @@ class GraphGen(object):
         self.subgraphScoresLists = self.generate_subgraph_scores_lists(self.initialSubgraphList)
 
         # Eliminates from each subgraph those edges whose weights are less than the hard limit
-        self.remove_edges_below_hard_limit()
+        self.remove_edges_below_hard_limit(
+            subgraphlist=self.initialSubgraphList,
+            scores=self.subgraphScoresLists,
+            similarity_scores_limit=dbase.options['cutoff'],
+        )
 
         # Make a new master list of subgraphs now that there may be more disconnected components
         self.workingSubgraphsList = self.generate_working_subgraphs_list()
@@ -173,8 +177,6 @@ class GraphGen(object):
 
             # Add edges to the resultingGraph to connect its components
             self.connect_subgraphs()
-
-        return
 
     @staticmethod
     def pick_lead(hub: str, names: list[str], strict_mtx) -> int:
@@ -314,25 +316,35 @@ class GraphGen(object):
 
         return subgraphScoresLists
 
-    def remove_edges_below_hard_limit(self):
+    @staticmethod
+    def remove_edges_below_hard_limit(subgraphlist, scores, similarity_scores_limit):
         """
 
         This function removes edges below the set hard limit from each subGraph
         and from each weightsList
 
+        Operates on subgraphlist in-place!
+
+        Parameters
+        ----------
+        subgraphlist : list
+
+        scores : list
+
+        similarity_scores_limit :
         """
 
         totalEdges = 0
 
-        for subgraph in self.initialSubgraphList:
+        for subgraph in subgraphlist:
 
-            weightsList = self.subgraphScoresLists[self.initialSubgraphList.index(subgraph)]
+            weightsList = scores[subgraphlist.index(subgraph)]
 
             index = 0
 
             for edge in weightsList:
 
-                if edge[2] < self.similarityScoresLimit:
+                if edge[2] < similarity_scores_limit:
                     subgraph.remove_edge(edge[0], edge[1])
 
                     index = weightsList.index(edge)
