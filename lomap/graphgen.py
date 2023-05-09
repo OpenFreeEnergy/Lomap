@@ -117,11 +117,15 @@ class GraphGen(object):
         # The following Section has been strongly copied/adapted from the original implementation
 
         # Generate a list related to the disconnected graphs present in the initial graph
-        if dbase.options['fast'] and dbase.options['radial']:
-            # only enable the fast map option if use the radial option
-            self.initialSubgraphList = self.generate_initial_subgraph_list(fast_map=True)
-        else:
-            self.initialSubgraphList = self.generate_initial_subgraph_list()
+        fast_map = dbase.options['fast'] and dbase.options['radial']
+        self.initialSubgraphList = self.generate_initial_subgraph_list(
+            fast_map=fast_map,
+            strict_mtx=dbase.strict_mtx,
+            ids=[mol.getID() for mol in dbase],
+            names=[mol.getName() for mol in dbase],
+            is_active=[mol.isActive() for mol in dbase],
+            lead_index=self.lead_index,
+        )
 
         # A list of elements made of [edge, weights] for each subgraph
         self.subgraphScoresLists = self.generate_subgraph_scores_lists(self.initialSubgraphList)
@@ -194,11 +198,26 @@ class GraphGen(object):
             max_index_final = max_index[0]
             return max_index_final
 
-    def generate_initial_subgraph_list(self, fast_map=False):
+    @staticmethod
+    def generate_initial_subgraph_list(fast_map, strict_mtx, ids, names, is_active, lead_index: int):
 
         """
         This function generates a starting graph connecting with edges all the
         compounds with a positive strict similarity score
+
+        Parameters
+        ----------
+        fast_map : bool
+          chooses one of two algorithms
+        strict_mtx: np.ndarray
+           matrix of scores between molecules
+        ids: list
+           list of identifiers for each molecule
+        names: list
+           names of each molecule
+        is_active : list[bool]
+           for each molecule, whether it is active
+        lead_index : int
 
         Returns
         -------
@@ -209,45 +228,43 @@ class GraphGen(object):
         """
         compound_graph = nx.Graph()
 
-        if (self.dbase.nums() * (self.dbase.nums() - 1) / 2) != self.dbase.strict_mtx.size:
-            raise ValueError("There are errors in the similarity score matrices")
-
         if not fast_map:
             # if not fast map option, connect all possible nodes to generate the initial graph
-            for i in range(0, self.dbase.nums()):
+            for i in range(len(ids)):
                 if i == 0:
-                    compound_graph.add_node(i, ID=self.dbase[i].getID(),
-                            fname_comp=os.path.basename(self.dbase[i].getName()),
-                            active=self.dbase[i].isActive())
+                    compound_graph.add_node(i, ID=ids[i],
+                            fname_comp=os.path.basename(names[i]),
+                            active=is_active[i])
 
-                for j in range(i + 1, self.dbase.nums()):
+                for j in range(i + 1, len(ids)):
 
                     if i == 0:
-                        compound_graph.add_node(j, ID=self.dbase[j].getID(),
-                            fname_comp=os.path.basename(self.dbase[j].getName()),
-                            active=self.dbase[j].isActive())
+                        compound_graph.add_node(j, ID=ids[j],
+                            fname_comp=os.path.basename(names[j]),
+                            active=is_active[j])
 
-                    wgt = self.dbase.strict_mtx[i, j]
+                    wgt = strict_mtx[i, j]
 
                     if wgt > 0.0:
                         compound_graph.add_edge(i, j, similarity=wgt, strict_flag=True)
         else:
             # if fast map option, then add all possible radial edges as the initial graph
-            for i in range(0, self.dbase.nums()):
+            for i in range(len(ids)):
                 # add the node for i
-                compound_graph.add_node(i, ID=self.dbase[i].getID(),
-                                        fname_comp=os.path.basename(self.dbase[i].getName()))
-                if i != self.lead_index:
-                    wgt = self.dbase.strict_mtx[i, self.lead_index]
+                compound_graph.add_node(i, ID=ids[i],
+                                        fname_comp=os.path.basename(names[i]))
+                if i != lead_index:
+                    wgt = strict_mtx[i, lead_index]
                     if wgt > 0:
-                        compound_graph.add_edge(i, self.lead_index, similarity=wgt, strict_flag=True)
+                        compound_graph.add_edge(i, lead_index, similarity=wgt, strict_flag=True)
 
         initialSubgraphGen = [compound_graph.subgraph(c).copy() for c in nx.connected_components(compound_graph)]
         initialSubgraphList = [x for x in initialSubgraphGen]
 
         return initialSubgraphList
 
-    def generate_subgraph_scores_lists(self, subgraphList):
+    @staticmethod
+    def generate_subgraph_scores_lists(subgraphList):
 
         """
         This function generate a list of lists where each inner list is the
