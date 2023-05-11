@@ -29,10 +29,6 @@ potential ligands within a substantial of compounds.
 # *****************************************************************************
 
 
-# ****************
-# MODULE IMPORTS
-# ****************
-
 import networkx as nx
 import numpy as np
 import subprocess
@@ -94,10 +90,6 @@ def find_non_cyclic_edges(subgraph):
     missingEdgesSet = set(nx.bridges(subgraph))
 
     return missingEdgesSet
-
-# *************************
-# Graph Class
-# *************************
 
 
 class GraphGen(object):
