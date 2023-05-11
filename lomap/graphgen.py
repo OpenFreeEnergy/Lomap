@@ -202,7 +202,10 @@ class GraphGen(object):
 
         if fast and radial:
             # if we use the fast and radial option, just need to add the surrounding edges from the initial graph
-            self.resultGraph = self.add_surrounding_edges()
+            self.resultGraph = self.add_surrounding_edges(subgraphs=self.workingSubgraphsList,
+                                                          score_matrix=score_matrix,
+                                                          lead_index=self.lead_index,
+                                                          similarity_score_limit=similarity_cutoff)
             # after adding the surround edges, some subgraphs may merge into a larger graph and so need to update the
             # current subgraphs
             # self.resultingSubgraphsList = copy.deepcopy(self.workingSubgraphsList)
@@ -468,31 +471,35 @@ class GraphGen(object):
                     else:
                         logging.info("Skipping edge %d-%d as it has similarity 1" % (edge[0],edge[1]))
 
-    def add_surrounding_edges(self):
+    def add_surrounding_edges(self, subgraphs: list,
+                              score_matrix: np.ndarray,
+                              lead_index: int,
+                              similarity_score_limit: float):
         """
         Add surrounding edges in each subgraph to make sure all nodes are in cycle
         """
-        for subgraph in self.workingSubgraphsList:
+        for subgraph in subgraphs:
             subgraph_nodes = subgraph.nodes()
-            if self.lead_index in subgraph_nodes:
+            if lead_index in subgraph_nodes:
                 # here we only consider the subgraph with lead compound
                 self.nonCycleNodesSet = find_non_cyclic_nodes(subgraph)
                 self.nonCycleEdgesSet = find_non_cyclic_edges(subgraph)
                 for node in self.nonCycleNodesSet:
                     # for each node in the noncyclenodeset:
-                    # find the similarity compare to all other surrounding nodes and pick the one with the max score and connect them
+                    # find the similarity compare to all other surrounding nodes
+                    # and pick the one with the max score and connect them
                     node_score_list = []
-                    for i in range(self.N):
-                        if i != node and i != self.lead_index:
-                            node_score_list.append(self.score_matrix[node, i])
+                    for i in range(score_matrix.shape[0]):
+                        if i != node and i != lead_index:
+                            node_score_list.append(score_matrix[node, i])
                         else:
                             node_score_list.append(0.0)
                     max_value = max(node_score_list)
-                    if max_value > self.similarityScoresLimit:
+                    if max_value > similarity_score_limit:
                         max_index = [i for i, x in enumerate(node_score_list) if x == max_value]
                         max_index_final = max_index[0]
                         subgraph.add_edge(node, max_index_final,
-                                          similarity=self.score_matrix[node, max_index_final], strict_flag=True)
+                                          similarity=score_matrix[node, max_index_final], strict_flag=True)
                 return subgraph
 
     def check_constraints(self, subgraph, numComp, require_cycle_covering):
