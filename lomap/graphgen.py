@@ -177,21 +177,6 @@ class GraphGen(object):
         # of an active
         self.distanceToActiveFailures = 0
 
-        # Draw Parameters
-
-        # THIS PART MUST BE CHANGED
-
-        # Max number of displayed chemical compound images as graph nodes
-        self.max_images = 2000
-
-        # Max number of displayed nodes in the graph
-        self.max_nodes = 100
-
-        # The maximum threshold distance in angstroms unit used to select if a molecule is depicted
-        self.max_mol_size = 50.0
-
-        self.edge_labels = True
-
         # The following Section has been strongly copied/adapted from the original implementation
 
         # Generate a list related to the disconnected graphs present in the initial graph
@@ -871,7 +856,19 @@ class GraphGen(object):
         else:
             return False
 
-    def generate_depictions(self, dbase):
+    def generate_depictions(self, dbase, max_images: int = 2000, max_mol_size: float = 50.0,
+                            edge_labels: bool = True):
+        """
+        Parameters
+        ----------
+        dbase
+        max_images : int
+           Max number of displayed chemical compound images as graph nodes
+        max_mol_size : float
+           The maximum threshold distance in angstroms unit used to select if a molecule is depicted
+        edge_labels : bool
+           if to add labels on edges
+        """
 
         def max_dist_mol(mol):
 
@@ -895,7 +892,7 @@ class GraphGen(object):
 
         temp_graph = self.resultGraph.copy()
 
-        if nx.number_of_nodes(temp_graph) <= self.max_images:
+        if nx.number_of_nodes(temp_graph) <= max_images:
             # Draw.DrawingOptions.atomLabelFontSize=30
             # Draw.DrawingOptions.dotsPerAngstrom=100
 
@@ -905,7 +902,7 @@ class GraphGen(object):
                 mol = dbase[id_mol].getMolecule()
                 max_dist = max_dist_mol(mol)
 
-                if max_dist < self.max_mol_size:
+                if max_dist < max_mol_size:
                     fname = os.path.join(directory_name, dbase[id_mol].getName() + ".png")
                     # 1, modify here to calculate the 2D structure for ligands cannot remove Hydrogens by rdkit
                     # 2, change the graph size to get better resolution
@@ -933,7 +930,7 @@ class GraphGen(object):
             else:
                 temp_graph[u][v]['color'] = 'red'
                 temp_graph[u][v]['penwidth'] = 2.5
-            if self.edge_labels:
+            if edge_labels:
                 temp_graph[u][v]['label'] = round(d['similarity'],2)
 
         nx.nx_agraph.write_dot(temp_graph, dbase.options['name'] + '_tmp.dot')
@@ -1050,19 +1047,24 @@ class GraphGen(object):
 
         logging.info(30 * '-')
 
-    ###### Still in developing stage ######
+    def draw(self, dbase, max_images: int=2000, max_nodes: int=100, edge_labels: bool = True):
+        """This function plots the NetworkX graph by using Matplotlib
 
-    def draw(self, dbase):
-        """
-        This function plots the NetworkX graph by using Matplotlib
-
+        Parameters
+        ----------
+        dbase
+        max_images : int
+          Max number of displayed chemical compound images as graph nodes
+        max_nodes: int
+          Max number of displayed nodes in the graph
+        edge_labels: bool
         """
 
         logging.info('\nDrawing....')
 
-        if nx.number_of_nodes(self.resultGraph) > self.max_nodes:
+        if nx.number_of_nodes(self.resultGraph) > max_nodes:
             logging.info('The number of generated graph nodes %d exceed the max number of drawable nodes %s' % (
-            nx.number_of_nodes(self.resultGraph), self.max_nodes))
+            nx.number_of_nodes(self.resultGraph), max_nodes))
             return
 
         def max_dist_mol(mol):
@@ -1116,7 +1118,7 @@ class GraphGen(object):
         # Draw node labels
         nx.draw_networkx_labels(self.resultGraph, pos, labels=node_labels, font_size=10)
 
-        if self.edge_labels:
+        if edge_labels:
             edge_weight_strict = dict([((u, v,), d['similarity']) for u, v, d in self.resultGraph.edges(data=True) if
                                        d['strict_flag'] == True])
             edge_weight_loose = dict([((u, v,), d['similarity']) for u, v, d in self.resultGraph.edges(data=True) if
@@ -1138,7 +1140,7 @@ class GraphGen(object):
         # edges loose
         nx.draw_networkx_edges(self.resultGraph, pos, edgelist=loose_edges, edge_color='r')
 
-        if nx.number_of_nodes(self.resultGraph) <= self.max_images:
+        if nx.number_of_nodes(self.resultGraph) <= max_images:
 
             trans = ax.transData.transform
             trans2 = fig.transFigure.inverted().transform
