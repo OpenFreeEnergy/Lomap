@@ -148,7 +148,6 @@ class GraphGen(object):
         self.maxPathLength = max_path_length
         self.maxDistFromActive = max_dist_from_active
         self.similarityScoresLimit = similarity_cutoff
-        self.requireCycleCovering = require_cycle_covering
 
         if radial:
             self.lead_index = self.pick_lead(
@@ -211,7 +210,7 @@ class GraphGen(object):
             # self.resultGraph = self.merge_all_subgraphs()
         else:
             # >>>>>>>>>>>>>>>>>>>>>>>>>>>ISSUE ORDER PROBLEM<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-            self.minimize_edges()
+            self.minimize_edges(require_cycle_covering)
             # >>>>>>>>>>>>>>>>>>>>>>>>>>>ISSUE ORDER PROBLEM<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
             # Collect together disjoint subgraphs of like charge into subgraphs
@@ -430,7 +429,7 @@ class GraphGen(object):
 
         return workingSubgraphsList
 
-    def minimize_edges(self):
+    def minimize_edges(self, require_cycle_covering):
         """
         Minimize edges in each subgraph while ensuring constraints are met
         """
@@ -457,12 +456,12 @@ class GraphGen(object):
                         # then add it back into the graph.
                         if self.lead_index not in [edge[0], edge[1]]:
                             subgraph.remove_edge(edge[0], edge[1])
-                            if self.check_constraints(subgraph, numberOfComponents) == False:
+                            if not self.check_constraints(subgraph, numberOfComponents, require_cycle_covering):
                                 subgraph.add_edge(edge[0], edge[1], similarity=edge[2], strict_flag=True)
                     elif edge[2] < 1.0:  # Don't remove edges with similarity 1
                         logging.info("Trying to remove edge %d-%d with similarity %f" % (edge[0],edge[1],edge[2]))
                         subgraph.remove_edge(edge[0], edge[1])
-                        if self.check_constraints(subgraph, numberOfComponents) == False:
+                        if not self.check_constraints(subgraph, numberOfComponents, require_cycle_covering):
                             subgraph.add_edge(edge[0], edge[1], similarity=edge[2], strict_flag=True)
                         else:
                             logging.info("Removed edge %d-%d" % (edge[0],edge[1]))
@@ -496,7 +495,7 @@ class GraphGen(object):
                                           similarity=self.score_matrix[node, max_index_final], strict_flag=True)
                 return subgraph
 
-    def check_constraints(self, subgraph, numComp):
+    def check_constraints(self, subgraph, numComp, require_cycle_covering):
         """
         Determine if the given subgraph still meets the constraints
 
@@ -505,9 +504,10 @@ class GraphGen(object):
         ----------
         subgraph : NetworkX subgraph obj
              the subgraph to check for the constraints
-
         numComp : int
             the number of connected componets
+        require_cycle_covering : bool
+            if to enforce cycle covering
 
         Returns
         -------
@@ -521,7 +521,7 @@ class GraphGen(object):
             constraintsMet = False
 
         # The requirement to keep a cycle covering is now optional
-        if constraintsMet and self.requireCycleCovering:
+        if constraintsMet and require_cycle_covering:
             if not self.check_cycle_covering(subgraph, self.nonCycleEdgesSet):
                 constraintsMet = False
 
