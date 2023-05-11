@@ -46,6 +46,7 @@ import logging
 import tempfile
 import shutil
 import traceback
+from typing import Optional
 
 __all__ = ['GraphGen']
 
@@ -100,40 +101,55 @@ def find_non_cyclic_edges(subgraph):
 
 
 class GraphGen(object):
-    """
-    This class is used to set and generate the graph used to plan
-    binding free energy calculation
+    """This class is used to set and generate the graph used to plan binding free energy calculation
+
+    Attributes
+    ----------
     """
 
     def __init__(self,
-                 score_matrix,
-                 ids,
-                 names,
-                 actives,
+                 score_matrix: np.ndarray,
+                 ids: list,
+                 names: list[str],
                  max_path_length,
-                 max_dist_from_active,
-                 similarity_cutoff,
+                 actives: list[bool],
+                 max_dist_from_active: int,
+                 similarity_cutoff: float,
                  require_cycle_covering,
                  radial: bool,
-                 fast,
-                 hub=None,
+                 fast: bool,
+                 hub: Optional[str] = None,
                  ):
 
         """
 
         Parameters
         ----------
-        score_matrix
-        ids
-        names
-        actives
+        score_matrix : np.ndarray
+          array of scores between each molecule.  Should be a symmetric (n x n) matrix
+        ids: list[int]
+          indices for each molecule.  Should be the same length as the score_matrix.
+          These ids are used as the 'ID' attribute in the resulting graph
+        names : list[str]
+          list of string identifiers for each ligand
+          these names are used as the 'fname_comp' attribute in the resulting graph
         max_path_length
-        max_dist_from_active
-        similarity_cutoff
-        require_cycle_covering
+          ???
+        actives : list[bool]
+          for each ligand in input, if they are considered active.  This is used in conjunction with the
+          max_dist_from_active argument
+        max_dist_from_active : int
+          ???
+        similarity_cutoff : float
+          the value above which edges must be to be considered viable.  0.0 would allow all edges
+        require_cycle_covering : bool
+          ???
         radial: bool
-        fast
+          whether to construct a radial graph.  Note that this radial graph will still include cycles
+        fast: bool
+          ???
         hub : str, optional
+          the **name** of the ligand to use as the center of the hub
         """
         self.score_matrix = score_matrix
         self.N = score_matrix.shape[0]
