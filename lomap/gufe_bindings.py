@@ -68,7 +68,7 @@ def generate_lomap_network(
     for i, mA in enumerate(molecules):
         for j, mB in enumerate(molecules[i+1:]):
             # pick best score across all mappings from all mappings
-            best_mp = None
+            best_mp: Optional[LigandAtomMapping] = None
             best_score = float('inf')
             for mapper in mappers:
                 mp: LigandAtomMapping
@@ -86,7 +86,6 @@ def generate_lomap_network(
             if best_mp is None:
                 continue
 
-            best_mp: LigandAtomMapping
             mtx[i, j] = mtx[j, i] = best_score
             mps[i, j] = mps[j, i] = best_mp.with_annotations({'score': best_score})
 
