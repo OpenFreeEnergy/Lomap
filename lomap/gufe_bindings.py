@@ -71,18 +71,24 @@ def generate_lomap_network(
             best_mp = None
             best_score = float('inf')
             for mapper in mappers:
-                mp: AtomMapping = next(mapper.suggest_mappings(mA, mB))
-                score = scorer(mp)
-
-                if score < best_score:
-                    best_mp = mp
-                    best_score = score
+                mp: LigandAtomMapping
+                score: float
+                try:
+                    mp, score = max((scorer(mp), mp) for mp in (mapper.suggest_mappings(mA, mB)))
+                except ValueError:
+                    # if mapper returned no mappings
+                    continue
+                else:
+                    if score < best_score:
+                        best_mp = mp
+                        best_score = score
 
             if best_mp is None:
                 continue
 
+            best_mp: LigandAtomMapping
             mtx[i, j] = mtx[j, i] = best_score
-            mps[i, j] = mps[j, i] = best_mp.with_annotation{'score': best_score}
+            mps[i, j] = mps[j, i] = best_mp.with_annotations({'score': best_score})
 
     gg = GraphGen(score_matrix=mtx,
                   ids=list(range(mtx.shape[0])),
