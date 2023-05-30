@@ -103,5 +103,9 @@ def generate_lomap_network(
                   )
     n: nx.Graph = gg.resultGraph
 
-    # todo: convert nx graph into LigandNetwork
-    return n
+    ln = LigandNetwork(
+        edges=[mps[i, j] for i, j in n.edges],
+        nodes=molecules,
+    )
+
+    return ln
