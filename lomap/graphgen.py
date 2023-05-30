@@ -144,7 +144,6 @@ class GraphGen(object):
           the **name** of the ligand to use as the center of the hub
         """
         self.score_matrix = score_matrix
-        self.N = score_matrix.shape[0]
         self.maxPathLength = max_path_length
         self.maxDistFromActive = max_dist_from_active
         self.similarityScoresLimit = similarity_cutoff
