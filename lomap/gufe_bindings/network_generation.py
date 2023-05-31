@@ -9,7 +9,7 @@ import networkx as nx
 import numpy as np
 from typing import Callable, Optional
 
-from .graphgen import GraphGen
+from ..graphgen import GraphGen
 
 
 def generate_lomap_network(
