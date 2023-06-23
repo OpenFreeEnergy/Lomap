@@ -1,6 +1,6 @@
 from gufe import(
     LigandAtomMapping,
-    LigandAtomMapper,
+    AtomMapper,
     LigandNetwork,
     SmallMoleculeComponent,
 )
@@ -14,7 +14,7 @@ from ..graphgen import GraphGen
 
 def generate_lomap_network(
         molecules: list[SmallMoleculeComponent],
-        mappers: list[LigandAtomMapper],
+        mappers: list[AtomMapper],
         scorer: Callable,
         distance_cutoff: float=0.6,
         max_path_length=6,

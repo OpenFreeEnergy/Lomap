@@ -4,7 +4,7 @@ from lomap import mcs as lomap_mcs
 import math
 from rdkit import Chem
 
-from gufe import LigandAtomMapping
+from gufe import AtomMapping
 
 DEFAULT_ANS_DIFFICULTY = {
     # H to element - not sure this has any effect currently
@@ -20,14 +20,14 @@ DEFAULT_ANS_DIFFICULTY = {
 }
 
 
-def ecr_score(mapping: LigandAtomMapping):
+def ecr_score(mapping: AtomMapping):
     molA = mapping.componentA.to_rdkit()
     molB = mapping.componentB.to_rdkit()
 
     return 1 - _dbmol.ecr(molA, molB)
 
 
-def mcsr_score(mapping: LigandAtomMapping, beta: float = 0.1):
+def mcsr_score(mapping: AtomMapping, beta: float = 0.1):
     """Maximum command substructure rule
 
     This rule was originally defined as::
@@ -59,7 +59,7 @@ def mcsr_score(mapping: LigandAtomMapping, beta: float = 0.1):
     return 1 - mcsr
 
 
-def mncar_score(mapping: LigandAtomMapping, ths: int = 4):
+def mncar_score(mapping: AtomMapping, ths: int = 4):
     """Minimum number of common atoms rule
 
     Parameters
@@ -84,11 +84,11 @@ def mncar_score(mapping: LigandAtomMapping, ths: int = 4):
     return 0.0 if ok else 1.0
 
 
-def tmcsr_score(self, mapping: LigandAtomMapping):
+def tmcsr_score(self, mapping: AtomMapping):
     raise NotImplementedError
 
 
-def atomic_number_score(mapping: LigandAtomMapping, beta=0.1,
+def atomic_number_score(mapping: AtomMapping, beta=0.1,
                         difficulty=None):
     """A score on the elemental changes happening in the mapping
 
@@ -100,7 +100,7 @@ def atomic_number_score(mapping: LigandAtomMapping, beta=0.1,
 
     Parameters
     ----------
-    mapping : LigandAtomMapping
+    mapping : AtomMapping
     beta : float, optional
       scaling factor for this rule, default 0.1
     difficulty : dict, optional
@@ -154,7 +154,7 @@ def atomic_number_score(mapping: LigandAtomMapping, beta=0.1,
     return 1 - atomic_number_rule
 
 
-def hybridization_score(mapping: LigandAtomMapping, beta=0.15):
+def hybridization_score(mapping: AtomMapping, beta=0.15):
     """
 
     Score calculated as:
@@ -163,7 +163,7 @@ def hybridization_score(mapping: LigandAtomMapping, beta=0.15):
 
     Parameters
     ----------
-    mapping : LigandAtomMapping
+    mapping : AtomMapping
     beta : float, optional
       default 0.15
 
@@ -201,7 +201,7 @@ def hybridization_score(mapping: LigandAtomMapping, beta=0.15):
     return 1 - hybridization_rule
 
 
-def sulfonamides_score(mapping: LigandAtomMapping, beta=0.4):
+def sulfonamides_score(mapping: AtomMapping, beta=0.4):
     """Checks if a sulfonamide appears and disallow this.
 
     Returns (1 - math.exp(- beta)) if this happens, else 0
@@ -238,7 +238,7 @@ def sulfonamides_score(mapping: LigandAtomMapping, beta=0.4):
         return 0
 
 
-def heterocycles_score(mapping: LigandAtomMapping, beta=0.4):
+def heterocycles_score(mapping: AtomMapping, beta=0.4):
     """Checks if a heterocycle is formed from a -H
 
     Pyrrole, furan and thiophene *are* pemitted however
@@ -287,7 +287,7 @@ def heterocycles_score(mapping: LigandAtomMapping, beta=0.4):
         return 0
 
 
-def transmuting_methyl_into_ring_score(mapping: LigandAtomMapping,
+def transmuting_methyl_into_ring_score(mapping: AtomMapping,
                                        beta=0.1, penalty=6.0):
     """Penalises ring forming
 
@@ -298,7 +298,7 @@ def transmuting_methyl_into_ring_score(mapping: LigandAtomMapping,
 
     Parameters
     ----------
-    mapping : LigandAtomMapping
+    mapping : AtomMapping
     beta : float
     penalty : float
 
@@ -336,7 +336,7 @@ def transmuting_methyl_into_ring_score(mapping: LigandAtomMapping,
         return 1 - math.exp(- beta * penalty)
 
 
-def transmuting_ring_sizes_score(mapping: LigandAtomMapping):
+def transmuting_ring_sizes_score(mapping: AtomMapping):
     """Checks if mapping alters a ring size"""
     molA = mapping.componentA.to_rdkit()
     molB = mapping.componentB.to_rdkit()
@@ -389,7 +389,7 @@ def transmuting_ring_sizes_score(mapping: LigandAtomMapping):
     return 1 - 0.1 if is_bad else 0
 
 
-def default_lomap_score(mapping: LigandAtomMapping):
+def default_lomap_score(mapping: AtomMapping):
     """The default score function from Lomap2
 
     Note
