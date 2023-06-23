@@ -2,6 +2,7 @@
 The MCS class wrapped to provide a gufe interface
 
 """
+import gufe
 from gufe import AtomMapper
 
 from .. import mcs as lomap_mcs
@@ -50,7 +51,9 @@ class LomapAtomMapper(AtomMapper):
         self.seed = seed
         self.shift = shift
 
-    def suggest_mappings(self, componentA, componentB):
+    def suggest_mappings(self,
+                         componentA: gufe.SmallMoleculeComponent,
+                         componentB: gufe.SmallMoleculeComponent):
         try:
             mcs = lomap_mcs.MCS(componentA.to_rdkit(), componentB.to_rdkit(),
                                 time=self.time,
