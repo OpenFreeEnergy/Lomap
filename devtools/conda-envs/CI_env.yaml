@@ -9,3 +9,4 @@ dependencies:
   - boost-cpp
   - pytest
   - codecov
+  - gufe >= 0.9.0

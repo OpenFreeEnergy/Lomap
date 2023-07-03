@@ -29,10 +29,6 @@ potential ligands within a substantial of compounds.
 # *****************************************************************************
 
 
-# ****************
-# MODULE IMPORTS
-# ****************
-
 import networkx as nx
 import numpy as np
 import subprocess
@@ -46,46 +42,118 @@ import logging
 import tempfile
 import shutil
 import traceback
+from typing import Optional
 
 __all__ = ['GraphGen']
 
 
-# *************************
-# Graph Class
-# *************************
+def find_non_cyclic_nodes(subgraph):
+    """
+    Generates a list of nodes of the subgraph that are not in a cycle
+
+    Parameters
+    ---------
+    subgraph : NetworkX subgraph obj
+        the subgraph to check for not cycle nodes
+
+    Returns
+    -------
+    missingNodesSet : set of graph nodes
+        the set of graph nodes that are not in a cycle
+
+    """
+    cycleList = nx.cycle_basis(subgraph)
+
+    cycleNodes = [node for cycle in cycleList for node in cycle]
+
+    missingNodesSet = set([node for node in subgraph.nodes() if node not in cycleNodes])
+
+    return missingNodesSet
+
+
+def find_non_cyclic_edges(subgraph):
+    """
+    Generates a set of edges of the subgraph that are not in a cycle (called
+    "bridges" in networkX terminology).
+
+    Parameters
+    ---------
+    subgraph : NetworkX subgraph obj
+        the subgraph to check for not cycle nodes
+
+    Returns
+    -------
+    missingEdgesSet : set of graph edges
+        the set of edges that are not in a cycle
+
+    """
+    missingEdgesSet = set(nx.bridges(subgraph))
+
+    return missingEdgesSet
 
 
 class GraphGen(object):
-    """
-    This class is used to set and generate the graph used to plan
-    binding free energy calculation
+    """This class is used to set and generate the graph used to plan binding free energy calculation
+
+    Attributes
+    ----------
     """
 
-    def __init__(self, dbase):
+    def __init__(self,
+                 score_matrix: np.ndarray,
+                 ids: list,
+                 names: list[str],
+                 max_path_length,
+                 actives: list[bool],
+                 max_dist_from_active: int,
+                 similarity_cutoff: float,
+                 require_cycle_covering,
+                 radial: bool,
+                 fast: bool,
+                 hub: Optional[str] = None,
+                 ):
 
         """
-        Inizialization function
 
         Parameters
         ----------
-
-        dbase : dbase object
-            the molecule container
-
+        score_matrix : np.ndarray
+          array of scores between each molecule.  Should be a symmetric (n x n) matrix
+        ids: list[int]
+          indices for each molecule.  Should be the same length as the score_matrix.
+          These ids are used as the 'ID' attribute in the resulting graph
+        names : list[str]
+          list of string identifiers for each ligand
+          these names are used as the 'fname_comp' attribute in the resulting graph
+        max_path_length
+          ???
+        actives : list[bool]
+          for each ligand in input, if they are considered active.  This is used in conjunction with the
+          max_dist_from_active argument
+        max_dist_from_active : int
+          ???
+        similarity_cutoff : float
+          the value above which edges must be to be considered viable.  0.0 would allow all edges
+        require_cycle_covering : bool
+          ???
+        radial: bool
+          whether to construct a radial graph.  Note that this radial graph will still include cycles
+        fast: bool
+          ???
+        hub : str, optional
+          the **name** of the ligand to use as the center of the hub
         """
+        self.score_matrix = score_matrix
+        self.maxPathLength = max_path_length
+        self.maxDistFromActive = max_dist_from_active
+        self.similarityScoresLimit = similarity_cutoff
 
-        self.dbase = dbase
-
-        self.maxPathLength = dbase.options['max']
-
-        self.maxDistFromActive = dbase.options['max_dist_from_actives']
-
-        self.similarityScoresLimit = dbase.options['cutoff']
-
-        self.requireCycleCovering = not dbase.options['allow_tree']
-
-        if dbase.options['radial']:
-            self.lead_index = self.pick_lead()
+        if radial:
+            self.lead_index = self.pick_lead(
+                hub=hub,
+                names=names,
+                strict_mtx=score_matrix
+            )
         else:
             self.lead_index = None
 
@@ -99,38 +167,31 @@ class GraphGen(object):
         # of an active
         self.distanceToActiveFailures = 0
 
-        # Draw Parameters
-
-        # THIS PART MUST BE CHANGED
-
-        # Max number of displayed chemical compound images as graph nodes
-        self.max_images = 2000
-
-        # Max number of displayed nodes in the graph
-        self.max_nodes = 100
-
-        # The maximum threshold distance in angstroms unit used to select if a molecule is depicted
-        self.max_mol_size = 50.0
-
-        self.edge_labels = True
-
         # The following Section has been strongly copied/adapted from the original implementation
 
         # Generate a list related to the disconnected graphs present in the initial graph
-        if dbase.options['fast'] and dbase.options['radial']:
-            # only enable the fast map option if use the radial option
-            self.initialSubgraphList = self.generate_initial_subgraph_list(fast_map=True)
-        else:
-            self.initialSubgraphList = self.generate_initial_subgraph_list()
+        fast_map = fast and radial
+        self.initialSubgraphList = self.generate_initial_subgraph_list(
+            fast_map=fast_map,
+            strict_mtx=score_matrix,
+            ids=ids,
+            names=names,
+            is_active=actives,
+            lead_index=self.lead_index,
+        )
 
         # A list of elements made of [edge, weights] for each subgraph
         self.subgraphScoresLists = self.generate_subgraph_scores_lists(self.initialSubgraphList)
 
         # Eliminates from each subgraph those edges whose weights are less than the hard limit
-        self.remove_edges_below_hard_limit()
+        self.remove_edges_below_hard_limit(
+            subgraphlist=self.initialSubgraphList,
+            scores=self.subgraphScoresLists,
+            similarity_scores_limit=similarity_cutoff,
+        )
 
         # Make a new master list of subgraphs now that there may be more disconnected components
-        self.workingSubgraphsList = self.generate_working_subgraphs_list()
+        self.workingSubgraphsList = self.generate_working_subgraphs_list(self.initialSubgraphList)
 
         # Make a new sorted list of [edge, weights] for each subgraph now that there may be new subgraphs
         self.workingSubgraphScoresLists = self.generate_subgraph_scores_lists(self.workingSubgraphsList)
@@ -138,9 +199,12 @@ class GraphGen(object):
         # Remove edges, whose removal does not violate constraints, from the subgraphs,
         # starting with lowest similarity score first
 
-        if dbase.options['fast'] and dbase.options['radial']:
+        if fast and radial:
             # if we use the fast and radial option, just need to add the surrounding edges from the initial graph
-            self.resultGraph = self.add_surrounding_edges()
+            self.resultGraph = self.add_surrounding_edges(subgraphs=self.workingSubgraphsList,
+                                                          score_matrix=score_matrix,
+                                                          lead_index=self.lead_index,
+                                                          similarity_score_limit=similarity_cutoff)
             # after adding the surround edges, some subgraphs may merge into a larger graph and so need to update the
             # current subgraphs
             # self.resultingSubgraphsList = copy.deepcopy(self.workingSubgraphsList)
@@ -148,14 +212,14 @@ class GraphGen(object):
             # self.resultGraph = self.merge_all_subgraphs()
         else:
             # >>>>>>>>>>>>>>>>>>>>>>>>>>>ISSUE ORDER PROBLEM<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-            self.minimize_edges()
+            self.minimize_edges(require_cycle_covering)
             # >>>>>>>>>>>>>>>>>>>>>>>>>>>ISSUE ORDER PROBLEM<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
             # Collect together disjoint subgraphs of like charge into subgraphs
             self.resultingSubgraphsList = copy.deepcopy(self.workingSubgraphsList)
 
             # Combine separate subgraphs into a single resulting graph
-            self.resultGraph = self.merge_all_subgraphs()
+            self.resultGraph = self.merge_all_subgraphs(self.workingSubgraphsList)
 
             # Make a copy of the resulting graph for later processing in connectResultingComponents()
             self.copyResultGraph = self.resultGraph.copy()
@@ -166,39 +230,68 @@ class GraphGen(object):
             # Add edges to the resultingGraph to connect its components
             self.connect_subgraphs()
 
-        return
+    @staticmethod
+    def pick_lead(hub: str, names: list[str], strict_mtx) -> int:
+        """Pick lead compount
 
-    def pick_lead(self):
-        if (self.dbase.nums() * (self.dbase.nums() - 1) / 2) != self.dbase.strict_mtx.size:
-            raise ValueError("There are errors in the similarity score matrices")
-        if not self.dbase.options['hub'] == "None":
+        Parameters
+        ----------
+        hub : str
+          input of desired hub
+        names: list[str]
+          names of each molecule
+        strict_mtx
+          scoring matrix
+
+        Returns
+        -------
+        index of lead compound
+        """
+        if not hub == "None":
             # hub radial option. Use the provided reference compound as a hub
             hub_index = None
-            for i in range(0, self.dbase.nums()):
-                if os.path.basename(self.dbase[i].getName()) == self.dbase.options['hub']:
+            for i, nm in enumerate(names):
+                if os.path.basename(nm) == hub:
                     hub_index = i
             if hub_index is None:
-                logging.info(f"Warning: the specified center ligand {self.dbase.options['hub']} is not in the "
+                logging.info(f"Warning: the specified center ligand {hub} is not in the "
                              "ligand database, will not use the radial option.")
             return hub_index
         else:
-            # complete radial option. Pick the compound with the highest total similarity to all other compounds to use as a hub
+            # complete radial option.
+            # Pick the compound with the highest total similarity to all other compounds to use as a hub
+            N = len(names)
             all_sum_i = []
-            for i in range(0, self.dbase.nums()):
+            for i in range(N):
                 sum_i = 0
-                for j in range(0, self.dbase.nums()):
-                    sum_i += self.dbase.strict_mtx[i, j]
+                for j in range(N):
+                    sum_i += strict_mtx[i, j]
                 all_sum_i.append(sum_i)
             max_value = max(all_sum_i)
             max_index = [i for i, x in enumerate(all_sum_i) if x == max_value]
             max_index_final = max_index[0]
             return max_index_final
 
-    def generate_initial_subgraph_list(self, fast_map=False):
+    @staticmethod
+    def generate_initial_subgraph_list(fast_map, strict_mtx, ids, names, is_active, lead_index: int):
 
         """
         This function generates a starting graph connecting with edges all the
         compounds with a positive strict similarity score
+
+        Parameters
+        ----------
+        fast_map : bool
+          chooses one of two algorithms
+        strict_mtx: np.ndarray
+           matrix of scores between molecules
+        ids: list
+           list of identifiers for each molecule
+        names: list
+           names of each molecule
+        is_active : list[bool]
+           for each molecule, whether it is active
+        lead_index : int
 
         Returns
         -------
@@ -209,45 +302,43 @@ class GraphGen(object):
         """
         compound_graph = nx.Graph()
 
-        if (self.dbase.nums() * (self.dbase.nums() - 1) / 2) != self.dbase.strict_mtx.size:
-            raise ValueError("There are errors in the similarity score matrices")
-
         if not fast_map:
             # if not fast map option, connect all possible nodes to generate the initial graph
-            for i in range(0, self.dbase.nums()):
+            for i in range(len(ids)):
                 if i == 0:
-                    compound_graph.add_node(i, ID=self.dbase[i].getID(),
-                            fname_comp=os.path.basename(self.dbase[i].getName()),
-                            active=self.dbase[i].isActive())
+                    compound_graph.add_node(i, ID=ids[i],
+                            fname_comp=os.path.basename(names[i]),
+                            active=is_active[i])
 
-                for j in range(i + 1, self.dbase.nums()):
+                for j in range(i + 1, len(ids)):
 
                     if i == 0:
-                        compound_graph.add_node(j, ID=self.dbase[j].getID(),
-                            fname_comp=os.path.basename(self.dbase[j].getName()),
-                            active=self.dbase[j].isActive())
+                        compound_graph.add_node(j, ID=ids[j],
+                            fname_comp=os.path.basename(names[j]),
+                            active=is_active[j])
 
-                    wgt = self.dbase.strict_mtx[i, j]
+                    wgt = strict_mtx[i, j]
 
                     if wgt > 0.0:
                         compound_graph.add_edge(i, j, similarity=wgt, strict_flag=True)
         else:
             # if fast map option, then add all possible radial edges as the initial graph
-            for i in range(0, self.dbase.nums()):
+            for i in range(len(ids)):
                 # add the node for i
-                compound_graph.add_node(i, ID=self.dbase[i].getID(),
-                                        fname_comp=os.path.basename(self.dbase[i].getName()))
-                if i != self.lead_index:
-                    wgt = self.dbase.strict_mtx[i, self.lead_index]
+                compound_graph.add_node(i, ID=ids[i],
+                                        fname_comp=os.path.basename(names[i]))
+                if i != lead_index:
+                    wgt = strict_mtx[i, lead_index]
                     if wgt > 0:
-                        compound_graph.add_edge(i, self.lead_index, similarity=wgt, strict_flag=True)
+                        compound_graph.add_edge(i, lead_index, similarity=wgt, strict_flag=True)
 
         initialSubgraphGen = [compound_graph.subgraph(c).copy() for c in nx.connected_components(compound_graph)]
         initialSubgraphList = [x for x in initialSubgraphGen]
 
         return initialSubgraphList
 
-    def generate_subgraph_scores_lists(self, subgraphList):
+    @staticmethod
+    def generate_subgraph_scores_lists(subgraphList):
 
         """
         This function generate a list of lists where each inner list is the
@@ -277,25 +368,35 @@ class GraphGen(object):
 
         return subgraphScoresLists
 
-    def remove_edges_below_hard_limit(self):
+    @staticmethod
+    def remove_edges_below_hard_limit(subgraphlist, scores, similarity_scores_limit):
         """
 
         This function removes edges below the set hard limit from each subGraph
         and from each weightsList
 
+        Operates on subgraphlist in-place!
+
+        Parameters
+        ----------
+        subgraphlist : list
+
+        scores : list
+
+        similarity_scores_limit :
         """
 
         totalEdges = 0
 
-        for subgraph in self.initialSubgraphList:
+        for subgraph in subgraphlist:
 
-            weightsList = self.subgraphScoresLists[self.initialSubgraphList.index(subgraph)]
+            weightsList = scores[subgraphlist.index(subgraph)]
 
             index = 0
 
             for edge in weightsList:
 
-                if edge[2] < self.similarityScoresLimit:
+                if edge[2] < similarity_scores_limit:
                     subgraph.remove_edge(edge[0], edge[1])
 
                     index = weightsList.index(edge)
@@ -304,7 +405,8 @@ class GraphGen(object):
 
             totalEdges = totalEdges + subgraph.number_of_edges()
 
-    def generate_working_subgraphs_list(self):
+    @staticmethod
+    def generate_working_subgraphs_list(subgraph_list):
         """
         After the deletition of the edges that have a weigth less than the
         selected threshould the subgraph maybe disconnected and a new master
@@ -318,10 +420,9 @@ class GraphGen(object):
             similatiry as weigth
 
         """
-
         workingSubgraphsList = []
 
-        for subgraph in self.initialSubgraphList:
+        for subgraph in subgraph_list:
 
             newSubgraphList = [subgraph.subgraph(c).copy() for c in nx.connected_components(subgraph)]
 
@@ -330,7 +431,7 @@ class GraphGen(object):
 
         return workingSubgraphsList
 
-    def minimize_edges(self):
+    def minimize_edges(self, require_cycle_covering):
         """
         Minimize edges in each subgraph while ensuring constraints are met
         """
@@ -343,10 +444,10 @@ class GraphGen(object):
             # weightsList = sorted(weightsList, key = itemgetter(1))
 
             # This part has been copied from the original code
-            self.nonCycleNodesSet = self.find_non_cyclic_nodes(subgraph)
-            self.nonCycleEdgesSet = self.find_non_cyclic_edges(subgraph)
+            self.nonCycleNodesSet = find_non_cyclic_nodes(subgraph)
+            self.nonCycleEdgesSet = find_non_cyclic_edges(subgraph)
             numberOfComponents = nx.number_connected_components(subgraph)
-            self.distanceToActiveFailures = self.count_distance_to_active_failures(subgraph)
+            self.distanceToActiveFailures = self.count_distance_to_active_failures(subgraph, self.maxDistFromActive)
 
             if len(subgraph.edges()) > 2:  # Graphs must have at least 3 edges to be minimzed
 
@@ -357,94 +458,50 @@ class GraphGen(object):
                         # then add it back into the graph.
                         if self.lead_index not in [edge[0], edge[1]]:
                             subgraph.remove_edge(edge[0], edge[1])
-                            if self.check_constraints(subgraph, numberOfComponents) == False:
+                            if not self.check_constraints(subgraph, numberOfComponents, require_cycle_covering):
                                 subgraph.add_edge(edge[0], edge[1], similarity=edge[2], strict_flag=True)
                     elif edge[2] < 1.0:  # Don't remove edges with similarity 1
                         logging.info("Trying to remove edge %d-%d with similarity %f" % (edge[0],edge[1],edge[2]))
                         subgraph.remove_edge(edge[0], edge[1])
-                        if self.check_constraints(subgraph, numberOfComponents) == False:
+                        if not self.check_constraints(subgraph, numberOfComponents, require_cycle_covering):
                             subgraph.add_edge(edge[0], edge[1], similarity=edge[2], strict_flag=True)
                         else:
                             logging.info("Removed edge %d-%d" % (edge[0],edge[1]))
                     else:
                         logging.info("Skipping edge %d-%d as it has similarity 1" % (edge[0],edge[1]))
 
-    def add_surrounding_edges(self):
+    def add_surrounding_edges(self, subgraphs: list,
+                              score_matrix: np.ndarray,
+                              lead_index: int,
+                              similarity_score_limit: float):
         """
         Add surrounding edges in each subgraph to make sure all nodes are in cycle
         """
-        for subgraph in self.workingSubgraphsList:
+        for subgraph in subgraphs:
             subgraph_nodes = subgraph.nodes()
-            if self.lead_index in subgraph_nodes:
+            if lead_index in subgraph_nodes:
                 # here we only consider the subgraph with lead compound
-                self.nonCycleNodesSet = self.find_non_cyclic_nodes(subgraph)
-                self.nonCycleEdgesSet = self.find_non_cyclic_edges(subgraph)
+                self.nonCycleNodesSet = find_non_cyclic_nodes(subgraph)
+                self.nonCycleEdgesSet = find_non_cyclic_edges(subgraph)
                 for node in self.nonCycleNodesSet:
-                    # for each node in the noncyclenodeset, find the similarity compare to all other surrounding nodes and pick the one with the max score and connect them
+                    # for each node in the noncyclenodeset:
+                    # find the similarity compare to all other surrounding nodes
+                    # and pick the one with the max score and connect them
                     node_score_list = []
-                    for i in range(0, self.dbase.nums()):
-                        if i != node and i != self.lead_index:
-                            node_score_list.append(self.dbase.strict_mtx[node, i])
+                    for i in range(score_matrix.shape[0]):
+                        if i != node and i != lead_index:
+                            node_score_list.append(score_matrix[node, i])
                         else:
                             node_score_list.append(0.0)
                     max_value = max(node_score_list)
-                    if max_value > self.similarityScoresLimit:
+                    if max_value > similarity_score_limit:
                         max_index = [i for i, x in enumerate(node_score_list) if x == max_value]
                         max_index_final = max_index[0]
                         subgraph.add_edge(node, max_index_final,
-                                          similarity=self.dbase.strict_mtx[node, max_index_final], strict_flag=True)
+                                          similarity=score_matrix[node, max_index_final], strict_flag=True)
                 return subgraph
 
-    def find_non_cyclic_nodes(self, subgraph):
-        """
-        Generates a list of nodes of the subgraph that are not in a cycle
-
-        Parameters
-        ---------
-        subgraph : NetworkX subgraph obj
-            the subgraph to check for not cycle nodes
-
-        Returns
-        -------
-        missingNodesSet : set of graph nodes
-            the set of graph nodes that are not in a cycle
-
-        """
-
-        missingNodesSet = set()
-
-        cycleNodes = []
-
-        cycleList = nx.cycle_basis(subgraph)
-
-        cycleNodes = [node for cycle in cycleList for node in cycle]
-
-        missingNodesSet = set([node for node in subgraph.nodes() if node not in cycleNodes])
-
-        return missingNodesSet
-
-    def find_non_cyclic_edges(self, subgraph):
-        """
-        Generates a set of edges of the subgraph that are not in a cycle (called
-        "bridges" in networkX terminology).
-
-        Parameters
-        ---------
-        subgraph : NetworkX subgraph obj
-            the subgraph to check for not cycle nodes
-
-        Returns
-        -------
-        missingEdgesSet : set of graph edges
-            the set of edges that are not in a cycle
-
-        """
-
-        missingEdgesSet = set(nx.bridges(subgraph))
-
-        return missingEdgesSet
-
-    def check_constraints(self, subgraph, numComp):
+    def check_constraints(self, subgraph, numComp, require_cycle_covering):
         """
         Determine if the given subgraph still meets the constraints
 
@@ -453,9 +510,10 @@ class GraphGen(object):
         ----------
         subgraph : NetworkX subgraph obj
              the subgraph to check for the constraints
-
         numComp : int
             the number of connected componets
+        require_cycle_covering : bool
+            if to enforce cycle covering
 
         Returns
         -------
@@ -469,21 +527,22 @@ class GraphGen(object):
             constraintsMet = False
 
         # The requirement to keep a cycle covering is now optional
-        if constraintsMet and self.requireCycleCovering:
-            if not self.check_cycle_covering(subgraph):
+        if constraintsMet and require_cycle_covering:
+            if not self.check_cycle_covering(subgraph, self.nonCycleEdgesSet):
                 constraintsMet = False
 
         if constraintsMet:
-            if not self.check_max_distance(subgraph):
+            if not self.check_max_distance(subgraph, max_path_length=self.maxPathLength):
                 constraintsMet = False
 
         if constraintsMet:
-            if not self.check_distance_to_active(subgraph):
+            if not self.check_distance_to_active(subgraph, self.distanceToActiveFailures, self.maxDistFromActive):
                 constraintsMet = False
 
         return constraintsMet
 
-    def remains_connected(self, subgraph, numComponents):
+    @staticmethod
+    def remains_connected(subgraph, numComponents) -> bool:
         """
         Determine if the subgraph remains connected after an edge has been
         removed
@@ -491,29 +550,23 @@ class GraphGen(object):
         Parameters
         ---------
         subgraph : NetworkX subgraph obj
-            the subgraph to check for connection after the edge deletition
-
-        numComp : int
-            the number of connected componets
+            the subgraph to check for connection after the edge deletion
+        numComponents : int
+            the number of connected components
 
         Returns
         -------
         isConnected : bool
             True if the subgraph is connected, False otherwise
-            :param numComponents:
-
         """
-
-        isConnected = False
-
-        if numComponents == nx.number_connected_components(subgraph):
-            isConnected = True
-        else:
+        is_connected = (numComponents == nx.number_connected_components(subgraph))
+        if not is_connected:
             logging.info("Rejecting edge deletion on graph connectivity")
 
-        return isConnected
+        return is_connected
 
-    def check_cycle_covering(self, subgraph):
+    @staticmethod
+    def check_cycle_covering(subgraph, non_cycle_edges_set):
         """
         Checks if the subgraph has a cycle covering. Note that this has been extended from
         the original algorithm: we not only care if the number of acyclic nodes has
@@ -525,6 +578,7 @@ class GraphGen(object):
         ---------
         subgraph : NetworkX subgraph obj
             the subgraph to check for connection after the edge deletion
+        non_cycle_edges_set
 
         Returns
         -------
@@ -532,17 +586,17 @@ class GraphGen(object):
             True if the subgraph has a cycle covering, False otherwise
 
         """
-
         hasCovering = True
 
         # Have we increased the number of non-cyclic edges?
-        if self.find_non_cyclic_edges(subgraph).difference(self.nonCycleEdgesSet):
+        if find_non_cyclic_edges(subgraph).difference(non_cycle_edges_set):
             hasCovering = False
             logging.info("Rejecting edge deletion on cycle covering")
 
         return hasCovering
 
-    def check_max_distance(self, subgraph):
+    @staticmethod
+    def check_max_distance(subgraph, max_path_length) -> bool:
         """
         Check to see if the graph has paths from all compounds to all other
         compounds within the specified limit
@@ -551,6 +605,7 @@ class GraphGen(object):
         ---------
         subgraph : NetworkX subgraph obj
             the subgraph to check for the max distance between nodes
+        max_path_length
 
         Returns
         -------
@@ -558,18 +613,18 @@ class GraphGen(object):
             True if the subgraph has all the nodes within the specified
             max distance
         """
-
         withinMaxDistance = True
 
         for node in subgraph:
             eccentricity = nx.eccentricity(subgraph, node)
-            if eccentricity > self.maxPathLength:
+            if eccentricity > max_path_length:
                 withinMaxDistance = False
                 logging.info("Rejecting edge deletion on graph diameter for node %d" % (node))
 
         return withinMaxDistance
 
-    def count_distance_to_active_failures(self, subgraph):
+    @staticmethod
+    def count_distance_to_active_failures(subgraph, max_dist_from_active):
         """
         Count the number of compounds that don't have a minimum-length path to an active
         within the specified limit
@@ -578,6 +633,7 @@ class GraphGen(object):
         ---------
         subgraph : NetworkX subgraph obj
             the subgraph to check for the max distance between nodes
+        max_dist_from_active
 
         Returns
         -------
@@ -587,27 +643,28 @@ class GraphGen(object):
 
         failures = 0
 
-        hasActives=False
+        hasActives = False
         for node in subgraph.nodes():
-            if (subgraph.nodes[node]["active"]):
-                hasActives=True
-        if (not hasActives):
+            if subgraph.nodes[node]["active"]:
+                hasActives = True
+        if not hasActives:
             return 0     # No actives, so don't bother checking
 
         paths = nx.shortest_path(subgraph)
         for node in subgraph.nodes():
-            if (not subgraph.nodes[node]["active"]):
-                ok=False
+            if not subgraph.nodes[node]["active"]:
+                ok = False
                 for node2 in subgraph.nodes():
-                    if (subgraph.nodes[node2]["active"]):
+                    if subgraph.nodes[node2]["active"]:
                         pathlen = len(paths[node][node2]) - 1   # No. edges is 1 less than no. nodes
-                        if (pathlen <= self.maxDistFromActive): ok=True
-                if (not ok):
+                        if pathlen <= max_dist_from_active:
+                            ok = True
+                if not ok:
                     failures = failures + 1
 
         return failures
 
-    def check_distance_to_active(self, subgraph):
+    def check_distance_to_active(self, subgraph, distance_to_active_failures, max_distance_from_active):
         """
         Check to see if we have increased the number of distance-to-active failures
 
@@ -615,21 +672,23 @@ class GraphGen(object):
         ---------
         subgraph : NetworkX subgraph obj
             the subgraph to check for the max distance between nodes
+        distance_to_active_failures
+        max_distance_from_active
 
         Returns
         -------
         ok : bool
             True if we have not increased the number of failed nodes
         """
-
-        count = self.count_distance_to_active_failures(subgraph)
-        failed =  (count > self.distanceToActiveFailures)
-        if (failed): logging.info("Rejecting edge deletion on distance-to-actives %d vs %d" % (count,self.distanceToActiveFailures))
-        logging.info("Checking edge deletion on distance-to-actives %d vs %d" % (count,self.distanceToActiveFailures))
+        count = self.count_distance_to_active_failures(subgraph, max_distance_from_active)
+        failed = count > distance_to_active_failures
+        if failed:
+            logging.info(f"Rejecting edge deletion on distance-to-actives {count} vs {distance_to_active_failures}")
+        logging.info(f"Checking edge deletion on distance-to-actives {count} vs {distance_to_active_failures}")
         return not failed
 
-
-    def merge_all_subgraphs(self):
+    @staticmethod
+    def merge_all_subgraphs(working_subgraphs):
         """Generates a single networkx graph object from the subgraphs that have
         been processed
 
@@ -643,7 +702,7 @@ class GraphGen(object):
 
         finalGraph = nx.Graph()
 
-        for subgraph in self.workingSubgraphsList:
+        for subgraph in working_subgraphs:
             finalGraph = nx.union(finalGraph, subgraph)
 
         return finalGraph
@@ -711,7 +770,7 @@ class GraphGen(object):
                         # I assumed that the score matrix is symmetric. In the Graph part this
                         # does not seems to be true:
 
-                        similarity = self.dbase.loose_mtx[nodesOfI[k]["ID"], nodesOfJ[l]["ID"]]
+                        similarity = self.score_matrix[nodesOfI[k]["ID"], nodesOfJ[l]["ID"]]
 
                         if similarity > 0.0:
                             edgesToCheck.append((nodesOfI[k]["ID"], nodesOfJ[l]["ID"], similarity))
@@ -772,7 +831,7 @@ class GraphGen(object):
                         # print 'Molecules (%d,%d)' % (nodesOfI[k],nodesOfJ[l])
                         # I assumed that the score matrix is symmetric. In the Graph part
                         # this does not seems to be true: <<<<<<<<<<<<<DEBUG>>>>>>>>>>>>>>>
-                        similarity = self.dbase.loose_mtx[nodesOfI[k]["ID"], nodesOfJ[l]["ID"]]
+                        similarity = self.score_matrix[nodesOfI[k]["ID"], nodesOfJ[l]["ID"]]
 
                         if similarity > 0.0:
                             edgesToCheck.append((nodesOfI[k]["ID"], nodesOfJ[l]["ID"], similarity))
@@ -795,16 +854,19 @@ class GraphGen(object):
         else:
             return False
 
-    def get_graph(self):
+    def generate_depictions(self, dbase, max_images: int = 2000, max_mol_size: float = 50.0,
+                            edge_labels: bool = True):
         """
-
-        Returns the final generated NetworkX graph
-
+        Parameters
+        ----------
+        dbase
+        max_images : int
+           Max number of displayed chemical compound images as graph nodes
+        max_mol_size : float
+           The maximum threshold distance in angstroms unit used to select if a molecule is depicted
+        edge_labels : bool
+           if to add labels on edges
         """
-
-        return self.resultGraph
-
-    def generate_depictions(self):
 
         def max_dist_mol(mol):
 
@@ -828,18 +890,18 @@ class GraphGen(object):
 
         temp_graph = self.resultGraph.copy()
 
-        if nx.number_of_nodes(temp_graph) <= self.max_images:
+        if nx.number_of_nodes(temp_graph) <= max_images:
             # Draw.DrawingOptions.atomLabelFontSize=30
             # Draw.DrawingOptions.dotsPerAngstrom=100
 
             for n in temp_graph:
 
                 id_mol = temp_graph.nodes[n]['ID']
-                mol = self.dbase[id_mol].getMolecule()
+                mol = dbase[id_mol].getMolecule()
                 max_dist = max_dist_mol(mol)
 
-                if max_dist < self.max_mol_size:
-                    fname = os.path.join(directory_name, self.dbase[id_mol].getName() + ".png")
+                if max_dist < max_mol_size:
+                    fname = os.path.join(directory_name, dbase[id_mol].getName() + ".png")
                     # 1, modify here to calculate the 2D structure for ligands cannot remove Hydrogens by rdkit
                     # 2, change the graph size to get better resolution
                     try:
@@ -849,7 +911,7 @@ class GraphGen(object):
                         # issue tracker for more details######
                         logging.info(
                             "Error attempting to remove hydrogens for molecule %s using RDKit. RDKit cannot kekulize the molecule" %
-                            self.dbase[id_mol].getName())
+                            dbase[id_mol].getName())
                     AllChem.Compute2DCoords(mol)
                     from rdkit.Chem.Draw.MolDrawing import DrawingOptions
                     DrawingOptions.bondLineWidth = 2.5
@@ -866,33 +928,33 @@ class GraphGen(object):
             else:
                 temp_graph[u][v]['color'] = 'red'
                 temp_graph[u][v]['penwidth'] = 2.5
-            if self.edge_labels:
+            if edge_labels:
                 temp_graph[u][v]['label'] = round(d['similarity'],2)
 
-        nx.nx_agraph.write_dot(temp_graph, self.dbase.options['name'] + '_tmp.dot')
+        nx.nx_agraph.write_dot(temp_graph, dbase.options['name'] + '_tmp.dot')
 
-        cmd = 'dot -Tpng ' + self.dbase.options['name'] + '_tmp.dot -o ' + self.dbase.options['name'] + '.png'
-
-        os.system(cmd)
-        cmd = 'dot -Teps ' + self.dbase.options['name'] + '_tmp.dot -o ' + self.dbase.options['name'] + '.eps'
+        cmd = 'dot -Tpng ' + dbase.options['name'] + '_tmp.dot -o ' + dbase.options['name'] + '.png'
 
         os.system(cmd)
-        cmd = 'dot -Tpdf ' + self.dbase.options['name'] + '_tmp.dot -o ' + self.dbase.options['name'] + '.pdf'
+        cmd = 'dot -Teps ' + dbase.options['name'] + '_tmp.dot -o ' + dbase.options['name'] + '.eps'
 
         os.system(cmd)
-        os.remove(self.dbase.options['name'] + '_tmp.dot')
+        cmd = 'dot -Tpdf ' + dbase.options['name'] + '_tmp.dot -o ' + dbase.options['name'] + '.pdf'
+
+        os.system(cmd)
+        os.remove(dbase.options['name'] + '_tmp.dot')
         shutil.rmtree(directory_name, ignore_errors=True)
 
     # The function to output the score and connectivity txt file
 
-    def layout_info(self):
+    def layout_info(self, dbase):
         # pass the lead compound index if the radial option is on and generate the
         # morph type of output required by FESetup
         if self.lead_index is not None:
-            morph_txt = open(self.dbase.options['name'] + "_morph.txt", "w")
+            morph_txt = open(dbase.options['name'] + "_morph.txt", "w")
             morph_data = "morph_pairs = "
-        with open(self.dbase.options['name'] + "_score_with_connection.txt", "w") as info_txt:
-            all_key_id = self.dbase.dic_mapping.keys()
+        with open(dbase.options['name'] + "_score_with_connection.txt", "w") as info_txt:
+            all_key_id = dbase.dic_mapping.keys()
             data = ["%-10s,%-10s,%-25s,%-25s,%-15s,%-15s,%-15s,%-10s\n" % (
             "Index_1", "Index_2", "Filename_1", "Filename_2", "Str_sim", "Eff_sim", "Loose_sim", "Connect")]
             for i in range(len(all_key_id) - 1):
@@ -906,16 +968,16 @@ class GraphGen(object):
                         connected = True
                     except IndexError:
                         pass
-                    Filename_i = self.dbase.dic_mapping[i]
-                    Filename_j = self.dbase.dic_mapping[j]
-                    MCmap = self.dbase.get_MCSmap(i,j)
+                    Filename_i = dbase.dic_mapping[i]
+                    Filename_j = dbase.dic_mapping[j]
+                    MCmap = dbase.get_MCSmap(i,j)
                     mapString=""
                     if MCmap is not None:
                         mapString = MCmap
                     # print "Check the filename", Filename_i, Filename_j
-                    strict_similarity = self.dbase.strict_mtx[i, j]
-                    loose_similarity = self.dbase.loose_mtx[i, j]
-                    true_strict_similarity = self.dbase.true_strict_mtx[i, j]
+                    strict_similarity = dbase.strict_mtx[i, j]
+                    loose_similarity = dbase.loose_mtx[i, j]
+                    true_strict_similarity = dbase.true_strict_mtx[i, j]
                     if connected:
                         new_line = "%-10s,%-10s,%-25s,%-25s,%-15.5f,%-15.5f,%-15.5f,%-10s,%s\n" % (
                         i, j, Filename_i, Filename_j, true_strict_similarity, strict_similarity, loose_similarity, "Yes",mapString)
@@ -930,8 +992,8 @@ class GraphGen(object):
                             else:
                                 # compare i and j with the lead compound, and
                                 # pick the one with the higher similarity as the start ligand
-                                similarity_i = self.dbase.strict_mtx[self.lead_index, i]
-                                similarity_j = self.dbase.strict_mtx[self.lead_index, j]
+                                similarity_i = dbase.strict_mtx[self.lead_index, i]
+                                similarity_j = dbase.strict_mtx[self.lead_index, j]
                                 if similarity_i > similarity_j:
                                     morph_string = "%s > %s, " % (morph_i, morph_j)
                                 else:
@@ -945,8 +1007,7 @@ class GraphGen(object):
             if self.lead_index is not None:
                 morph_txt.write(morph_data)
 
-
-    def write_graph(self, output_no_images, output_no_graph):
+    def write_graph(self, dbase, output_no_images, output_no_graph):
         """
 
         This function writes to a file the final generated NetworkX graph as
@@ -957,17 +1018,17 @@ class GraphGen(object):
         """
 
         try:
-            self.dbase.write_dic()
-            self.layout_info()
+            dbase.write_dic()
+            self.layout_info(dbase)
         except Exception as e:
             traceback.print_exc()
-            raise IOError("%s: %s.txt" % (str(e), self.dbase.options['name']))
+            raise IOError("%s: %s.txt" % (str(e), dbase.options['name']))
 
         try:
             if not output_no_images:
                 self.generate_depictions()
             if not output_no_graph:
-                nx.nx_agraph.write_dot(self.resultGraph, self.dbase.options['name'] + '.dot')
+                nx.nx_agraph.write_dot(self.resultGraph, dbase.options['name'] + '.dot')
         except Exception as e:
             traceback.print_exc()
             raise IOError('Problems during the file generation: %s' % str(e))
@@ -976,29 +1037,32 @@ class GraphGen(object):
 
         log = 'The following files have been generated:'
         if not output_no_graph:
-            log += f'\n{self.dbase.options["name"]}.dot\tGraph file'
+            log += f'\n{dbase.options["name"]}.dot\tGraph file'
         if not output_no_images:
-            log += f'\n{self.dbase.options["name"]}.png\tPng file'
-        log += f'\n{self.dbase.options["name"]}.txt\tMapping Text file'
+            log += f'\n{dbase.options["name"]}.png\tPng file'
+        log += f'\n{dbase.options["name"]}.txt\tMapping Text file'
         logging.info(log)
 
         logging.info(30 * '-')
 
-        return
+    def draw(self, dbase, max_images: int=2000, max_nodes: int=100, edge_labels: bool = True):
+        """This function plots the NetworkX graph by using Matplotlib
 
-    ###### Still in developing stage ######
-
-    def draw(self):
-        """
-        This function plots the NetworkX graph by using Matplotlib
-
+        Parameters
+        ----------
+        dbase
+        max_images : int
+          Max number of displayed chemical compound images as graph nodes
+        max_nodes: int
+          Max number of displayed nodes in the graph
+        edge_labels: bool
         """
 
         logging.info('\nDrawing....')
 
-        if nx.number_of_nodes(self.resultGraph) > self.max_nodes:
+        if nx.number_of_nodes(self.resultGraph) > max_nodes:
             logging.info('The number of generated graph nodes %d exceed the max number of drawable nodes %s' % (
-            nx.number_of_nodes(self.resultGraph), self.max_nodes))
+            nx.number_of_nodes(self.resultGraph), max_nodes))
             return
 
         def max_dist_mol(mol):
@@ -1052,7 +1116,7 @@ class GraphGen(object):
         # Draw node labels
         nx.draw_networkx_labels(self.resultGraph, pos, labels=node_labels, font_size=10)
 
-        if self.edge_labels:
+        if edge_labels:
             edge_weight_strict = dict([((u, v,), d['similarity']) for u, v, d in self.resultGraph.edges(data=True) if
                                        d['strict_flag'] == True])
             edge_weight_loose = dict([((u, v,), d['similarity']) for u, v, d in self.resultGraph.edges(data=True) if
@@ -1074,7 +1138,7 @@ class GraphGen(object):
         # edges loose
         nx.draw_networkx_edges(self.resultGraph, pos, edgelist=loose_edges, edge_color='r')
 
-        if nx.number_of_nodes(self.resultGraph) <= self.max_images:
+        if nx.number_of_nodes(self.resultGraph) <= max_images:
 
             trans = ax.transData.transform
             trans2 = fig.transFigure.inverted().transform
@@ -1101,14 +1165,14 @@ class GraphGen(object):
                 id_mol = self.resultGraph.nodes[each_node]['ID']
                 # skip remove Hs by rdkit if Hs cannot be removed
                 try:
-                    mol = AllChem.RemoveHs(self.dbase[id_mol].getMolecule())
+                    mol = AllChem.RemoveHs(dbase[id_mol].getMolecule())
                 except:
                     ###### need to ask RDKit to fix this if possible, see the code
                     # issue tracker for more details######
-                    mol = self.dbase[id_mol].getMolecule()
+                    mol = dbase[id_mol].getMolecule()
                     logging.info(
                         "Error attempting to remove hydrogens for molecule %s using RDKit. RDKit cannot kekulize the molecule" %
-                        self.dbase[id_mol].getName())
+                        dbase[id_mol].getName())
 
                 # max_dist = max_dist_mol(mol)
                 # if max_dist > 7.0:
@@ -1142,5 +1206,3 @@ class GraphGen(object):
         # print 'Graph .png file has been generated...'
 
         plt.show()
-
-        return
