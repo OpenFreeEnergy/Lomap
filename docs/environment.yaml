@@ -1,0 +1,14 @@
+name: openfe-docs
+channels:
+- https://conda.anaconda.org/conda-forge
+dependencies:
+- openff-units==0.2.0
+- plugcli
+- pydata-sphinx-theme
+- python=3.10
+- sphinx
+- tqdm
+- gufe
+- pip:
+  - sphinx-design
+  - sphinx-toolbox
