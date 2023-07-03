@@ -3,7 +3,7 @@ The MCS class wrapped to provide a gufe interface
 
 """
 import gufe
-from gufe import AtomMapper
+from gufe import AtomMapper, LigandAtomMapping
 
 from .. import mcs as lomap_mcs
 
@@ -72,5 +72,9 @@ class LomapAtomMapper(AtomMapper):
         mapping_dict = dict((map(int, v.split(':'))
                              for v in mapping_string.split(',')))
 
-        yield mapping_dict
+        yield LigandAtomMapping(
+            componentA=componentA,
+            componentB=componentB,
+            componentA_to_componentB=mapping_dict,
+        )
         return
