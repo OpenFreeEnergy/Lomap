@@ -64,7 +64,9 @@ from .dbmol import SMatrix
 from .dbmol import Molecule
 from .mcs import MCS
 from .gufe_bindings import (
-    generate_lomap_network
+    generate_lomap_network,
+    LomapAtomMapper,
+    default_lomap_score,
 )
 
 del dbmol
