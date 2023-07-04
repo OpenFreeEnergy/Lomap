@@ -1126,7 +1126,7 @@ class MCS(object):
 
     def heavy_atom_mcs_map(self):
         """
-        Returns a list of tuples mapping atoms from moli to molj
+        Gives a list of tuples mapping atoms from moli to molj
         Heavy atoms only, returned sorted by first index
         """
         maplist=[]
@@ -1139,16 +1139,18 @@ class MCS(object):
 
     def heavy_atom_match_list(self):
         """
-        Returns a string listing the MCS match between the two molecules as
-          atom_m1:atom_m2,atom_m1:atom_m2,...
+        Gives a string listing the MCS match between the two molecules as
+          `atom_m1:atom_m2,atom_m1:atom_m2,...`
+
         Heavy atoms only
         """
         return ",".join([str(i)+":"+str(j) for (i,j) in self.heavy_atom_mcs_map()])
 
     def all_atom_match_list(self):
         """
-        Returns a string listing the MCS match between the two molecules as
-          atom_m1:atom_m2,atom_m1:atom_m2,...
+        Gives a string listing the MCS match between the two molecules as
+        `atom_m1:atom_m2,atom_m1:atom_m2,...`
+
         All atoms including hydrogens. The string is sorted by first index.
         We need to be careful that this function is symmetric, and that hydrogens
         are mapped correctly.
