@@ -10,6 +10,8 @@ Welcome to lomap's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   legacy.rst
+
 
 
 Indices and tables
