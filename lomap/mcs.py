@@ -12,14 +12,6 @@ potential ligands within a substantial of compounds.
 
 """
 
-# *****************************************************************************
-# Lomap2: A toolkit to plan alchemical relative binding affinity calculations
-# Copyright 2015 - 2016  UC Irvine and the Authors
-#
-# Authors: Dr Gaetano Calabro' and Dr David Mobley
-#
-# *****************************************************************************
-
 
 from rdkit import Chem
 from rdkit.Chem import rdFMCS
@@ -33,10 +25,6 @@ from rdkit.Geometry.rdGeometry import Point3D
 import math
 from rdkit import RDLogger
 import logging
-
-# *******************************
-# Maximum Common Subgraph Class
-# *******************************
 
 
 __all__ = ['MCS']
@@ -722,28 +710,23 @@ class MCS(object):
 
     @staticmethod
     def getMapping(moli, molj, hydrogens=False, fname=None, time_out=150):
-
-        """
-        Compute the MCS between two passed molecules
+        """Compute the MCS between two passed molecules
 
         Parameters
         ----------
-
         moli : RDKit molecule object
             the first molecule used to perform the MCS calculation
         molj : RDKit molecule object
             the second molecule used to perform the MCS calculation
         hydrogens : bool
             incluse or not the hydrogens in the MCS calculation
-
         fname : string
             the filename used to output a png file depicting the MCS mapping
-
         time_out: int
             the max time in seconds used to compute the MCS
 
-        Returns:
-        --------
+        Returns
+        -------
         map_moli_molj: python list of tuple [...(i,j)...]
             the list of tuple which contains the atom mapping indexes between
             the two molecules. The indexes (i,j) are resplectively related to
@@ -835,11 +818,7 @@ class MCS(object):
 
         return map_moli_to_molj
 
-
-    ############ MCS BASED RULES ############
-
     def mcsr(self):
-
         """
         This rule computes the similarity between the two passed molecules
         used to compute the MCS
@@ -848,8 +827,6 @@ class MCS(object):
         -------
         scr_mcsr : float
             the rule score
-
-
         """
 
         # The number of heavy atoms in each molecule
@@ -866,9 +843,7 @@ class MCS(object):
 
         return scr_mcsr
 
-    # MNACR rule
     def mncar(self, ths=4):
-
         """
         This rule cut the similarity score between two molecules if they do
         not share the selected number of atoms
@@ -903,9 +878,7 @@ class MCS(object):
     def tmcsr(self, strict_flag=True):
         return 1.0
 
-    # AtomicNumber rule
     def atomic_number_rule(self):
-
         """
         This rule checks how many elements have been changed in the MCS
         and a score based on the fraction of MCS matches that are the same atomic number.
@@ -964,9 +937,7 @@ class MCS(object):
         logging.info('atomic number score from %d mismatches is %f' %(nmismatch,an_score))
         return an_score
 
-    # Hybridization rule
     def hybridization_rule(self, penalty_weight = 1.5):
-
         """
         This rule checks how many atoms have changed hybridization state.
         The penalty weight means how many "atoms" different a hybridization state change
@@ -998,10 +969,7 @@ class MCS(object):
         logging.info('hybridization score from %d mismatches is %f' %(nmismatch,hyb_score))
         return hyb_score
 
-
-    # Sulfonamides rule
     def sulfonamides_rule(self, penalty=4):
-
         """
         This rule checks to see if we are growing a complete sulfonamide, and
         returns 0 if we are. This means that if this rule is used we effectively disallow
@@ -1033,9 +1001,7 @@ class MCS(object):
         logging.info('sulfonamide score is %f' %(sulf_score))
         return sulf_score
 
-    # Heterocycles rule
     def heterocycles_rule(self, penalty=4):
-
         """
         This rule checks to see if we are growing a heterocycle from a hydrogen, and
         returns <1 if we are. This means that if this rule is used we penalise
@@ -1076,7 +1042,6 @@ class MCS(object):
         return het_score
 
     def transmuting_methyl_into_ring_rule(self, penalty=6):
-
         """
          Rule to prevent turning a methyl into a ring atom and similar transformations
          (you can grow a ring, but you can't transmute into one)
@@ -1117,7 +1082,6 @@ class MCS(object):
         return mescore
 
     def transmuting_ring_sizes_rule(self):
-
         """
          Rule to prevent turning a ring atom into a ring atom with a different ring size
          (you can grow a ring, but you can't turn a cyclopentyl into a cyclohexyl)
@@ -1161,10 +1125,10 @@ class MCS(object):
         return 0.1 if is_bad else 1
 
     def heavy_atom_mcs_map(self):
-        '''
+        """
         Returns a list of tuples mapping atoms from moli to molj
         Heavy atoms only, returned sorted by first index
-        '''
+        """
         maplist=[]
         for at in self.mcs_mol.GetAtoms():
             moli_idx = int(at.GetProp('to_moli'))
@@ -1174,24 +1138,24 @@ class MCS(object):
         return maplist
 
     def heavy_atom_match_list(self):
-        '''
+        """
         Returns a string listing the MCS match between the two molecules as
           atom_m1:atom_m2,atom_m1:atom_m2,...
         Heavy atoms only
-        '''
+        """
         return ",".join([str(i)+":"+str(j) for (i,j) in self.heavy_atom_mcs_map()])
 
     def all_atom_match_list(self):
-        '''
+        """
         Returns a string listing the MCS match between the two molecules as
           atom_m1:atom_m2,atom_m1:atom_m2,...
         All atoms including hydrogens. The string is sorted by first index.
         We need to be careful that this function is symmetric, and that hydrogens
         are mapped correctly.
-        '''
+        """
 
         def get_attached_atoms_not_in_mcs(mol,i):
-            ''' Get atoms attached to atom i which are not in the MCS '''
+            """ Get atoms attached to atom i which are not in the MCS """
             attached=[]
             for b in mol.GetBonds():
                 if b.GetEndAtomIdx()==i or b.GetBeginAtomIdx()==i:
