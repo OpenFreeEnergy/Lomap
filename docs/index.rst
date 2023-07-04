@@ -10,6 +10,7 @@ Welcome to lomap's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   api.rst
    legacy.rst
 
 
