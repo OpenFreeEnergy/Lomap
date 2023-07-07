@@ -41,6 +41,8 @@ import logging
 
 __all__ = ['MCS']
 
+logger = logging.getLogger(__name__)
+
 
 def atom_hybridization(a):
     """
@@ -456,7 +458,6 @@ class MCS(object):
 
                 map_mcs_mol()   # Regenerate mappings after deletion
 
-
         def map_mcs_mol():
             """
 
@@ -672,6 +673,10 @@ class MCS(object):
 
         # Cleanup any partial rings remaining
         delete_broken_ring()
+
+        # Only single fragment
+        mols = Chem.GetMolFrags(self.mcs_mol, asMols=True)
+        self.mcs_mol = max(mols, key=lambda x: x.GetNumAtoms())
 
         # Mapping between the found MCS molecule and moli,  molj
         try:
