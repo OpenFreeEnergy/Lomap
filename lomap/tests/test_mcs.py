@@ -269,6 +269,18 @@ def regression_mappings_explicit(toluene_explicit,
     return Chem.Mol(toluene_explicit), Chem.Mol(other), other_mapping
 
 
+@pytest.fixture()
+def whole_fragment_pair():
+    """files for issue #32
+
+    these molecules previously generated a mapping with multiple fragments
+    """
+    m1 = Chem.MolFromMolFile(_rf('data/lig_41.sdf'), removeHs=False)
+    m2 = Chem.MolFromMolFile(_rf('data/lig_74.sdf'), removeHs=False)
+
+    return m1, m2
+
+
 def test_toluene_to_other(regression_mappings):
     toluene, other, ref_mapping = regression_mappings
 
@@ -455,3 +467,12 @@ def test_shift_parameter(use_shift, refval1, refval2, naphthalene_shift, benzoxa
     assert len(mapper.heavy_atom_mcs_map()) == 6
     assert mismatch(naphthalene_shift, benzoxazole_shift, True, mapping) == pytest.approx(refval1)
     assert mismatch(naphthalene_shift, benzoxazole_shift, False, mapping) == pytest.approx(refval2)
+
+
+def test_whole_fragment_match_only(whole_fragment_pair):
+    # issue #32
+    m = mcs.MCS(whole_fragment_pair[0], whole_fragment_pair[1])
+
+    frags = Chem.GetMolFrags(m.mcs_mol)
+
+    assert len(frags) == 1
