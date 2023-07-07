@@ -675,7 +675,7 @@ class MCS(object):
         delete_broken_ring()
 
         # Only single fragment
-        mols = Chem.GetMolFrags(self.mcs_mol, asMols=True)
+        mols = Chem.GetMolFrags(self.mcs_mol, asMols=True, sanitizeFrags=False)
         self.mcs_mol = max(mols, key=lambda x: x.GetNumAtoms())
 
         # Mapping between the found MCS molecule and moli,  molj
