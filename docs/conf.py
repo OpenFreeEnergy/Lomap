@@ -18,11 +18,22 @@ author = 'Lomap developers'
 
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.intersphinx',
     'sphinx.ext.napoleon',
     'sphinx_toolbox.collapse',
     'sphinx.ext.autosectionlabel',
     'sphinx_design',
 ]
+
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3.9", None),
+    "numpy": ("https://numpy.org/doc/stable", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
+    "rdkit": ("https://www.rdkit.org/docs", None),
+    "openff.units": ("https://docs.openforcefield.org/units/en/stable", None),
+    "gufe": ("https://gufe.readthedocs.io/en/latest/", None),
+}
+
 
 autoclass_content = 'both'
 
