@@ -2,19 +2,19 @@ from gufe import(
     LigandAtomMapping,
     AtomMapper,
     LigandNetwork,
-    SmallMoleculeComponent,
 )
+import gufe
 import itertools
 import networkx as nx
 import numpy as np
-from typing import Callable, Optional
+from typing import Callable, Optional, Union
 
 from ..graphgen import GraphGen
 
 
 def generate_lomap_network(
-        molecules: list[SmallMoleculeComponent],
-        mappers: list[AtomMapper],
+        molecules: list[gufe.SmallMoleculeComponent],
+        mappers: Union[AtomMapper, list[AtomMapper]],
         scorer: Callable,
         distance_cutoff: float=0.6,
         max_path_length=6,
@@ -23,7 +23,7 @@ def generate_lomap_network(
         require_cycle_covering: bool=True,
         radial: bool=False,
         fast: bool=False,
-        hub: Optional[SmallMoleculeComponent] = None,
+        hub: Optional[gufe.SmallMoleculeComponent] = None,
     ) -> LigandNetwork:
     """Generate a LigandNetwork according to Lomap's network creation rules
 
@@ -31,7 +31,7 @@ def generate_lomap_network(
     ----------
     molecules : list[SmallMoleculeComponent]
        molecules to map
-    mappers : LigandAtomMapper
+    mappers : list[AtomMapper] or AtomMapper
        one or more Mapper functions to use to propose edges
     scorer: function
        scoring function for edges.  Should be a function which takes an AtomMapping and returns a value from 0.0 (best)
@@ -58,6 +58,8 @@ def generate_lomap_network(
     """
     if not mappers:
         raise ValueError("At least one Mapper must be provided")
+    if isinstance(mappers, gufe.AtomMapper):
+        mappers = [mappers]
 
     # gen n x n mappings with scores
     mtx = np.zeros((len(molecules), len(molecules)), dtype=float)
