@@ -60,6 +60,8 @@ def generate_lomap_network(
         raise ValueError("At least one Mapper must be provided")
     if isinstance(mappers, gufe.AtomMapper):
         mappers = [mappers]
+    if actives is None:
+        actives = [False] * len(molecules)
 
     # gen n x n mappings with scores
     mtx = np.zeros((len(molecules), len(molecules)), dtype=float)
@@ -76,7 +78,8 @@ def generate_lomap_network(
                 mp: LigandAtomMapping
                 score: float
                 try:
-                    mp, score = max((scorer(mp), mp) for mp in (mapper.suggest_mappings(mA, mB)))
+                    score, mp = max((scorer(mp), mp)
+                                    for mp in (mapper.suggest_mappings(mA, mB)))
                 except ValueError:
                     # if mapper returned no mappings
                     continue
