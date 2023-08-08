@@ -4,6 +4,7 @@ The MCS class wrapped to provide a gufe interface
 """
 import gufe
 from gufe import AtomMapper, LigandAtomMapping
+from typing import Iterable
 
 from .. import mcs as lomap_mcs
 
@@ -53,7 +54,18 @@ class LomapAtomMapper(AtomMapper):
 
     def suggest_mappings(self,
                          componentA: gufe.SmallMoleculeComponent,
-                         componentB: gufe.SmallMoleculeComponent):
+                         componentB: gufe.SmallMoleculeComponent) -> Iterable[LigandAtomMapping]:
+        """Generate one or more mappings between two small molecules
+        
+        Parameters
+        ----------
+        componentA, componentB: gufe.SmallMoleculeComponent
+
+        Returns
+        -------
+        mapping : Iterable[LigandAtomMapping]
+          potential mappings
+        """
         try:
             mcs = lomap_mcs.MCS(componentA.to_rdkit(), componentB.to_rdkit(),
                                 time=self.time,
