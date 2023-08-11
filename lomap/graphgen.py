@@ -1026,7 +1026,7 @@ class GraphGen(object):
 
         try:
             if not output_no_images:
-                self.generate_depictions()
+                self.generate_depictions(dbase)
             if not output_no_graph:
                 nx.nx_agraph.write_dot(self.resultGraph, dbase.options['name'] + '.dot')
         except Exception as e:
