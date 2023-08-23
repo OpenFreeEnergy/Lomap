@@ -5,11 +5,15 @@ from gufe import(
 )
 import gufe
 import itertools
+import logging
 import networkx as nx
 import numpy as np
 from typing import Callable, Optional, Union
 
 from ..graphgen import GraphGen
+
+
+logger = logging.getLogger(__name__)
 
 
 def generate_lomap_network(
@@ -64,37 +68,47 @@ def generate_lomap_network(
         actives = [False] * len(molecules)
 
     # gen n x n mappings with scores
-    mtx = np.zeros((len(molecules), len(molecules)), dtype=float)
+    # initially all inf scores, i.e. impossible
+    mtx = np.full((len(molecules), len(molecules)), fill_value=1.0,
+                  dtype=float)
     # np array of mappings
     mps = np.zeros_like(mtx, dtype=object)
 
     # for all combinations of molecules
-    for i, mA in enumerate(molecules):
-        for j, mB in enumerate(molecules[i+1:]):
-            # pick best score across all mappings from all mappings
-            best_mp: Optional[LigandAtomMapping] = None
-            best_score = float('inf')
-            for mapper in mappers:
-                mp: LigandAtomMapping
-                score: float
-                try:
-                    score, mp = max((scorer(mp), mp)
-                                    for mp in (mapper.suggest_mappings(mA, mB)))
-                except ValueError:
-                    # if mapper returned no mappings
-                    continue
-                else:
-                    if score < best_score:
-                        best_mp = mp
-                        best_score = score
+    for i, j in itertools.combinations(range(len(molecules)), 2):
+        mA, mB = molecules[i], molecules[j]
 
-            if best_mp is None:
+        # pick best score across all mappings from all mappings
+        best_mp: Optional[LigandAtomMapping] = None
+        best_score = float('inf')
+        for mapper in mappers:
+            mp: LigandAtomMapping
+            score: float
+            try:
+                score, mp = min((scorer(mp), mp)
+                                for mp in (mapper.suggest_mappings(mA, mB)))
+            except ValueError:
+                # if mapper returned no mappings
                 continue
+            else:
+                if score < best_score:
+                    best_mp = mp
+                    best_score = score
 
-            mtx[i, j] = mtx[j, i] = best_score
-            mps[i, j] = mps[j, i] = best_mp.with_annotations({'score': best_score})
+        if best_mp is None:
+            logger.debug(f"Found no mapping for {mA} {mB}")
+            continue
 
-    gg = GraphGen(score_matrix=mtx,
+        logger.debug(f"Mapping for {mA} {mB} has score {best_score}")
+
+        mtx[i, j] = mtx[j, i] = best_score
+        mps[i, j] = mps[j, i] = best_mp.with_annotations({'score': best_score})
+
+    # original GraphGen uses "similarity" i.e. 0 is bad, 1.0 is good
+    # whereas gufe uses "distance", i.e. 0 is good, 1.0 is worse
+    gg_mtx = 1 - mtx
+
+    gg = GraphGen(score_matrix=gg_mtx,
                   ids=list(range(mtx.shape[0])),
                   names=[m.name for m in molecules],
                   max_path_length=max_path_length,
