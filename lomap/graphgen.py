@@ -92,6 +92,9 @@ def find_non_cyclic_edges(subgraph):
     return missingEdgesSet
 
 
+logger = logging.getLogger(__name__)
+
+
 class GraphGen(object):
     """This class is used to set and generate the graph used to plan binding free energy calculation
 
