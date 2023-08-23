@@ -722,7 +722,7 @@ class DBMolecules(object):
         # The Graph is build from an instance of the Class GraphGen by passing
         # the selected user options
         Gr = graphgen.GraphGen(
-            score_matrix=self.strict_mtx,
+            score_matrix=self.strict_mtx.to_numpy_2D_array(),
             ids=[m.getID() for m in self],
             names=[m.getName() for m in self],
             actives=[m.isActive() for m in self],
