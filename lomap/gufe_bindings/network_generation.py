@@ -20,13 +20,13 @@ def generate_lomap_network(
         molecules: list[gufe.SmallMoleculeComponent],
         mappers: Union[AtomMapper, list[AtomMapper]],
         scorer: Callable,
-        distance_cutoff: float=0.6,
+        distance_cutoff: float = 0.4,
         max_path_length=6,
         actives: Optional[list[bool]] = None,
         max_dist_from_active=2,
-        require_cycle_covering: bool=True,
-        radial: bool=False,
-        fast: bool=False,
+        require_cycle_covering: bool = True,
+        radial: bool = False,
+        fast: bool = False,
         hub: Optional[gufe.SmallMoleculeComponent] = None,
     ) -> LigandNetwork:
     """Generate a LigandNetwork according to Lomap's network creation rules
@@ -38,8 +38,8 @@ def generate_lomap_network(
     mappers : list[AtomMapper] or AtomMapper
        one or more Mapper functions to use to propose edges
     scorer: function
-       scoring function for edges.  Should be a function which takes an AtomMapping and returns a value from 0.0 (best)
-       to 1.0 (worst).  These values are use as the "distance" between two molecules, and compared against the
+       scoring function for edges.  Should be a function which takes an AtomMapping and returns a value from 1.0 (best)
+       to 0.0 (worst).  These values are use as the "distance" between two molecules, and compared against the
        'distance_cutoff' parameter
     distance_cutoff : float
        the maximum distance/dissimilarity between two molecules for an edge to be accepted
@@ -80,18 +80,18 @@ def generate_lomap_network(
 
         # pick best score across all mappings from all mappings
         best_mp: Optional[LigandAtomMapping] = None
-        best_score = float('inf')
+        best_score = 0.0
         for mapper in mappers:
             mp: LigandAtomMapping
             score: float
             try:
-                score, mp = min((scorer(mp), mp)
+                score, mp = max((scorer(mp), mp)
                                 for mp in (mapper.suggest_mappings(mA, mB)))
             except ValueError:
                 # if mapper returned no mappings
                 continue
             else:
-                if score < best_score:
+                if score > best_score:
                     best_mp = mp
                     best_score = score
 
@@ -104,11 +104,7 @@ def generate_lomap_network(
         mtx[i, j] = mtx[j, i] = best_score
         mps[i, j] = mps[j, i] = best_mp.with_annotations({'score': best_score})
 
-    # original GraphGen uses "similarity" i.e. 0 is bad, 1.0 is good
-    # whereas gufe uses "distance", i.e. 0 is good, 1.0 is worse
-    gg_mtx = 1 - mtx
-
-    gg = GraphGen(score_matrix=gg_mtx,
+    gg = GraphGen(score_matrix=mtx,
                   ids=list(range(mtx.shape[0])),
                   names=[m.name for m in molecules],
                   max_path_length=max_path_length,
