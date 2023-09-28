@@ -12,3 +12,4 @@ dependencies:
 - pip:
   - sphinx-design
   - sphinx-toolbox
+  - git+https://github.com/OpenFreeEnergy/ofe-sphinx-theme@main

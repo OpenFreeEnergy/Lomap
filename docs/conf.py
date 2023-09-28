@@ -46,7 +46,8 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'alabaster'
-html_static_path = ['_static']
-html_css_files = [
-    'css/custom.css',
-]
+html_static_path = ['ofe_sphinx_theme']
+html_theme_options = {
+    "accent_color": "FeelingBlue",
+}
+html_css_files = []
