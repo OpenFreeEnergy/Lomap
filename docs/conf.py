@@ -34,7 +34,6 @@ intersphinx_mapping = {
     "gufe": ("https://gufe.readthedocs.io/en/latest/", None),
 }
 
-
 autoclass_content = 'both'
 
 templates_path = ['_templates']
