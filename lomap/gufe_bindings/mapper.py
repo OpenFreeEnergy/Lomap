@@ -7,6 +7,7 @@ from gufe import AtomMapper, LigandAtomMapping
 from typing import Iterable
 
 from .. import mcs as lomap_mcs
+from .._due import due, Doi
 
 
 class LomapAtomMapper(AtomMapper):
@@ -52,6 +53,7 @@ class LomapAtomMapper(AtomMapper):
         self.seed = seed
         self.shift = shift
 
+    @due.dcite(Doi("https://doi.org/10.1007/s10822-013-9678-y"), description="LOMAP")
     def suggest_mappings(self,
                          componentA: gufe.SmallMoleculeComponent,
                          componentB: gufe.SmallMoleculeComponent) -> Iterable[LigandAtomMapping]:

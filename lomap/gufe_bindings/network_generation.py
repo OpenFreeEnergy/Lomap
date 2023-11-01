@@ -11,11 +11,13 @@ import numpy as np
 from typing import Callable, Optional, Union
 
 from ..graphgen import GraphGen
+from .._due import due, Doi
 
 
 logger = logging.getLogger(__name__)
 
 
+@due.dcite(Doi("https://doi.org/10.1007/s10822-013-9678-y"), description="LOMAP")
 def generate_lomap_network(
         molecules: list[gufe.SmallMoleculeComponent],
         mappers: Union[AtomMapper, list[AtomMapper]],
