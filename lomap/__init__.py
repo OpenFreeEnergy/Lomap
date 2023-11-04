@@ -58,6 +58,8 @@ Using
       strict, loose = db_mol.build_matrices()
       nx_graph = db_mol.build_graph() 
 """
+from importlib.metadata import version
+__version__ = version("lomap2")
 
 from .dbmol import DBMolecules
 from .dbmol import SMatrix
@@ -73,6 +75,3 @@ del dbmol
 del mcs
 
 from . import _due
-
-from importlib.metadata import version
-__version__ = version("lomap")
