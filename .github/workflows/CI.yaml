@@ -35,6 +35,7 @@ jobs:
         include:
           - rdkit-version: "2021"
             python-version: "3.9"
+            os: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
