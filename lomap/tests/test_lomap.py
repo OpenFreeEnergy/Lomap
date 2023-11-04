@@ -1,4 +1,4 @@
-import pkg_resources
+import importlib
 
 from lomap.mcs import MCS
 from rdkit import RDLogger, Chem
@@ -14,8 +14,8 @@ import pytest
 
 def _rf(fn):
     # get path to file from inside lomap installation
-    f = pkg_resources.resource_filename('lomap', 'tests/' + fn)
-    return f
+    f = importlib.resources.files('lomap.tests') / fn
+    return f.as_posix()
 
 
 @pytest.mark.parametrize('fn1, fn2, threed_arg, max3d_arg, exp_mcsr', [

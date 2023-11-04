@@ -3,7 +3,7 @@ Regression tests for the MCS class
 
 These might start failing if RDKit changes canonical order of atoms.
 """
-import pkg_resources
+import importlib
 import pytest
 from rdkit import Chem
 
@@ -12,8 +12,8 @@ from lomap import mcs
 
 def _rf(fn):
     # get path to file from inside lomap installation
-    f = pkg_resources.resource_filename('lomap', 'tests/' + fn)
-    return f
+    f = importlib.resources.files('lomap.tests') / fn
+    return f.as_posix()
 
 
 @pytest.fixture(scope='session')
