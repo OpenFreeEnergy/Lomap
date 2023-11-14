@@ -19,8 +19,8 @@ class LomapAtomMapper(AtomMapper):
     shift: bool
 
     def __init__(self, *, time: int = 20, threed: bool = True,
-                 max3d: float = 1000.0, element_change: bool = True,
-                 seed: str = '', shift: bool = True):
+                 max3d: float = 1.0, element_change: bool = True,
+                 seed: str = '', shift: bool = False):
         """Wraps the MCS atom mapper from Lomap.
 
         Kwargs are passed directly to the MCS class from Lomap for each mapping
