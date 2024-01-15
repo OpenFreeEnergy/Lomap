@@ -53,6 +53,24 @@ class LomapAtomMapper(AtomMapper):
         self.seed = seed
         self.shift = shift
 
+    @classmethod
+    def _defaults(cls):
+        return {}
+
+    def _to_dict(self) -> dict:
+        return {
+            'time': self.time,
+            'threed': self.threed,
+            'max3d': self.max3d,
+            'element_change': self.element_change,
+            'seed': self.seed,
+            'shift': self.shift,
+        }
+
+    @classmethod
+    def _from_dict(cls, d: dict):
+        return cls(**d)
+
     @due.dcite(Doi("https://doi.org/10.1007/s10822-013-9678-y"), description="LOMAP")
     def suggest_mappings(self,
                          componentA: gufe.SmallMoleculeComponent,
