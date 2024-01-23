@@ -71,6 +71,11 @@ class LomapAtomMapper(AtomMapper):
     def _from_dict(cls, d: dict):
         return cls(**d)
 
+    def __repr__(self):
+        return (f"<LomapAtomMapper (time={self.time}, threed={self.threed}, "
+                f"max3d={self.max3d}, element_change={self.element_change}, "
+                f"seed='{self.seed}', shift={self.shift})>")
+
     @due.dcite(Doi("https://doi.org/10.1007/s10822-013-9678-y"), description="LOMAP")
     def suggest_mappings(self,
                          componentA: gufe.SmallMoleculeComponent,

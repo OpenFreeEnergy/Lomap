@@ -70,9 +70,8 @@ def generate_lomap_network(
         actives = [False] * len(molecules)
 
     # gen n x n mappings with scores
-    # initially all inf scores, i.e. impossible
-    mtx = np.full((len(molecules), len(molecules)), fill_value=1.0,
-                  dtype=float)
+    # initially all zero scores, i.e. impossible
+    mtx = np.zeros((len(molecules), len(molecules)), dtype=float)
     # np array of mappings
     mps = np.zeros_like(mtx, dtype=object)
 
