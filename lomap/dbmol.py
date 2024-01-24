@@ -31,7 +31,6 @@ import math
 import multiprocessing
 import os
 import pickle
-from ._version import get_versions
 from typing import Optional
 
 from rdkit.Chem import rdFMCS
@@ -41,6 +40,8 @@ from . import graphgen
 from . import mcs
 from rdkit import Chem
 from rdkit import DataStructs
+
+import lomap
 
 __all__ = ['DBMolecules', 'SMatrix', 'Molecule']
 
@@ -1171,7 +1172,7 @@ def _startup_inner(
 # ----------------------------------------------------------------
 parser = argparse.ArgumentParser(description='Lead Optimization Mapper 2. A program to plan alchemical relative '
                                              'binding affinity calculations',
-                                 prog='LOMAP v. %s' % get_versions()['version'])
+                                 prog='LOMAP v. %s' % lomap.__version__)
 parser.add_argument('directory', action=CheckDir, \
                     help='The mol2/sdf file directory')
 parser.add_argument('-p', '--parallel', default=1, action=CheckPos, type=int, \

@@ -26,3 +26,15 @@ def test_to_dict_roundtrip():
     assert m2.element_change == ref_vals['element_change']
     assert m2.seed == ref_vals['seed']
     assert m2.shift == ref_vals['shift']
+
+    
+def test_repr():
+    m = LomapAtomMapper()
+
+    assert repr(m) == ("<LomapAtomMapper (time=20, threed=True, max3d=1000.0, "
+                       "element_change=True, seed='', shift=True)>")
+
+    m = LomapAtomMapper(time=15, seed='c1ccccc1')
+
+    assert repr(m) == ("<LomapAtomMapper (time=15, threed=True, max3d=1000.0, "
+                       "element_change=True, seed='c1ccccc1', shift=True)>")
