@@ -8,4 +8,4 @@ dependencies:
   - rdkit
   - pytest
   - codecov
-  - gufe >= 0.9.0
+  - gufe >= 0.10.0

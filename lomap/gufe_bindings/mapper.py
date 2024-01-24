@@ -53,6 +53,24 @@ class LomapAtomMapper(AtomMapper):
         self.seed = seed
         self.shift = shift
 
+    @classmethod
+    def _defaults(cls):
+        return {}
+
+    def _to_dict(self) -> dict:
+        return {
+            'time': self.time,
+            'threed': self.threed,
+            'max3d': self.max3d,
+            'element_change': self.element_change,
+            'seed': self.seed,
+            'shift': self.shift,
+        }
+
+    @classmethod
+    def _from_dict(cls, d: dict):
+        return cls(**d)
+
     def __repr__(self):
         return (f"<LomapAtomMapper (time={self.time}, threed={self.threed}, "
                 f"max3d={self.max3d}, element_change={self.element_change}, "
