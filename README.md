@@ -1,5 +1,5 @@
 [![CI](https://github.com/OpenFreeEnergy/Lomap/actions/workflows/CI.yaml/badge.svg)](https://github.com/OpenFreeEnergy/Lomap/actions/workflows/CI.yaml)
-
+[![Documentation Status](https://readthedocs.org/projects/lomap/badge/?version=latest)](https://lomap.readthedocs.io/en/latest/?badge=latest)
 
 # Lomap
 Alchemical free energy calculations hold increasing promise 
