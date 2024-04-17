@@ -20,10 +20,10 @@ DEFAULT_ANS_DIFFICULTY = {
 }
 
 
-def ecr_score(mapping: LigandAtomMapping,charge_changes_score) -> float:
+def ecr_score(mapping: LigandAtomMapping, charge_changes_score) -> float:
     molA = mapping.componentA.to_rdkit()
     molB = mapping.componentB.to_rdkit()
-    
+
     # Get formal charges of both molecules
     total_charge_molA = _dbmol.formal_charge(molA)
     total_charge_molB = _dbmol.formal_charge(molB)
@@ -410,7 +410,8 @@ def transmuting_ring_sizes_score(mapping: LigandAtomMapping) -> float:
     return 0.1 if is_bad else 1.0
 
 
-def default_lomap_score(mapping: LigandAtomMapping, charge_changes_score = 0.0) -> float:
+def default_lomap_score(mapping: LigandAtomMapping,
+                        charge_changes_score=0.0) -> float:
     """The default score function from Lomap2
 
 
@@ -423,7 +424,8 @@ def default_lomap_score(mapping: LigandAtomMapping, charge_changes_score = 0.0) 
     mapping : LigandAtomMapping
       The atom mapping to score.
     charge_changes_score: float
-      The electrostatic score to be assigned for mappings of ligands that differ in net charge. 
+      The electrostatic score to be assigned for mappings of ligands that
+      differ in net charge.
       Default: 0.0 (e.g. not allowing net charge changes)
 
     Returns
