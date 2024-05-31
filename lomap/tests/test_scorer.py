@@ -5,6 +5,7 @@ from rdkit import Chem
 from functools import partial
 import lomap
 from lomap.gufe_bindings.scorers import ecr_score
+from lomap import dbmol
 
 
 @pytest.fixture
