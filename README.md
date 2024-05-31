@@ -58,16 +58,16 @@ import lomap
 
 db_mol = lomap.DBMolecules("python string pointing to a directory with mol2 files", output=True)
 
-    #More graphing options:
-    # Use the complete radial graph option. The ligand with the most structural similarity to all of the others will be picked as the 'lead compounds' and used as the central compound.
-    db_mol = lomap.DBMolecules("python string pointing to a directory with mol2 files", output=True, radial=True)
+#More graphing options:
+# Use the complete radial graph option. The ligand with the most structural similarity to all of the others will be picked as the 'lead compounds' and used as the central compound.
+db_mol = lomap.DBMolecules("python string pointing to a directory with mol2 files", output=True, radial=True)
 
-    # Use a radial graph with a manually specified hub compound
-    db_mol = lomap.DBMolecules("python string pointing to a directory with mol2 files", output=True, radial=True, hub=filename.mol2)
+# Use a radial graph with a manually specified hub compound
+db_mol = lomap.DBMolecules("python string pointing to a directory with mol2 files", output=True, radial=True, hub=filename.mol2)
 
-    # Use a radial graph with a manually specified hub compound and fast graphing option
-    #the fast graphing option create the initial graph by connecting the hub ligand with the possible surrounding ligands and add surrounding edges based on the similarities accoss surrounding nodes
-    db_mol = lomap.DBMolecules("python string pointing to a directory with mol2 files", output=True, radial=True, hub=filename.mol2, fast=True)
+# Use a radial graph with a manually specified hub compound and fast graphing option
+#the fast graphing option create the initial graph by connecting the hub ligand with the possible surrounding ligands and add surrounding edges based on the similarities accoss surrounding nodes
+db_mol = lomap.DBMolecules("python string pointing to a directory with mol2 files", output=True, radial=True, hub=filename.mol2, fast=True)
 
 # Calculate the similarity matrix betweeen the database molecules. Two molecules are generated
 # related to the scrict rule and loose rule 
