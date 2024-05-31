@@ -3,6 +3,7 @@ import gufe
 import pytest
 from rdkit import Chem
 from functools import partial
+from numpy.testing import assert_equal
 import lomap
 from lomap.gufe_bindings.scorers import ecr_score
 from lomap import dbmol
