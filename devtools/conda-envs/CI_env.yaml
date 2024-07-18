@@ -5,7 +5,7 @@ dependencies:
   - networkx
   - numpy
   - matplotlib
-  - rdkit
+  - rdkit != 2024.03.4
   - pytest
   - codecov
   - gufe >= 0.10.0
