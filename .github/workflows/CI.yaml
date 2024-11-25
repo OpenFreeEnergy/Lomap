@@ -31,14 +31,14 @@ jobs:
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12"]
         rdkit-version: ["latest", ]
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-13, macos-latest]
         include:
           - rdkit-version: "2021"
             python-version: "3.9"
             os: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Additional info about the build
         run: |
           uname -a
@@ -84,7 +84,7 @@ jobs:
         run: pytest -vv 
 
       - name: Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         if: ${{ github.repository == 'OpenFreeEnergy/Lomap'
                 && github.event_name == 'pull_request' }}
         with:
