@@ -9,7 +9,7 @@ import functools
 import logging
 import networkx as nx
 import numpy as np
-from typing import Callable, Optional, Union, Any
+from typing import Callable, Optional, Union, Any, Dict
 import warnings
 
 from ..graphgen import GraphGen
@@ -18,16 +18,27 @@ from .._due import due, Doi
 
 logger = logging.getLogger(__name__)
 
-def deprecated_kwarg(old_name:str, new_name:str):
+def rename_kwargs(func_name:str, kwargs:Dict[str, Any], old_name:str, new_name:str):
+    """Helper function for deprecating function arguments."""
+    if old_name in kwargs:
+        warnings.warn(f"{func_name} argument '{old_name}' is deprecated. Please use '{new_name}' instead.",
+                      DeprecationWarning)
+        kwargs[new_name] = kwargs.pop(old_name)
+    return kwargs
+
+def deprecated_kwarg(old_name:str, new_name:str) -> Callable:
+  """Decorator for deprecating keyword arguments
+
+  e.g.
+  @deprecated_kwarg(old_arg='new_arg')
+  def my_function(new_arg)
+      ...
+  """
   def decorator(func: Callable)->Callable:
-      # old_name = 'molecules'
-      # new_name = 'ligands'
+
       @functools.wraps(func)
       def wrapper(*args:Any, **kwargs:Any):
-          if old_name in kwargs:
-            kwargs[new_name] = kwargs.pop(old_name)
-            warnings.warn(f"{func.__name__} argument '{old_name}' is deprecated. Please use '{new_name}' instead.",
-                          DeprecationWarning)
+            kwargs = rename_kwargs(func.__name__, kwargs, old_name=old_name, new_name=new_name)
             return func(*args, **kwargs)
       return wrapper
   return decorator
