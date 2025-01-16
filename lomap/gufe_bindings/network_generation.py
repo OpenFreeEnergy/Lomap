@@ -5,10 +5,12 @@ from gufe import(
 )
 import gufe
 import itertools
+import functools
 import logging
 import networkx as nx
 import numpy as np
-from typing import Callable, Optional, Union
+from typing import Callable, Optional, Union, Any
+import warnings
 
 from ..graphgen import GraphGen
 from .._due import due, Doi
@@ -16,10 +18,24 @@ from .._due import due, Doi
 
 logger = logging.getLogger(__name__)
 
+def deprecated_kwarg(old_name:str, new_name:str):
+  def decorator(func: Callable)->Callable:
+      # old_name = 'molecules'
+      # new_name = 'ligands'
+      @functools.wraps(func)
+      def wrapper(*args:Any, **kwargs:Any):
+          if old_name in kwargs:
+            kwargs[new_name] = kwargs.pop(old_name)
+            warnings.warn(f"{func.__name__} argument '{old_name}' is deprecated. Please use '{new_name}' instead.",
+                          DeprecationWarning)
+            return func(*args, **kwargs)
+      return wrapper
+  return decorator
 
+@deprecated_kwarg(old_name='molecules', new_name='ligands')
 @due.dcite(Doi("https://doi.org/10.1007/s10822-013-9678-y"), description="LOMAP")
 def generate_lomap_network(
-        molecules: list[gufe.SmallMoleculeComponent],
+        ligands: list[gufe.SmallMoleculeComponent],
         mappers: Union[AtomMapper, list[AtomMapper]],
         scorer: Callable,
         distance_cutoff: float = 0.4,
@@ -35,7 +51,7 @@ def generate_lomap_network(
 
     Parameters
     ----------
-    molecules : list[SmallMoleculeComponent]
+    ligands : list[SmallMoleculeComponent]
        molecules to map
     mappers : list[AtomMapper] or AtomMapper
        one or more Mapper functions to use to propose edges
@@ -67,17 +83,17 @@ def generate_lomap_network(
     if isinstance(mappers, gufe.AtomMapper):
         mappers = [mappers]
     if actives is None:
-        actives = [False] * len(molecules)
+        actives = [False] * len(ligands)
 
     # gen n x n mappings with scores
     # initially all zero scores, i.e. impossible
-    mtx = np.zeros((len(molecules), len(molecules)), dtype=float)
+    mtx = np.zeros((len(ligands), len(ligands)), dtype=float)
     # np array of mappings
     mps = np.zeros_like(mtx, dtype=object)
 
-    # for all combinations of molecules
-    for i, j in itertools.combinations(range(len(molecules)), 2):
-        mA, mB = molecules[i], molecules[j]
+    # for all combinations of ligands
+    for i, j in itertools.combinations(range(len(ligands)), 2):
+        mA, mB = ligands[i], ligands[j]
 
         # pick best score across all mappings from all mappings
         best_mp: Optional[LigandAtomMapping] = None
@@ -107,7 +123,7 @@ def generate_lomap_network(
 
     gg = GraphGen(score_matrix=mtx,
                   ids=list(range(mtx.shape[0])),
-                  names=[m.name for m in molecules],
+                  names=[m.name for m in ligands],
                   max_path_length=max_path_length,
                   actives=actives,
                   max_dist_from_active=max_dist_from_active,
@@ -121,7 +137,7 @@ def generate_lomap_network(
 
     ln = LigandNetwork(
         edges=[mps[i, j] for i, j in n.edges],
-        nodes=molecules,
+        nodes=ligands,
     )
 
     return ln

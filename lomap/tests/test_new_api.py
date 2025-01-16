@@ -29,10 +29,12 @@ def basic():
 
 
 def test_generate_network_smoketest(basic):
-    network = lomap.generate_lomap_network(
-        molecules=basic,
-        mappers=lomap.LomapAtomMapper(),
-        scorer=lomap.default_lomap_score,
-    )
+    with pytest.deprecated_call():
+        network = lomap.generate_lomap_network(
+            molecules=basic,
+            mappers=lomap.LomapAtomMapper(),
+            scorer=lomap.default_lomap_score,
+        )
 
-    assert isinstance(network, gufe.LigandNetwork)
+        assert isinstance(network, gufe.LigandNetwork)
+
