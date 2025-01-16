@@ -38,3 +38,12 @@ def test_generate_network_smoketest(basic):
 
         assert isinstance(network, gufe.LigandNetwork)
 
+
+def test_overdefined_generate_network(basic):
+    with pytest.raises(ValueError):
+        lomap.generate_lomap_network(
+            molecules=basic,
+            ligands=basic,
+            mappers=lomap.LomapAtomMapper(),
+            scorer=lomap.default_lomap_score,
+        )
