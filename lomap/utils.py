@@ -23,7 +23,6 @@ def rename_kwargs(func_name: str, kwargs: Dict[str, Any], name_mappings: Dict[st
 
 
 def deprecated_kwargs(name_mappings: Dict[str, str]) -> Callable:
-    # TODO: make this work for multiple args
     """Decorator for deprecating keyword arguments
 
     e.g.
