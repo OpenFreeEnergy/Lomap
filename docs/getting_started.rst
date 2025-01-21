@@ -1,3 +1,7 @@
+:orphan:
+
+.. # remove "orphan" once this has been populated
+
 Getting started using Lomap
 ===========================
 
