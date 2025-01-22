@@ -29,12 +29,22 @@ See [AUTHORS.md](https://github.com/OpenFreeEnergy/Lomap/blob/main/AUTHORS.md)
 
 ## Installation
 
+### Latest Release
 `conda install -c conda-forge lomap2`
 
-Alternatively, you can install the prerequisites and then install from source
-with:
+### Development Version
+Alternatively, you can install the development version of `lomap` directly from the `main` branch of this repository.
 
-`python setup.py install`
+First install the package dependencies using conda (or mamba) in a virtual environemnt with:
+
+```bash
+conda env create -f environment.yaml
+conda activate lomap-env
+```
+
+Then install `lomap` with:
+
+`pip install -e .`
 
 Usage
 -----
