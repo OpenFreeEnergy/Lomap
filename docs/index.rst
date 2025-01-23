@@ -12,7 +12,6 @@ Lomap (Lead Optimisation Mapper) is a tool for planning perturbation networks fo
    :maxdepth: 2
    :caption: Contents:
 
-   getting_started.rst
    api.rst
    legacy.rst
    citing.rst

@@ -1,4 +1,4 @@
-name: openfe-docs
+name: lomap-docs
 channels:
 - https://conda.anaconda.org/conda-forge
 dependencies:
