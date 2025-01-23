@@ -3,23 +3,25 @@ import warnings
 from typing import Any, Callable, Dict
 
 
-def rename_kwargs(func_name: str, kwargs: Dict[str, Any], name_mappings: Dict[str, str]):
+def rename_kwargs(
+    func_name: str, kwargs: Dict[str, Any], name_mappings: Dict[str, str]
+):
     """Helper function for deprecating function arguments."""
     for old_name, new_name in name_mappings.items():
+        deprecation_msg = (
+            f"{func_name} argument '{old_name}' is deprecated, please use '{new_name}' instead.",
+        )
         if old_name in kwargs:
             if new_name in kwargs:
                 raise ValueError(
-                    f"Both {new_name} and {old_name} are defined for {func_name}."
-                    + f"{old_name} is deprecated, please use {new_name} instead."
+                    f"Both '{new_name}' and '{old_name}' are defined for {func_name}."
+                    + f"'{old_name}' is deprecated, please use '{new_name}' instead."
                 )
 
             else:
-                warnings.warn(
-                    f"{func_name} argument '{old_name}' is deprecated. Please use '{new_name}' instead.",
-                    DeprecationWarning,
-                )
+                warnings.warn(deprecation_msg, DeprecationWarning)
                 kwargs[new_name] = kwargs.pop(old_name)
-        return kwargs
+    return kwargs
 
 
 def deprecated_kwargs(name_mappings: Dict[str, str]) -> Callable:
