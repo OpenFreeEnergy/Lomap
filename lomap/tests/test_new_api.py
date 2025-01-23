@@ -29,7 +29,7 @@ def basic():
 
 
 def test_generate_network_smoketest(basic):
-    with pytest.deprecated_call():
+    with pytest.deprecated_call(match="'molecules' is deprecated, please use 'ligands'"):
         network = lomap.generate_lomap_network(
             molecules=basic,
             mappers=lomap.LomapAtomMapper(),
@@ -40,7 +40,7 @@ def test_generate_network_smoketest(basic):
 
 
 def test_overdefined_deprecated_generate_network(basic):
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Both 'molecules' and 'ligands' are defined"):
         lomap.generate_lomap_network(
             molecules=basic,
             ligands=basic,

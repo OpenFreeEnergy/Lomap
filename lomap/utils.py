@@ -14,7 +14,7 @@ def rename_kwargs(
         if old_name in kwargs:
             if new_name in kwargs:
                 raise ValueError(
-                    f"Both '{new_name}' and '{old_name}' are defined for {func_name}."
+                    f"Both '{old_name}' and '{new_name}' are defined for {func_name}."
                     + f"'{old_name}' is deprecated, please use '{new_name}' instead."
                 )
 
