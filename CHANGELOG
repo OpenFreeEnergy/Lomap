@@ -2,6 +2,10 @@
 CHANGELOG
 *********
 
+Unreleased
+==========
+- Replaced the ``molecules`` argument with ``ligands`` in ``generate_lomap_network()``. Argument name ``molecules`` will be deprecated.
+
 2.3.0
 =====
 - Added shift option to MCS and cli (-s or --shift), this defaults to True.  In combination with threed/-3 this option

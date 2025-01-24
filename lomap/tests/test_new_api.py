@@ -29,10 +29,21 @@ def basic():
 
 
 def test_generate_network_smoketest(basic):
-    network = lomap.generate_lomap_network(
-        molecules=basic,
-        mappers=lomap.LomapAtomMapper(),
-        scorer=lomap.default_lomap_score,
-    )
+    with pytest.deprecated_call(match="'molecules' is deprecated, please use 'ligands'"):
+        network = lomap.generate_lomap_network(
+            molecules=basic,
+            mappers=lomap.LomapAtomMapper(),
+            scorer=lomap.default_lomap_score,
+        )
 
-    assert isinstance(network, gufe.LigandNetwork)
+        assert isinstance(network, gufe.LigandNetwork)
+
+
+def test_overdefined_deprecated_generate_network(basic):
+    with pytest.raises(ValueError, match="Both 'molecules' and 'ligands' are defined"):
+        lomap.generate_lomap_network(
+            molecules=basic,
+            ligands=basic,
+            mappers=lomap.LomapAtomMapper(),
+            scorer=lomap.default_lomap_score,
+        )
