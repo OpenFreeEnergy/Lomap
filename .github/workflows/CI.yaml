@@ -51,7 +51,7 @@ jobs:
       - uses: mamba-org/setup-micromamba@v1
         if: ${{ matrix.rdkit-version != 'latest' }}
         with:
-          environment-file: devtools/conda-envs/CI_env.yaml
+          environment-file: environment.yaml
           cache-environment: true
           cache-downloads: true
           cache-environment-key: environment-${{ steps.date.outputs.date }}
@@ -64,7 +64,7 @@ jobs:
       - uses: mamba-org/setup-micromamba@v1
         if:  ${{ matrix.rdkit-version == 'latest' }}
         with:
-          environment-file: devtools/conda-envs/CI_env.yaml
+          environment-file: environment.yaml
           cache-environment: true
           cache-downloads: true
           cache-environment-key: environment-${{ steps.date.outputs.date }}

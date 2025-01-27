@@ -1,4 +1,4 @@
-name: test
+name: lomap-env
 channels:
   - conda-forge
 dependencies:

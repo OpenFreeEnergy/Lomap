@@ -2,23 +2,23 @@
 [![Documentation Status](https://readthedocs.org/projects/lomap/badge/?version=latest)](https://lomap.readthedocs.io/en/latest/?badge=latest)
 
 # Lomap
-Alchemical free energy calculations hold increasing promise 
-as an aid to drug discovery efforts. However, applications of 
-these techniques in discovery projects have been relatively 
-rare, partly because of the difficulty of planning and setting up 
-calculations. The lead optimization mapper (LOMAP) was 
-introduced as an automated algorithm to plan efficient relative 
-free energy calculations between potential ligands within 
+Alchemical free energy calculations hold increasing promise
+as an aid to drug discovery efforts. However, applications of
+these techniques in discovery projects have been relatively
+rare, partly because of the difficulty of planning and setting up
+calculations. The lead optimization mapper (LOMAP) was
+introduced as an automated algorithm to plan efficient relative
+free energy calculations between potential ligands within
 a substantial of compounds. The original LOMAP code was mainly
-based on commercial APIs such as OpenEye and Schrodinger. The aim 
+based on commercial APIs such as OpenEye and Schrodinger. The aim
 of this project is to develop a new version of LOMAP based on free
-avalaible APIs such as RDKit offering the scientific community a 
+avalaible APIs such as RDKit offering the scientific community a
 free tool to plan in advance binding free energy calculations.
 
 ## Prerequisites
 * RDKit Release > 2021
 * NetworkX
-* Matplotlib 
+* Matplotlib
 * python > 3.8
 
 Authors
@@ -29,16 +29,28 @@ See [AUTHORS.md](https://github.com/OpenFreeEnergy/Lomap/blob/main/AUTHORS.md)
 
 ## Installation
 
+### Latest Release
+
+You can install using conda (or mamba). Note the package name is `lomap2`:
 `conda install -c conda-forge lomap2`
 
-Alternatively, you can install the prerequisites and then install from source
-with:
+### Development Version
+Alternatively, you can install the development version of `lomap` directly from the `main` branch of this repository.
 
-`python setup.py install`
+First install the package dependencies using conda (or mamba) in a virtual environment with:
+
+```bash
+conda env create -f environment.yaml
+conda activate lomap-env
+```
+
+Then install `lomap` locally with:
+
+`pip install -e .`
 
 Usage
 -----
-As a commandline tool LOMAP can be simply used as:
+As a command line tool, LOMAP can be simply used as:
 `
 lomap test/basic/
 `
@@ -70,31 +82,31 @@ db_mol = lomap.DBMolecules("python string pointing to a directory with mol2 file
 db_mol = lomap.DBMolecules("python string pointing to a directory with mol2 files", output=True, radial=True, hub=filename.mol2, fast=True)
 
 # Calculate the similarity matrix betweeen the database molecules. Two molecules are generated
-# related to the scrict rule and loose rule 
+# related to the scrict rule and loose rule
 
 strict, loose = db_mol.build_matrices()
 
 # Generate the NetworkX graph and output the results
-nx_graph = db_mol.build_graph() 
+nx_graph = db_mol.build_graph()
 
 
-# Calculate the Maximum Common Subgraph (MCS) between 
-# the first two molecules in the molecule database 
+# Calculate the Maximum Common Subgraph (MCS) between
+# the first two molecules in the molecule database
 # ignoring hydrogens and depicting the mapping in a file
-    
+
 MC = lomap.MCS.getMapping(db_mol[0].getMolecule(), db_mol[1].getMolecule(), hydrogens=False, fname='mcs.png')
 
 
 # Alchemical transformation are usually performed between molecules with
 # the same charges. However, it is possible to allow this transformation
-# manually setting the electrostatic score for the whole set of molecules 
-# producing a connected graph. The electrostatic scrore must be in the 
+# manually setting the electrostatic score for the whole set of molecules
+# producing a connected graph. The electrostatic scrore must be in the
 # range [0,1]
 
 
 db_mol = lomap.DBMolecules("python string pointing to a directory with mol2 files", output=True, ecrscore=0.1)
 strict, loose = db_mol.build_matrices()
-nx_graph = db_mol.build_graph() 
+nx_graph = db_mol.build_graph()
 ```
 
 ## History
