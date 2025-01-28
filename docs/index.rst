@@ -6,12 +6,13 @@
 Welcome to Lomap's documentation!
 =================================
 
-Lomap (Lead Optimisation Mapper) is a tool for planning perturbation networks for free energy calculations.
+Lomap (Lead Optimization Mapper) is a tool for planning perturbation networks for free energy calculations.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
+   installation.rst
    api.rst
    legacy.rst
    citing.rst
@@ -23,4 +24,3 @@ Indices and tables
 
 * :ref:`genindex`
 * :ref:`modindex`
-* :ref:`search`
