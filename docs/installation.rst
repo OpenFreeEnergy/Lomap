@@ -5,6 +5,7 @@ Latest Release
 --------------
 
 You can install lomap using conda (or mamba). Note the package name is ``lomap2``:
+
 .. parsed-literal::
     conda install -c conda-forge lomap2
 
