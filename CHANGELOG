@@ -3,7 +3,7 @@ CHANGELOG
 *********
 
 3.2.0
-==========
+=====
 - Replaced the ``molecules`` argument with ``ligands`` in ``generate_lomap_network()``. Argument name ``molecules`` will be deprecated.
 
 2.3.0
