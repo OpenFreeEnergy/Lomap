@@ -8,9 +8,7 @@ def rename_kwargs(
 ):
     """Helper function for deprecating function arguments."""
     for old_name, new_name in name_mappings.items():
-        deprecation_msg = (
-            f"{func_name} argument '{old_name}' is deprecated, please use '{new_name}' instead.",
-        )
+        deprecation_msg = f"{func_name} argument '{old_name}' is deprecated, please use '{new_name}' instead."
         if old_name in kwargs:
             if new_name in kwargs:
                 raise ValueError(
