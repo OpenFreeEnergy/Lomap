@@ -11,7 +11,7 @@ You can install lomap using conda (or mamba). Note the package name is ``lomap2`
 
 Development Version
 -------------------
-Alternatively, you can install the development version of ``lomap``` directly from the ``main`` branch of this repository.
+Alternatively, you can install the development version of ``lomap`` directly from the ``main`` branch of this repository.
 
 First install the package dependencies using conda (or mamba) in a virtual environment with:
 
