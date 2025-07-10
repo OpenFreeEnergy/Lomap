@@ -30,18 +30,10 @@ potential ligands within a substantial of compounds.
 # ****************
 
 
-from rdkit import Chem
-from rdkit.Chem import rdFMCS
-from rdkit.Chem import AllChem
-from rdkit.Chem.Draw.MolDrawing import DrawingOptions
-from rdkit.Chem import Draw
 from rdkit import DataStructs
 from rdkit.Chem.Fingerprints import FingerprintMols
-import sys
-import math
 from rdkit import RDLogger
 import logging
-import argparse
 
 # *******************************
 # Figureprint Class

@@ -39,7 +39,6 @@ import numpy as np
 from . import graphgen
 from . import mcs
 from rdkit import Chem
-from rdkit import DataStructs
 
 import lomap
 
@@ -1211,7 +1210,7 @@ parser.add_argument('-d', '--display', default=False, action='store_true', \
 graph_group = parser.add_argument_group('Graph setting')
 graph_group.add_argument('-T', '--allow-tree', default=False, action='store_true', \
                          help='Remove the requirement that all molecules be in a cycle, so that the returned '
-                              'graph will be a tree instead.');
+                              'graph will be a tree instead.')
 graph_group.add_argument('-m', '--max', default=6, action=CheckPos, type=int, \
                          help='The maximum diameter of the graph')
 graph_group.add_argument('-A', '--max-dist-from-actives', default=2, action=CheckPos, type=int, \

@@ -1185,7 +1185,7 @@ class GraphGen(object):
                 # add try exception for cases cannot be draw
                 try:
                     img_mol = Draw.MolToImage(mol, mol_size, kekulize=False)
-                except Exception as ex:
+                except Exception:
                     img_mol = None
                     logging.exception(
                         "This mol cannot be draw using the RDKit Draw function, need to check for more details...")

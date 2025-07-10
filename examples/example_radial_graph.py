@@ -1,7 +1,5 @@
 # Import lomap
 import lomap
-import sys
-import networkx as nx
 
 # Create the molecule database by using .mol2 files
 # The DBMolecule class must be created with a valid

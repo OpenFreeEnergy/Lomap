@@ -6,7 +6,6 @@ from lomap.dbmol import DBMolecules
 from lomap import dbmol
 import multiprocessing
 import math
-import argparse
 import logging
 
 import pytest
