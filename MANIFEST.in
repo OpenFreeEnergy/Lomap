@@ -8,7 +8,7 @@ recursive-include src/lomap/tests  *txt
 
 include MANIFEST.in
 include README.md
-include LICENCE.txt
+include LICENSE.txt
 include examples/example.py
 include versioneer.py
 include src/lomap/_version.py
