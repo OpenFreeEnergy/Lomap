@@ -19,7 +19,7 @@ free tool to plan in advance binding free energy calculations.
 * RDKit Release > 2021
 * NetworkX
 * Matplotlib
-* python > 3.8
+* python > 3.9
 
 Authors
 -------
