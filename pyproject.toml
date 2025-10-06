@@ -1,6 +1,6 @@
 [build-system]
 requires = [
-	"setuptools>=64.0",
+	"setuptools>=77.0.3",
 	"setuptools-scm>=8",
 ]
 build-backend = "setuptools.build_meta"
@@ -11,7 +11,8 @@ description = "Lead Optimization Mapper 2"
 readme = "README.md"
 authors = [{name = "Gaetano Calabro and David Mobley"}]
 maintainers = [{name = "The Open Free Energy developers", email = "openfreeenergy@omsf.io"}]
-license = {text = "MIT"}
+license = "MIT"
+license-files = ["LICENSE"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Environment :: Console",
@@ -53,7 +54,6 @@ lomap = "lomap.dbmol:startup"
 [tool.setuptools]
 zip-safe = false
 include-package-data = true
-license-files = ["LICENSE"]
 
 [tool.setuptools.packages]
 find = {namespaces = false}
