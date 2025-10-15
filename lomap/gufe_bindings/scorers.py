@@ -411,7 +411,7 @@ def transmuting_ring_sizes_score(mapping: LigandAtomMapping) -> float:
 
 
 def default_lomap_score(mapping: LigandAtomMapping,
-                        charge_changes_score=0.0) -> float:
+                        charge_changes_score=0.1) -> float:
     """The default score function from Lomap2
 
 
@@ -426,7 +426,7 @@ def default_lomap_score(mapping: LigandAtomMapping,
     charge_changes_score: float
       The electrostatic score to be assigned for mappings of ligands that
       differ in net charge.
-      Default: 0.0 (e.g. not allowing net charge changes)
+      Default: 0.1 (e.g. allowing net charge changes)
 
     Returns
     -------

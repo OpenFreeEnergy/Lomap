@@ -29,10 +29,12 @@ def test_unconnected_lomap_network(smcs):
 
 
 def test_connected_lomap_network(smcs):
+    # The default charge_changes_score is now 0.1, so a network of ligands
+    # with different net charges should now always be connected
     network = lomap.generate_lomap_network(
         molecules=smcs,
         mappers=lomap.LomapAtomMapper(),
-        scorer=partial(lomap.default_lomap_score, charge_changes_score=0.1),
+        scorer=partial(lomap.default_lomap_score),
     )
 
     assert network.is_connected() == True
