@@ -36,7 +36,6 @@ def test_connected_lomap_network(smcs):
         mappers=lomap.LomapAtomMapper(),
         scorer=partial(lomap.default_lomap_score),
     )
-
     assert network.is_connected() == True
 
 
@@ -59,3 +58,13 @@ def test_ecr_consistency(smcs):
     assert_equal(score_zero, score_dbmol)
     assert not any(score_zero)
     assert all([i == 0.1 for i in score_nonzero])
+
+
+def test_default_and_explicit_charge_change_score_same(smcs):
+    mapper = lomap.LomapAtomMapper()
+    mapping = next(mapper.suggest_mappings(smcs[0], smcs[1]))
+    result_default = lomap.default_lomap_score(mapping)
+    result_explicit = lomap.default_lomap_score(mapping,
+                                                charge_changes_score=0.1)
+
+    assert result_default == result_explicit
