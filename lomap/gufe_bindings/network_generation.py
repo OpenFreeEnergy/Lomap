@@ -44,13 +44,13 @@ def generate_lomap_network(
        to 0.0 (worst).  These values are use as the "distance" between two molecules, and compared against the
        'distance_cutoff' parameter
     distance_cutoff : float
-       the maximum distance/dissimilarity between two molecules for an edge to be accepted
+       edges with a score >= 1 - distance_cutoff will be accepted. Default is 0.4.
     max_path_length : int
-      maximum distance between any two molecules in the resulting network
+      maximum distance between any two molecules in the resulting network. Default is 6.
     actives : list[bool]
-      for each molecule, if it is tagged as an active molecule
+      for each molecule, if it is tagged as an active molecule 
     max_dist_from_active
-      when 'actives' is given, constrains the resulting map to
+      when 'actives' is given, constrains the resulting map to be within this distance from an active molecule. Default is 2.
     require_cycle_covering : bool
       add cycles into the network
     radial : bool
