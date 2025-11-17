@@ -1,0 +1,7 @@
+$PROJECT = $GITHUB_REPO = 'Lomap'
+$GITHUB_ORG = 'OpenFreeEnergy'
+
+$ACTIVITIES = ['changelog']
+
+$CHANGELOG_FILENAME = 'docs/CHANGELOG.rst'
+$CHANGELOG_TEMPLATE = 'TEMPLATE.rst'

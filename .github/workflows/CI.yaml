@@ -29,9 +29,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
-        rdkit-version: ["latest", ]
-        os: [ubuntu-latest, macos-13, macos-latest]
+        python-version: ["3.11", "3.12", "3.13"]
+        rdkit-version: ["latest"]
+        os: [ubuntu-latest, macos-15-intel, macos-latest]
         include:
           - rdkit-version: "2021"
             python-version: "3.9"
@@ -48,7 +48,7 @@ jobs:
         id: date
         run: echo "date=$(date +%Y-%m-%d)" >> "${GITHUB_OUTPUT}"
       # https://github.com/mamba-org/setup-micromamba
-      - uses: mamba-org/setup-micromamba@v1
+      - uses: mamba-org/setup-micromamba@v2
         if: ${{ matrix.rdkit-version != 'latest' }}
         with:
           environment-file: environment.yaml
@@ -61,7 +61,7 @@ jobs:
             rdkit=${{ matrix.rdkit-version }}
 
 
-      - uses: mamba-org/setup-micromamba@v1
+      - uses: mamba-org/setup-micromamba@v2
         if:  ${{ matrix.rdkit-version == 'latest' }}
         with:
           environment-file: environment.yaml
