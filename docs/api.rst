@@ -8,3 +8,5 @@ Lomap API guide
 
 
 .. autofunction:: lomap.generate_lomap_network
+
+..autofunction:: lomap.default_lomap_score
