@@ -12,7 +12,7 @@ readme = "README.md"
 authors = [{name = "Gaetano Calabro and David Mobley"}]
 maintainers = [{name = "The Open Free Energy developers", email = "openfreeenergy@omsf.io"}]
 license = "MIT"
-license-files = ["LICENSE"]
+license-files = ["LICENSE.txt"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Environment :: Console",
