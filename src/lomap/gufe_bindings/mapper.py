@@ -36,7 +36,7 @@ class LomapAtomMapper(AtomMapper):
           equivalent mappings and prune the mapping, default True
         max3d : float, optional
           maximum discrepancy in Angstroms between atoms before mapping is not
-          allowed, default 1000.0, which effectively trims no atoms
+          allowed, default 1.0
         element_change: bool, optional
           whether to allow element changes in the mappings, default True
         seed: str, optional
