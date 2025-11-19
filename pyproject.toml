@@ -32,11 +32,6 @@ urls = {Homepage = "https://github.com/OpenFreeEnergy/Lomap"}
 keywords = ['alchemical free energy', 'setup', 'perturbation', 'network']
 requires-python = ">= 3.9"
 dependencies = [
-    "numpy",
-    "networkx",
-    "matplotlib",
-    "rdkit",
-    "gufe>=0.9.0",
 ]
 dynamic = ["version"]
 
@@ -54,9 +49,6 @@ lomap = "lomap.dbmol:startup"
 [tool.setuptools]
 zip-safe = false
 include-package-data = true
-
-[tool.setuptools.packages]
-find = {namespaces = false}
 
 [tool.setuptools_scm]
 fallback_version = "0.0.0"
