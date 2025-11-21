@@ -1,14 +1,14 @@
-graft lomap
-recursive-include lomap/tests  *sdf
-recursive-include lomap/tests  *mol2
-recursive-include lomap/tests  *gpickle
-recursive-include lomap/tests  *pickle
-recursive-include lomap/tests  *txt
+graft src/lomap
+recursive-include src/lomap/tests  *sdf
+recursive-include src/lomap/tests  *mol2
+recursive-include src/lomap/tests  *gpickle
+recursive-include src/lomap/tests  *pickle
+recursive-include src/lomap/tests  *txt
 
 
 include MANIFEST.in
 include README.md
-include LICENCE.txt
+include LICENSE.txt
 include examples/example.py
 include versioneer.py
-include lomap/_version.py
+include src/lomap/_version.py
