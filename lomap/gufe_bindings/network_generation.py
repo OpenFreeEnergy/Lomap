@@ -44,7 +44,7 @@ def generate_lomap_network(
        to 0.0 (worst).  These values are use as the "distance" between two molecules, and compared against the
        'distance_cutoff' parameter
     distance_cutoff : float
-       edges with a score >= 1 - distance_cutoff will be accepted. Default is 0.4.
+       edges with a score < 1 - distance_cutoff will be rejected. Default is 0.4.
     max_path_length : int
       maximum distance between any two molecules in the resulting network. Default is 6.
     actives : list[bool]
