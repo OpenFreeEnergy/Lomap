@@ -50,7 +50,7 @@ def generate_lomap_network(
     actives : list[bool]
       for each molecule, if it is tagged as an active molecule 
     max_dist_from_active
-      when 'actives' is given, constrains the resulting map to be within this distance from an active molecule. Default is 2.
+      when 'actives' is given, constrains the resulting map to be within this this number of edges (e.g. distance) from an active molecule. Default is 2.
     require_cycle_covering : bool
       add cycles into the network
     radial : bool
