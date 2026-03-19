@@ -35,8 +35,8 @@ def requires_package(package_name: str) -> Callable:
             return obj
 
         msg = (
-            f"'{package_name}' is required to use '{obj.__qualname__}' but is "
-            f"not installed. Install it with: pip install {package_name}"
+            f"'{package_name}' is required to use '{obj.__qualname__}' "
+            "but is not installed."
         )
 
         if inspect.isclass(obj):
