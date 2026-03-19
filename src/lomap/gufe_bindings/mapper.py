@@ -2,14 +2,24 @@
 The MCS class wrapped to provide a gufe interface
 
 """
-import gufe
-from gufe import AtomMapper, LigandAtomMapping
+from __future__ import annotations
+
+try:
+    import gufe
+    from gufe import AtomMapper, LigandAtomMapping
+except ImportError:
+    gufe = None  # type: ignore[assignment]
+    AtomMapper = object  # type: ignore[assignment,misc]
+    LigandAtomMapping = None  # type: ignore[assignment,misc]
+
 from typing import Iterable
 
 from .. import mcs as lomap_mcs
 from .._due import due, Doi
+from ..utils import requires_package
 
 
+@requires_package("gufe")
 class LomapAtomMapper(AtomMapper):
     time: int
     threed: bool

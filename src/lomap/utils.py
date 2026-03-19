@@ -1,6 +1,61 @@
 import functools
+import importlib
+import inspect
 import warnings
 from typing import Any, Callable, Dict
+
+
+def requires_package(package_name: str) -> Callable:
+    """Decorator that raises ImportError when the decorated class or function
+    is used and ``package_name`` is not installed.
+
+    Parameters
+    ----------
+    package_name : str
+        Name of the required package (e.g. ``"gufe"``).
+
+    Examples
+    --------
+    .. code-block:: python
+
+        @requires_package("gufe")
+        def my_function(): ...
+
+        @requires_package("gufe")
+        class MyClass: ...
+    """
+    try:
+        importlib.import_module(package_name)
+        available = True
+    except ImportError:
+        available = False
+
+    def decorator(obj):
+        if available:
+            return obj
+
+        msg = (
+            f"'{package_name}' is required to use '{obj.__qualname__}' but is "
+            f"not installed. Install it with: pip install {package_name}"
+        )
+
+        if inspect.isclass(obj):
+            original_init = obj.__init__
+
+            @functools.wraps(original_init)
+            def _init(self, *args, **kwargs):
+                raise ImportError(msg)
+
+            obj.__init__ = _init
+            return obj
+        else:
+            @functools.wraps(obj)
+            def wrapper(*args, **kwargs):
+                raise ImportError(msg)
+
+            return wrapper
+
+    return decorator
 
 
 def rename_kwargs(

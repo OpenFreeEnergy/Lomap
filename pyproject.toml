@@ -41,6 +41,7 @@ test = [
     "codecov",
 ]
 graphviz = ["pygraphviz"]
+gufe = ["gufe"]
 
 [project.scripts]
 lomap = "lomap.dbmol:startup"
