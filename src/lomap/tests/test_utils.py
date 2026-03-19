@@ -34,10 +34,6 @@ def _without_gufe():
         sys.modules.update(bindings_snapshot)
 
 
-# ---------------------------------------------------------------------------
-# requires_package decorator
-# ---------------------------------------------------------------------------
-
 class TestRequiresPackage:
     def test_function_raises_when_package_missing(self):
         from lomap.utils import requires_package
@@ -97,10 +93,6 @@ class TestRequiresPackage:
         with pytest.raises(ImportError, match="my_special_func"):
             my_special_func()
 
-
-# ---------------------------------------------------------------------------
-# gufe_bindings without gufe installed
-# ---------------------------------------------------------------------------
 
 class TestGufeBindingsWithoutGufe:
     def test_lomap_atom_mapper_raises(self):
