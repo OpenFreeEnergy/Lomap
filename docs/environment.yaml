@@ -6,6 +6,7 @@ dependencies:
 - gufe>=1.6.1
 # Last compatible sphinx release compatible with sphinx-toolbox is v8.2.3
 - sphinx <=8.2.3
+- sphinx-toolbox
 - pip:
   - sphinx-design
   - sphinx-toolbox
