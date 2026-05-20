@@ -44,7 +44,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 html_theme = 'ofe_sphinx_theme'
 html_static_path = ['_static']
-html_theme_options = {
-    "accent_color": "FeelingBlue",
-}
+#html_theme_options = {
+#    "accent_color": "FeelingBlue",
+#}
 html_css_files = []

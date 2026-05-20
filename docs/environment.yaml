@@ -4,8 +4,8 @@ channels:
 dependencies:
 - python=3.11
 - gufe>=1.6.1
-# Last compatible sphinx release compatible with sphinx-toolbox is v8.2.3
-- sphinx <=7.2.6
+# sphinx-toolbox appears to be broken with sphinx 8+
+- sphinx <=8
 - sphinx-toolbox
 - pip:
   - sphinx-design
