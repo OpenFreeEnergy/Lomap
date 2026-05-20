@@ -2,10 +2,9 @@ name: lomap-docs
 channels:
 - https://conda.anaconda.org/conda-forge
 dependencies:
-- pydata-sphinx-theme
 - python=3.11
 - gufe>=1.6.1
 - pip:
   - sphinx-design
   - sphinx-toolbox
-  - git+https://github.com/OpenFreeEnergy/ofe-sphinx-theme@v0.2.0
+  - git+https://github.com/OpenFreeEnergy/ofe-sphinx-theme@v0.3.1
