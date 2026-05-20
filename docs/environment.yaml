@@ -3,7 +3,7 @@ channels:
 - https://conda.anaconda.org/conda-forge
 dependencies:
 - pydata-sphinx-theme
-- python=3.10
+- python=3.11
 - gufe>=1.6.1
 - pip:
   - sphinx-design
