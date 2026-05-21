@@ -771,7 +771,7 @@ class DBMolecules(object):
             raise IOError('It was not possible to write out the mapping file')
         file_txt.write('#ID\tFileName\n')
         for key in self.dic_mapping:
-            file_txt.write(f"{key}\t{self.dic_mapping[key])}\n")
+            file_txt.write(f"{key}\t{self.dic_mapping[key]}\n")
 
         file_txt.close()
 
