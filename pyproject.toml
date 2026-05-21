@@ -50,3 +50,7 @@ packages.find.where = ["src"]
 
 [tool.setuptools_scm]
 fallback_version = "0.0.0"
+
+[tool.mypy]
+files = "src"
+warn_unused_ignores = true
