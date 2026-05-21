@@ -791,11 +791,11 @@ class SMatrix(np.ndarray):
 
         elif len(shape) == 2:
             if shape[0] != shape[1]:
-                raise ValueError('The matrix must be a squre matrix')
+                raise ValueError('The matrix must be a square matrix')
 
-        l = int(shape[0] * (shape[0] - 1) / 2)
+        elems = int(shape[0] * (shape[0] - 1) / 2)
 
-        shape = (l,)
+        shape = (elems,)
 
         obj = np.ndarray.__new__(subtype, shape, dtype, buffer, offset, strides, order)
 
@@ -838,11 +838,9 @@ class SMatrix(np.ndarray):
         if i == j:
             return 0.0
 
-        # Length of the linear array
-        l = self.size
-
         # Total number of elements in the corresponding bi-dimensional symmetric matrix
-        n = int((1 + math.sqrt(1 + 8 * l)) / 2)
+        # where self.size is the length of the linear array
+        n = int((1 + math.sqrt(1 + 8 * self.size)) / 2)
 
         if i > n - 1:
             raise ValueError('First index out of bound')
@@ -886,11 +884,9 @@ class SMatrix(np.ndarray):
         j = kargs[0][1]
         value = kargs[1]
 
-        # Length of the linear array
-        l = self.size
-
         # Total number of elements in the corresponding bi-dimensional symmetric matrix
-        n = int((1 + math.sqrt(1 + 8 * l)) / 2)
+        # where self.size is the length of the linear array
+        n = int((1 + math.sqrt(1 + 8 * self.size)) / 2)
 
         if i > n - 1:
             raise ValueError('First index out of bound')
@@ -916,11 +912,9 @@ class SMatrix(np.ndarray):
 
         """
 
-        # Length of the linear array
-        l = self.size
-
         # Total number of elements in the corresponding bi-dimensional symmetric matrix
-        n = int((1 + math.sqrt(1 + 8 * l)) / 2)
+        # where self.size is the length of the linear array
+        n = int((1 + math.sqrt(1 + 8 * self.size)) / 2)
 
         np_mat = np.zeros((n, n))
 
@@ -1164,17 +1158,17 @@ def _startup_inner(
     # loose.to_numpy_2D_array()
 
     # Graph generation based on the similarity score matrix
-    nx_graph = db_mol.build_graph()
+    _ = db_mol.build_graph()
 
-    # print nx_graph.nodes(data=True)
-    # print nx_graph.edges(data=True)
+    # print db_mol.Graph.nodes(data=True)
+    # print db_mol.Graph.edges(data=True)
 
 
 # Command line user interface
 # ----------------------------------------------------------------
 parser = argparse.ArgumentParser(description='Lead Optimization Mapper 2. A program to plan alchemical relative '
                                              'binding affinity calculations',
-                                 prog='LOMAP v. %s' % lomap.__version__)
+                                 prog="LOMAP v. {lomap.__version__}")
 parser.add_argument('directory', action=CheckDir, \
                     help='The mol2/sdf file directory')
 parser.add_argument('-p', '--parallel', default=1, action=CheckPos, type=int, \
