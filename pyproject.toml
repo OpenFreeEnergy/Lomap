@@ -67,6 +67,5 @@ lint.select = [
 lint.ignore = [
   "E402", # module-level import not at top (conflicts w/ isort)
   "E501", # line-length violations (black enforces these)
-  # "E722", # bare excepts (TODO: we should fix these in a follow-up PR)
   "F401", # unused imports (TODO: fix later)
 ]
