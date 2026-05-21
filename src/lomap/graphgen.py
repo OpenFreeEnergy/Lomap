@@ -953,8 +953,7 @@ class GraphGen(object):
             morph_data = "morph_pairs = "
         with open(dbase.options['name'] + "_score_with_connection.txt", "w") as info_txt:
             all_key_id = dbase.dic_mapping.keys()
-            data = ["%-10s,%-10s,%-25s,%-25s,%-15s,%-15s,%-15s,%-10s\n" % (
-            "Index_1", "Index_2", "Filename_1", "Filename_2", "Str_sim", "Eff_sim", "Loose_sim", "Connect")]
+            data = [f"{'Index_1':<10},{'Index_2':<10},{'Filename_1':<25},{'Filename_2':<25},{'Str_sim':<15},{'Eff_sim':<15},{'Loose_sim':<15},{'Connect':<10}\n"]
             for i in range(len(all_key_id) - 1):
                 for j in range(i + 1, len(all_key_id)):
                     morph_string = None
@@ -980,8 +979,7 @@ class GraphGen(object):
                     loose_similarity = dbase.loose_mtx[i, j]
                     true_strict_similarity = dbase.true_strict_mtx[i, j]
                     if connected:
-                        new_line = "%-10s,%-10s,%-25s,%-25s,%-15.5f,%-15.5f,%-15.5f,%-10s,%s\n" % (
-                        i, j, Filename_i, Filename_j, true_strict_similarity, strict_similarity, loose_similarity, "Yes",mapString)
+                        new_line = f"{str(i):<10},{str(j):<10},{Filename_i:<25},{Filename_j:<25},{true_strict_similarity:<15.5f},{strict_similarity:<15.5f},{loose_similarity:<15.5f},{'Yes':<10},{mapString}\n"
                         # generate the morph type, and pick the start ligand based on the similarity
                         if self.lead_index is not None:
                             morph_i = Filename_i.split(".")[0]
@@ -1001,8 +999,7 @@ class GraphGen(object):
                                     morph_string = f"{morph_j} > {morph_i}, "
                             morph_data += morph_string
                     else:
-                        new_line = "%-10s,%-10s,%-25s,%-25s,%-15.5f,%-15.5f,%-15.5f,%-10s,%s\n" % (
-                        i, j, Filename_i, Filename_j, true_strict_similarity, strict_similarity, loose_similarity, "No",mapString)
+                        new_line = f"{i:<10},{j:<10},{Filename_i:<25},{Filename_j:<25},{true_strict_similarity:<15.5f},{strict_similarity:<15.5f},{loose_similarity:<15.5f},{'No':<10},{mapString}\n"
                     data.append(new_line)
             info_txt.writelines(data)
             if self.lead_index is not None:
