@@ -421,8 +421,8 @@ class DBMolecules(object):
                 rdkit_mol = Chem.MolFromMolFile(fname, sanitize=False, removeHs=False)
 
             # Reading problems
-            if rdkit_mol == None:
-                logging.warning('Error reading the file: %s' % os.path.basename(fname))
+            if rdkit_mol is None:
+                logging.warning(f"Error reading the file: {os.path.basename(fname)}")
                 mol_error_list_fn.append(os.path.basename(fname))
                 continue
 
@@ -432,10 +432,10 @@ class DBMolecules(object):
 
             # Cosmetic printing and status
             if print_cnt < 15 or print_cnt == (len(mol_fnames) - 1):
-                logging.info('ID %s\t%s' % (mol.getID(), os.path.basename(fname)))
+                logging.info(f"ID {mol.getID()}\t{os.path.basename(fname)}")
 
             if print_cnt == 15:
-                logging.info('ID %s\t%s' % (mol.getID(), os.path.basename(fname)))
+                logging.info(f"ID {mol.getID()}\t{os.path.basename(fname)}")
                 logging.info(3 * '\t.\t.\n')
 
             print_cnt += 1
@@ -444,14 +444,13 @@ class DBMolecules(object):
 
         logging.info(30 * '-')
 
-        logging.info('Finish reading input files. %d structures in total....skipped %d\n' % (
-        len(molid_list), len(mol_error_list_fn)))
+        logging.info(f"Finish reading input files. {len(molid_list)} structures in total....skipped {len(mol_error_list_fn)}\n")
 
         if mol_error_list_fn:
             logging.warning('Skipped molecules:')
             logging.warning(30 * '-')
             for fn in mol_error_list_fn:
-                logging.warning('%s' % fn)
+                logging.warning(f"{fn}")
             print(30 * '-')
 
         return molid_list
@@ -564,7 +563,7 @@ class DBMolecules(object):
             moli = self[i].getMolecule()
             molj = self[j].getMolecule()
 
-            logging.info('Processing molecules: %s-%s' % (self[i].getName(), self[j].getName()))
+            logging.info(f"Processing molecules: {self[i].getName()}-{self[j].getName()}")
 
             # The Electrostatic score rule is calculated
             ecr_score = ecr(moli, molj)
