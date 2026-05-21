@@ -350,7 +350,7 @@ class MCS(object):
                     mcsat = self.mcs_mol.GetAtomWithIdx(i)
                     mcsat.SetChiralTag(Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CW)
                     if verbose == 'pedantic':
-                       logging.info('Inverted chiral atom detected: %d' %(i))
+                       logging.info(f"Inverted chiral atom detected: {i}")
 
 
             # Flag inverted atoms
@@ -361,7 +361,6 @@ class MCS(object):
             # repeat until no more flagged chiral centres remain.
 
             while True:
-                mcs_chiral_set = set()
                 atom_idx = -1;
 
                 for atom in self.mcs_mol.GetAtoms():
@@ -411,7 +410,7 @@ class MCS(object):
                     min_frag.sort(reverse=True)
 
                     if verbose == 'pedantic':
-                       logging.info('Removing %d atoms to remove chiral inversion' %(len(min_frag)))
+                       logging.info(f"Removing {len(min_frag)} atoms to remove chiral inversion")
                     edit_mol = Chem.EditableMol(self.mcs_mol)
                     for idx in min_frag:
                         edit_mol.RemoveAtom(idx)
@@ -446,7 +445,7 @@ class MCS(object):
                 to_remove.sort(reverse=True)
 
                 if verbose == 'pedantic':
-                    logging.info('Removing %d atoms from MCS to clear up partial rings' %(len(to_remove)))
+                    logging.info(f"Removing {len(to_remove)} atoms from MCS to clear up partial rings")
 
                 edit_mcs_mol = Chem.EditableMol(self.mcs_mol)
                 for i in to_remove:
@@ -546,15 +545,19 @@ class MCS(object):
 
             rginfo = mol.GetRingInfo()
 
-            rgs = rginfo.AtomRings()
+            rings = rginfo.AtomRings()
 
-            # print rgs
+            rings_set = set(
+                [
+                    idx
+                    for ring in rings
+                    for idx in ring
+                ]
+            )
 
-            rgs_set = set([e for l in rgs for e in l])
-
-            for idx in rgs_set:
-                for r in rgs:
-                    if idx in r:
+            for idx in rings_set:
+                for ring in rings:
+                    if idx in ring:
                         val = int(mol.GetAtomWithIdx(idx).GetProp('rc'))
                         val = val + 1
                         mol.GetAtomWithIdx(idx).SetProp('rc', str(val))
