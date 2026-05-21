@@ -996,9 +996,9 @@ class GraphGen(object):
                                 similarity_i = dbase.strict_mtx[self.lead_index, i]
                                 similarity_j = dbase.strict_mtx[self.lead_index, j]
                                 if similarity_i > similarity_j:
-                                    morph_string = "%s > %s, " % (morph_i, morph_j)
+                                    morph_string = f"{morph_i} > {morph_j}, "
                                 else:
-                                    morph_string = "%s > %s, " % (morph_j, morph_i)
+                                    morph_string = f"{morph_j} > {morph_i}, "
                             morph_data += morph_string
                     else:
                         new_line = "%-10s,%-10s,%-25s,%-25s,%-15.5f,%-15.5f,%-15.5f,%-10s,%s\n" % (
@@ -1106,8 +1106,8 @@ class GraphGen(object):
 
         pos = nx.nx_agraph.graphviz_layout(self.resultGraph, prog="neato")
 
-        strict_edges = [(u, v) for (u, v, d) in self.resultGraph.edges(data=True) if d['strict_flag'] == True]
-        loose_edges = [(u, v) for (u, v, d) in self.resultGraph.edges(data=True) if d['strict_flag'] == False]
+        strict_edges = [(u, v) for (u, v, d) in self.resultGraph.edges(data=True) if d['strict_flag']]
+        loose_edges = [(u, v) for (u, v, d) in self.resultGraph.edges(data=True) if not d['strict_flag']]
 
         node_labels = dict([(u, d['ID']) for u, d in self.resultGraph.nodes(data=True)])
 
