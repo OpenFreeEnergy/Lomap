@@ -935,11 +935,9 @@ class SMatrix(np.ndarray):
 
         """
 
-        # Length of the linear array
-        l = self.size
-
         # Total number of elements in the corresponding bi-dimensional symmetric matrix
-        n = int((1 + math.sqrt(1 + 8 * l)) / 2)
+        # where self.size is the length of the linear array
+        n = int((1 + math.sqrt(1 + 8 * self.size)) / 2)
 
         return n
 

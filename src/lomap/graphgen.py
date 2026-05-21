@@ -464,14 +464,14 @@ class GraphGen(object):
                             if not self.check_constraints(subgraph, numberOfComponents, require_cycle_covering):
                                 subgraph.add_edge(edge[0], edge[1], similarity=edge[2], strict_flag=True)
                     elif edge[2] < 1.0:  # Don't remove edges with similarity 1
-                        logging.info("Trying to remove edge %d-%d with similarity %f" % (edge[0],edge[1],edge[2]))
+                        logging.info(f"Trying to remove edge {edge[0]}-{edge[1]} with similarity {edge[2]}")
                         subgraph.remove_edge(edge[0], edge[1])
                         if not self.check_constraints(subgraph, numberOfComponents, require_cycle_covering):
                             subgraph.add_edge(edge[0], edge[1], similarity=edge[2], strict_flag=True)
                         else:
-                            logging.info("Removed edge %d-%d" % (edge[0],edge[1]))
+                            logging.info(f"Removed edge {edge[0]}-{edge[1]}")
                     else:
-                        logging.info("Skipping edge %d-%d as it has similarity 1" % (edge[0],edge[1]))
+                        logging.info(f"Skipping edge {edge[0]}-{edge[1]} as it has similarity 1")
 
     def add_surrounding_edges(self, subgraphs: list,
                               score_matrix: np.ndarray,
@@ -622,7 +622,7 @@ class GraphGen(object):
             eccentricity = nx.eccentricity(subgraph, node)
             if eccentricity > max_path_length:
                 withinMaxDistance = False
-                logging.info("Rejecting edge deletion on graph diameter for node %d" % (node))
+                logging.info(f"Rejecting edge deletion on graph diameter for node {node}")
 
         return withinMaxDistance
 
@@ -765,7 +765,7 @@ class GraphGen(object):
                 # change the following lines to be compatible with networkx 2.0
                 for k in nodesOfI.keys():
 
-                    for l in nodesOfJ.keys():
+                    for l in nodesOfJ.keys():  # noqa: E741
                         # produce an edge from nodesOfI[k] and nodesofJ[l] if nonzero weights push
                         # this edge into possibleEdgeList """
 
@@ -786,8 +786,6 @@ class GraphGen(object):
             sortedList = sorted(edgesToCheck, key=itemgetter(2), reverse=True)
             sortedListAdditionalInfo = sorted(edgesToCheckAdditionalInfo, key=itemgetter(2), reverse=True)
             edgeToAdd = sortedList[0]
-            # self.edgeFile.write("\n" + str(edgeToAdd))
-            edgeToAddAdditionalInfo = sortedListAdditionalInfo[0]
             self.edgesAddedInFirstTreePass.append(edgeToAdd)
             self.resultGraph.add_edge(edgeToAdd[0], edgeToAdd[1], similarity=edgeToAdd[2], strict_flag=False)
 

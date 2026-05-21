@@ -48,7 +48,7 @@ import argparse
 # *******************************
 
 
-__all__ = ['FIGUREPRINT']
+__all__ = ['FIGUREPRINT']  # noqa: F822
 
 
 class Figureprint(object):
@@ -82,7 +82,7 @@ class Figureprint(object):
         self.moli = moli
         self.molj = molj
 
-        if not options.verbose == 'pedantic':
+        if not options.verbose == 'pedantic':  # noqa: F821
             lg = RDLogger.logger()
             lg.setLevel(RDLogger.CRITICAL)
 
