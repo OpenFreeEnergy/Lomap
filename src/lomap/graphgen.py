@@ -752,7 +752,6 @@ class GraphGen(object):
             return False
 
         edgesToCheck = []
-        edgesToCheckAdditionalInfo = []
         numzeros = 0
 
         for i in range(0, len(self.workingSubgraphsList)):
@@ -777,14 +776,12 @@ class GraphGen(object):
 
                         if similarity > 0.0:
                             edgesToCheck.append((nodesOfI[k]["ID"], nodesOfJ[l]["ID"], similarity))
-                            edgesToCheckAdditionalInfo.append((nodesOfI[k]["ID"], nodesOfJ[l]["ID"], similarity, i, j))
                         else:
                             numzeros = numzeros + 1
 
         if len(edgesToCheck) > 0:
 
             sortedList = sorted(edgesToCheck, key=itemgetter(2), reverse=True)
-            sortedListAdditionalInfo = sorted(edgesToCheckAdditionalInfo, key=itemgetter(2), reverse=True)
             edgeToAdd = sortedList[0]
             self.edgesAddedInFirstTreePass.append(edgeToAdd)
             self.resultGraph.add_edge(edgeToAdd[0], edgeToAdd[1], similarity=edgeToAdd[2], strict_flag=False)
@@ -824,7 +821,7 @@ class GraphGen(object):
 
                 for k in nodesOfI.keys():
 
-                    for l in nodesOfJ.keys():
+                    for l in nodesOfJ.keys():  # noqa: 741
 
                         # produce an edge from nodesOfI[k] and nodesofJ[l] if
                         # nonzero weights push this edge into possibleEdgeList """
@@ -911,8 +908,8 @@ class GraphGen(object):
                         ###### need to ask RDKit to fix this if possible, see the code
                         # issue tracker for more details######
                         logging.info(
-                            "Error attempting to remove hydrogens for molecule %s using RDKit. RDKit cannot kekulize the molecule" %
-                            dbase[id_mol].getName())
+                            f"Error attempting to remove hydrogens for molecule {dbase[id_mol].getName()} using RDKit. RDKit cannot kekulize the molecule"
+                        )
                     AllChem.Compute2DCoords(mol)
                     from rdkit.Chem.Draw.MolDrawing import DrawingOptions
                     DrawingOptions.bondLineWidth = 2.5
@@ -923,7 +920,7 @@ class GraphGen(object):
                     temp_graph.nodes[n]['penwidth'] = 2.5
                     # self.resultGraph.node[n]['xlabel'] =  self.resultGraph.nodes[n]['ID']
         for u, v, d in temp_graph.edges(data=True):
-            if d['strict_flag'] == True:
+            if d['strict_flag']:
                 temp_graph[u][v]['color'] = 'blue'
                 temp_graph[u][v]['penwidth'] = 2.5
             else:
@@ -962,10 +959,8 @@ class GraphGen(object):
                 for j in range(i + 1, len(all_key_id)):
                     morph_string = None
                     connected = False
-                    similarity=0
                     try:
                         edgedata=[d for (u,v,d) in self.resultGraph.edges(data=True) if ((u==i and v==j) or (u==j and v==i))]
-                        similarity = edgedata[0]['similarity']
                         connected = True
                     except IndexError:
                         pass
