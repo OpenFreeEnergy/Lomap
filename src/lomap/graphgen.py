@@ -904,7 +904,9 @@ class GraphGen(object):
                     # 2, change the graph size to get better resolution
                     try:
                         mol = AllChem.RemoveHs(mol)
-                    except:
+                    except (AllChem.KekulizeException, ValueError):
+                        # Note: newer versions of RDKit now use KekulizeException
+                        # for backwards compatibility, we also include ValueError which used to be thrown.
                         ###### need to ask RDKit to fix this if possible, see the code
                         # issue tracker for more details######
                         logging.info(
@@ -1163,7 +1165,9 @@ class GraphGen(object):
                 # skip remove Hs by rdkit if Hs cannot be removed
                 try:
                     mol = AllChem.RemoveHs(dbase[id_mol].getMolecule())
-                except:
+                except (AllChem.KekulizeException, ValueError):
+                    # Note: newer versions of RDKit now use KekulizeException
+                    # for backwards compatibility, we also include ValueError which used to be thrown.
                     ###### need to ask RDKit to fix this if possible, see the code
                     # issue tracker for more details######
                     mol = dbase[id_mol].getMolecule()
