@@ -1023,7 +1023,7 @@ class GraphGen(object):
             self.layout_info(dbase)
         except Exception as e:
             traceback.print_exc()
-            raise IOError("%s: %s.txt" % (str(e), dbase.options['name']))
+            raise IOError(f"{str(e)}: {dbase.options['name']}.txt")
 
         try:
             if not output_no_images:
@@ -1032,7 +1032,7 @@ class GraphGen(object):
                 nx.nx_agraph.write_dot(self.resultGraph, dbase.options['name'] + '.dot')
         except Exception as e:
             traceback.print_exc()
-            raise IOError('Problems during the file generation: %s' % str(e))
+            raise IOError(f"Problems during the file generation: {str(e)}")
 
         logging.info(30 * '-')
 
@@ -1062,8 +1062,7 @@ class GraphGen(object):
         logging.info('\nDrawing....')
 
         if nx.number_of_nodes(self.resultGraph) > max_nodes:
-            logging.info('The number of generated graph nodes %d exceed the max number of drawable nodes %s' % (
-            nx.number_of_nodes(self.resultGraph), max_nodes))
+            logging.info(f"The number of generated graph nodes {nx.number_of_nodes(self.resultGraph)} exceed the max number of drawable nodes {max_nodes}")
             return
 
         def max_dist_mol(mol):
@@ -1172,8 +1171,8 @@ class GraphGen(object):
                     # issue tracker for more details######
                     mol = dbase[id_mol].getMolecule()
                     logging.info(
-                        "Error attempting to remove hydrogens for molecule %s using RDKit. RDKit cannot kekulize the molecule" %
-                        dbase[id_mol].getName())
+                        f"Error attempting to remove hydrogens for molecule {dbase[id_mol].getName()} using RDKit. RDKit cannot kekulize the molecule"
+                    )
 
                 # max_dist = max_dist_mol(mol)
                 # if max_dist > 7.0:
