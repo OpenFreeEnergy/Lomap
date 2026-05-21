@@ -37,19 +37,28 @@ def atom_hybridization(a):
     RDKit has an un-useful hybridization definition. Instead, just look at the number
     of multiple bonds from an atom
     """
-    if a.GetIsAromatic(): return 2
+    if a.GetIsAromatic():
+        return 2
+
     xs = 0
     for b in a.GetBonds():
-        if b.GetBondType() == Chem.rdchem.BondType.AROMATIC: return 2
-        if b.GetBondType() == Chem.rdchem.BondType.DOUBLE: xs += 1
-        if b.GetBondType() == Chem.rdchem.BondType.TRIPLE: xs += 2
-        if b.GetBondType() == Chem.rdchem.BondType.ONEANDAHALF: xs += 0.5
+        if b.GetBondType() == Chem.rdchem.BondType.AROMATIC:
+            return 2
+        if b.GetBondType() == Chem.rdchem.BondType.DOUBLE:
+            xs += 1
+        if b.GetBondType() == Chem.rdchem.BondType.TRIPLE:
+            xs += 2
+        if b.GetBondType() == Chem.rdchem.BondType.ONEANDAHALF:
+            xs += 0.5
 
     # O- is sp2 to avoid problems with carboxylate etc
-    if a.GetAtomicNum() == 8 and a.GetFormalCharge() < 0: return 2  # sp2
+    if a.GetAtomicNum() == 8 and a.GetFormalCharge() < 0:
+        return 2  # sp2
 
-    if xs == 0: return 3  # sp3
-    if xs > 1.1: return 1  # sp
+    if xs == 0:
+        return 3  # sp3
+    if xs > 1.1:
+        return 1  # sp
     return 2  # sp2
 
 
