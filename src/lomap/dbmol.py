@@ -647,11 +647,11 @@ class DBMolecules(object):
         self.loose_mtx = SMatrix(shape=(self.nums(),))
         self.true_strict_mtx = SMatrix(shape=(self.nums(),))
         # The total number of the effective elements present in the symmetric matrix
-        l = int(self.nums() * (self.nums() - 1) / 2)
+        elems = int(self.nums() * (self.nums() - 1) / 2)
 
         if self.options['parallel'] == 1:  # Serial execution
             MCS_map = {}
-            self.compute_mtx(0, l - 1, self.strict_mtx, self.loose_mtx, self.true_strict_mtx, MCS_map)
+            self.compute_mtx(0, elems - 1, self.strict_mtx, self.loose_mtx, self.true_strict_mtx, MCS_map)
             for idx in MCS_map:
                 self.set_MCSmap(idx[0], idx[1], MCS_map[idx])
         else:
@@ -661,11 +661,11 @@ class DBMolecules(object):
             # Number of selected processes
             num_proc = self.options['parallel']
 
-            delta = int(l / num_proc)
-            rem = l % num_proc
+            delta = int(elems / num_proc)
+            rem = elems % num_proc
 
             if delta < 1:
-                kmax = l
+                kmax = elems
             else:
                 kmax = num_proc
             proc = []
@@ -687,12 +687,15 @@ class DBMolecules(object):
                     if k == 0:
                         i = 0
                     else:
-                        i = j + 1
+                        # Note: this loop structure assumes j will be defined
+                        # in the first iteration where k == 0, it's not ideal and linters
+                        # don't like it, but it should work
+                        i = j + 1  # noqa: F821
 
                     if k != kmax - 1:
                         j = i + spc - 1
                     else:
-                        j = l - 1
+                        j = elems - 1
 
                     # Python multiprocessing allocation
                     p = multiprocessing.Process(target=self.compute_mtx,
@@ -768,7 +771,7 @@ class DBMolecules(object):
             raise IOError('It was not possible to write out the mapping file')
         file_txt.write('#ID\tFileName\n')
         for key in self.dic_mapping:
-            file_txt.write('%d\t%s\n' % (key, self.dic_mapping[key]))
+            file_txt.write(f"{key}\t{self.dic_mapping[key])}\n")
 
         file_txt.close()
 
