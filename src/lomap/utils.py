@@ -1,10 +1,10 @@
 import functools
 import warnings
-from typing import Any, Callable, Dict
+from typing import Any, Callable
 
 
 def rename_kwargs(
-    func_name: str, kwargs: Dict[str, Any], name_mappings: Dict[str, str]
+    func_name: str, kwargs: dict[str, Any], name_mappings: dict[str, str]
 ):
     """Helper function for deprecating function arguments."""
     for old_name, new_name in name_mappings.items():
@@ -22,7 +22,7 @@ def rename_kwargs(
     return kwargs
 
 
-def deprecated_kwargs(name_mappings: Dict[str, str]) -> Callable:
+def deprecated_kwargs(name_mappings: dict[str, str]) -> Callable:
     """Decorator for deprecating keyword arguments
 
     e.g.

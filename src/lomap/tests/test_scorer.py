@@ -25,7 +25,7 @@ def test_unconnected_lomap_network(smcs):
         scorer=partial(lomap.default_lomap_score, charge_changes_score=0.0),
     )
 
-    assert network.is_connected() == False
+    assert not network.is_connected()
 
 
 def test_connected_lomap_network(smcs):
@@ -36,7 +36,7 @@ def test_connected_lomap_network(smcs):
         mappers=lomap.LomapAtomMapper(),
         scorer=partial(lomap.default_lomap_score),
     )
-    assert network.is_connected() == True
+    assert network.is_connected()
 
 
 def test_ecr_consistency(smcs):
