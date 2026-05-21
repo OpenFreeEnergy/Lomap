@@ -220,7 +220,7 @@ class MCS(object):
                     rwm = Chem.RWMol(self.mcs_mol)
                     rwm.RemoveAtom(worstatomidx)
                     if verbose == 'pedantic':
-                       logging.info('Removing atom %d from MCS based on distance %f' %(worstatomidx,worstdist))
+                       logging.info(f"Removing atom {worstatomidx} from MCS based on distance {worstdist}")
                     self.mcs_mol=Chem.Mol(rwm)
                 else:
                     break
@@ -251,14 +251,14 @@ class MCS(object):
                                 if not self.mcs_mol.GetBondBetweenAtoms(aimcs,baimcs):
                                     to_remove.append(aimcs)
                                     if verbose == 'pedantic':
-                                       logging.info('Bond in first mol between atoms %d and %d not matched in MCS' %(ai.GetIdx(),bai.GetIdx()))
+                                       logging.info(f"Bond in first mol between atoms {ai.GetIdx()} and {bai.GetIdx()} not matched in MCS")
 
             if to_remove:
                 # Delete atoms from the MCS, highest index first
                 to_remove.sort(reverse=True)
 
                 if verbose == 'pedantic':
-                   logging.info('Removing %d atoms from MCS based on detection of broken RDKit ring bond matching' %(len(to_remove)))
+                   logging.info(f"Removing {len(to_remove)} atoms from MCS based on detection of broken RDKit ring bond matching")
 
                 edit_mcs_mol = Chem.EditableMol(self.mcs_mol)
                 for i in to_remove:
@@ -285,7 +285,8 @@ class MCS(object):
                 parity = True
                 for i in range(len(perm)-1):
                     for j in range(i+1,len(perm)):
-                        if (perm[i]<perm[j]): parity = not parity
+                        if (perm[i]<perm[j]):
+                            parity = not parity
 
                 return parity
 
@@ -303,11 +304,11 @@ class MCS(object):
                         nbrs.append(1000)   # should not be more than one!
 
                 if not permutation_parity(nbrs):
-                    if a.GetChiralTag()==Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CW: return Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CCW
-                    if a.GetChiralTag()==Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CCW: return Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CW
+                    if a.GetChiralTag()==Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CW:
+                        return Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CCW
+                    if a.GetChiralTag()==Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CCW:
+                        return Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CW
                 return a.GetChiralTag()
-
-
 
             def flag_inverted_atoms_in_mcs():
                 """
