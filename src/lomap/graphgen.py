@@ -821,7 +821,7 @@ class GraphGen(object):
 
                 for k in nodesOfI.keys():
 
-                    for l in nodesOfJ.keys():  # noqa: 741
+                    for l in nodesOfJ.keys():  # noqa: E741
 
                         # produce an edge from nodesOfI[k] and nodesofJ[l] if
                         # nonzero weights push this edge into possibleEdgeList """
@@ -959,8 +959,13 @@ class GraphGen(object):
                 for j in range(i + 1, len(all_key_id)):
                     morph_string = None
                     connected = False
+                    similarity = 0
                     try:
-                        edgedata=[d for (u,v,d) in self.resultGraph.edges(data=True) if ((u==i and v==j) or (u==j and v==i))]
+                        # Note: this portion of the code seems to be solely relying on the use of
+                        # an IndexError not being raised at some point in the next two lines..
+                        # it's less than ideal but we also won't remove it.
+                        edgedata = [d for (u,v,d) in self.resultGraph.edges(data=True) if ((u==i and v==j) or (u==j and v==i))]
+                        similarity = edgedata[0]['similarity']  # noqa: F841
                         connected = True
                     except IndexError:
                         pass
