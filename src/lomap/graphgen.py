@@ -987,9 +987,9 @@ class GraphGen(object):
                             morph_i = Filename_i.split(".")[0]
                             morph_j = Filename_j.split(".")[0]
                             if i == self.lead_index:
-                                morph_string = "%s > %s, " % (morph_i, morph_j)
+                                morph_string = f"{morph_i} > {morph_j}, "
                             elif j == self.lead_index:
-                                morph_string = "%s > %s, " % (morph_j, morph_i)
+                                morph_string = f"{morph_j} > {morph_i}, "
                             else:
                                 # compare i and j with the lead compound, and
                                 # pick the one with the higher similarity as the start ligand
