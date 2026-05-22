@@ -811,28 +811,28 @@ class GraphGen(object):
 
         edgesToCheck = []
 
-        for i in range(0, len(self.resultingSubgraphsList)):
+        for idx_i in range(0, len(self.resultingSubgraphsList)):
 
-            nodesOfI = self.resultingSubgraphsList[i].nodes()
+            nodesOfI = self.resultingSubgraphsList[idx_i].nodes()
 
-            for j in range(i + 1, len(self.resultingSubgraphsList)):
+            for idx_j in range(idx_i + 1, len(self.resultingSubgraphsList)):
 
-                nodesOfJ = self.resultingSubgraphsList[j].nodes()
+                nodesOfJ = self.resultingSubgraphsList[idx_j].nodes()
 
-                for k in nodesOfI.keys():
+                for node_i in nodesOfI.keys():
 
-                    for l in nodesOfJ.keys():  # noqa: E741
+                    for node_j in nodesOfJ.keys():
 
-                        # produce an edge from nodesOfI[k] and nodesofJ[l] if
+                        # produce an edge from nodesOfI[node_i] and nodesofJ[node_j] if
                         # nonzero weights push this edge into possibleEdgeList """
 
-                        # print 'Molecules (%d,%d)' % (nodesOfI[k],nodesOfJ[l])
+                        # print 'Molecules (%d,%d)' % (nodesOfI[node_i],nodesOfJ[node_j])
                         # I assumed that the score matrix is symmetric. In the Graph part
                         # this does not seems to be true: <<<<<<<<<<<<<DEBUG>>>>>>>>>>>>>>>
-                        similarity = self.score_matrix[nodesOfI[k]["ID"], nodesOfJ[l]["ID"]]
+                        similarity = self.score_matrix[nodesOfI[node_i]["ID"], nodesOfJ[node_j]["ID"]]
 
                         if similarity > 0.0:
-                            edgesToCheck.append((nodesOfI[k]["ID"], nodesOfJ[l]["ID"], similarity))
+                            edgesToCheck.append((nodesOfI[node_i]["ID"], nodesOfJ[node_j]["ID"], similarity))
 
         finalEdgesToCheck = [edge for edge in edgesToCheck if edge not in self.edgesAddedInFirstTreePass]
 
