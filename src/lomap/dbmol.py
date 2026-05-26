@@ -592,7 +592,7 @@ class DBMolecules:
                 strict_scr = abs(self.prespecified_links[(i, j)])
                 loose_scr = strict_scr
                 logging.info(
-                    f"MCS molecules: {self[i].getName()} - {self[i].getName()} "
+                    f"MCS molecules: {self[i].getName()} - {self[j].getName()} "
                     "final score {strict_scr} set in links file"
                 )
             else:
