@@ -54,10 +54,6 @@ target-version = "py311"
 line-length = 100
 indent-width = 4
 # Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
-exclude = [
-  "*/*.gpickle",
-  "*/*.pickle",
-]
 lint.select = [
   "E",  # pycodestyle errors
   "F",  # Pyflakes

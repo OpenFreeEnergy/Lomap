@@ -10,7 +10,7 @@ repos:
     rev: v6.0.0
     hooks:
     - id: trailing-whitespace
-      exclude: '\.(pdb|gro|top|sdf|xml|cif|graphml)$'
+      exclude: '\.(pdb|gro|top|sdf|xml|cif|graphml|gpickle)$'
     - id: check-added-large-files
       args: ["--maxkb=4000"]
     - id: check-case-conflict
