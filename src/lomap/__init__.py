@@ -71,7 +71,8 @@ from .gufe_bindings import (
     default_lomap_score,
 )
 
-del dbmol
-del mcs
+# Issue #127
+del dbmol  # noqa: F821
+del mcs  # noqa: F821
 
 from . import _due

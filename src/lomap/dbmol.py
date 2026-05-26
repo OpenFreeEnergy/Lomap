@@ -421,8 +421,8 @@ class DBMolecules(object):
                 rdkit_mol = Chem.MolFromMolFile(fname, sanitize=False, removeHs=False)
 
             # Reading problems
-            if rdkit_mol == None:
-                logging.warning('Error reading the file: %s' % os.path.basename(fname))
+            if rdkit_mol is None:
+                logging.warning(f"Error reading the file: {os.path.basename(fname)}")
                 mol_error_list_fn.append(os.path.basename(fname))
                 continue
 
@@ -432,10 +432,10 @@ class DBMolecules(object):
 
             # Cosmetic printing and status
             if print_cnt < 15 or print_cnt == (len(mol_fnames) - 1):
-                logging.info('ID %s\t%s' % (mol.getID(), os.path.basename(fname)))
+                logging.info(f"ID {mol.getID()}\t{os.path.basename(fname)}")
 
             if print_cnt == 15:
-                logging.info('ID %s\t%s' % (mol.getID(), os.path.basename(fname)))
+                logging.info(f"ID {mol.getID()}\t{os.path.basename(fname)}")
                 logging.info(3 * '\t.\t.\n')
 
             print_cnt += 1
@@ -444,14 +444,13 @@ class DBMolecules(object):
 
         logging.info(30 * '-')
 
-        logging.info('Finish reading input files. %d structures in total....skipped %d\n' % (
-        len(molid_list), len(mol_error_list_fn)))
+        logging.info(f"Finish reading input files. {len(molid_list)} structures in total....skipped {len(mol_error_list_fn)}\n")
 
         if mol_error_list_fn:
             logging.warning('Skipped molecules:')
             logging.warning(30 * '-')
             for fn in mol_error_list_fn:
-                logging.warning('%s' % fn)
+                logging.warning(str(fn))
             print(30 * '-')
 
         return molid_list
@@ -564,7 +563,7 @@ class DBMolecules(object):
             moli = self[i].getMolecule()
             molj = self[j].getMolecule()
 
-            logging.info('Processing molecules: %s-%s' % (self[i].getName(), self[j].getName()))
+            logging.info(f"Processing molecules: {self[i].getName()}-{self[j].getName()}")
 
             # The Electrostatic score rule is calculated
             ecr_score = ecr(moli, molj)
@@ -648,11 +647,11 @@ class DBMolecules(object):
         self.loose_mtx = SMatrix(shape=(self.nums(),))
         self.true_strict_mtx = SMatrix(shape=(self.nums(),))
         # The total number of the effective elements present in the symmetric matrix
-        l = int(self.nums() * (self.nums() - 1) / 2)
+        elems = int(self.nums() * (self.nums() - 1) / 2)
 
         if self.options['parallel'] == 1:  # Serial execution
             MCS_map = {}
-            self.compute_mtx(0, l - 1, self.strict_mtx, self.loose_mtx, self.true_strict_mtx, MCS_map)
+            self.compute_mtx(0, elems - 1, self.strict_mtx, self.loose_mtx, self.true_strict_mtx, MCS_map)
             for idx in MCS_map:
                 self.set_MCSmap(idx[0], idx[1], MCS_map[idx])
         else:
@@ -662,11 +661,11 @@ class DBMolecules(object):
             # Number of selected processes
             num_proc = self.options['parallel']
 
-            delta = int(l / num_proc)
-            rem = l % num_proc
+            delta = int(elems / num_proc)
+            rem = elems % num_proc
 
             if delta < 1:
-                kmax = l
+                kmax = elems
             else:
                 kmax = num_proc
             proc = []
@@ -688,12 +687,15 @@ class DBMolecules(object):
                     if k == 0:
                         i = 0
                     else:
-                        i = j + 1
+                        # Note: this loop structure assumes j will be defined
+                        # in the first iteration where k == 0, it's not ideal and linters
+                        # don't like it, but it should work
+                        i = j + 1  # noqa: F821
 
                     if k != kmax - 1:
                         j = i + spc - 1
                     else:
-                        j = l - 1
+                        j = elems - 1
 
                     # Python multiprocessing allocation
                     p = multiprocessing.Process(target=self.compute_mtx,
@@ -769,7 +771,7 @@ class DBMolecules(object):
             raise IOError('It was not possible to write out the mapping file')
         file_txt.write('#ID\tFileName\n')
         for key in self.dic_mapping:
-            file_txt.write('%d\t%s\n' % (key, self.dic_mapping[key]))
+            file_txt.write(f"{key}\t{self.dic_mapping[key]}\n")
 
         file_txt.close()
 
@@ -789,11 +791,11 @@ class SMatrix(np.ndarray):
 
         elif len(shape) == 2:
             if shape[0] != shape[1]:
-                raise ValueError('The matrix must be a squre matrix')
+                raise ValueError('The matrix must be a square matrix')
 
-        l = int(shape[0] * (shape[0] - 1) / 2)
+        elems = int(shape[0] * (shape[0] - 1) / 2)
 
-        shape = (l,)
+        shape = (elems,)
 
         obj = np.ndarray.__new__(subtype, shape, dtype, buffer, offset, strides, order)
 
@@ -836,11 +838,9 @@ class SMatrix(np.ndarray):
         if i == j:
             return 0.0
 
-        # Length of the linear array
-        l = self.size
-
         # Total number of elements in the corresponding bi-dimensional symmetric matrix
-        n = int((1 + math.sqrt(1 + 8 * l)) / 2)
+        # where self.size is the length of the linear array
+        n = int((1 + math.sqrt(1 + 8 * self.size)) / 2)
 
         if i > n - 1:
             raise ValueError('First index out of bound')
@@ -884,11 +884,9 @@ class SMatrix(np.ndarray):
         j = kargs[0][1]
         value = kargs[1]
 
-        # Length of the linear array
-        l = self.size
-
         # Total number of elements in the corresponding bi-dimensional symmetric matrix
-        n = int((1 + math.sqrt(1 + 8 * l)) / 2)
+        # where self.size is the length of the linear array
+        n = int((1 + math.sqrt(1 + 8 * self.size)) / 2)
 
         if i > n - 1:
             raise ValueError('First index out of bound')
@@ -914,11 +912,9 @@ class SMatrix(np.ndarray):
 
         """
 
-        # Length of the linear array
-        l = self.size
-
         # Total number of elements in the corresponding bi-dimensional symmetric matrix
-        n = int((1 + math.sqrt(1 + 8 * l)) / 2)
+        # where self.size is the length of the linear array
+        n = int((1 + math.sqrt(1 + 8 * self.size)) / 2)
 
         np_mat = np.zeros((n, n))
 
@@ -939,11 +935,9 @@ class SMatrix(np.ndarray):
 
         """
 
-        # Length of the linear array
-        l = self.size
-
         # Total number of elements in the corresponding bi-dimensional symmetric matrix
-        n = int((1 + math.sqrt(1 + 8 * l)) / 2)
+        # where self.size is the length of the linear array
+        n = int((1 + math.sqrt(1 + 8 * self.size)) / 2)
 
         return n
 
@@ -1162,17 +1156,17 @@ def _startup_inner(
     # loose.to_numpy_2D_array()
 
     # Graph generation based on the similarity score matrix
-    nx_graph = db_mol.build_graph()
+    _ = db_mol.build_graph()
 
-    # print nx_graph.nodes(data=True)
-    # print nx_graph.edges(data=True)
+    # print db_mol.Graph.nodes(data=True)
+    # print db_mol.Graph.edges(data=True)
 
 
 # Command line user interface
 # ----------------------------------------------------------------
 parser = argparse.ArgumentParser(description='Lead Optimization Mapper 2. A program to plan alchemical relative '
                                              'binding affinity calculations',
-                                 prog='LOMAP v. %s' % lomap.__version__)
+                                 prog=f"LOMAP v. {lomap.__version__}")
 parser.add_argument('directory', action=CheckDir, \
                     help='The mol2/sdf file directory')
 parser.add_argument('-p', '--parallel', default=1, action=CheckPos, type=int, \

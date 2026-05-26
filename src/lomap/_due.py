@@ -60,7 +60,7 @@ except Exception as e:
     if not isinstance(e, ImportError):
         import logging
         logging.getLogger("duecredit").error(
-            "Failed to import duecredit due to %s" % str(e))
+            f"Failed to import duecredit due to {str(e)}")
     # Initiate due stub
     due = InactiveDueCreditCollector()
     BibTeX = Doi = Url = Text = _donothing_func
