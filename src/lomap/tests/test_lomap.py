@@ -1,15 +1,15 @@
-import importlib
-
-from lomap.mcs import MCS
-from rdkit import RDLogger, Chem
-from lomap.dbmol import DBMolecules
-from lomap import dbmol
-import multiprocessing
-import math
 import argparse
+import importlib
 import logging
+import math
+import multiprocessing
 
 import pytest
+from rdkit import Chem, RDLogger
+
+from lomap import dbmol
+from lomap.dbmol import DBMolecules
+from lomap.mcs import MCS
 
 
 def _rf(fn):
@@ -410,7 +410,7 @@ def test_insufficient_arguments(self):
 
 def fields_for_link(mola, molb):
     """ Parse the out_score_with_connection.txt file, find the line for mola to molb, and return its fields. """
-    with open('./out_score_with_connection.txt', 'r') as f:
+    with open('./out_score_with_connection.txt') as f:
         for line in f.readlines():
             fields = line.replace(",","").split()
             if (fields[2] == mola and fields[3] == molb) or (fields[3] == mola and fields[2] == molb):

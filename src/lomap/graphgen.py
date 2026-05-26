@@ -29,20 +29,20 @@ potential ligands within a substantial of compounds.
 # *****************************************************************************
 
 
+import copy
+import logging
+import os.path
+import shutil
+import subprocess
+import tempfile
+import traceback
+from operator import itemgetter
+from typing import Optional
+
+import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
-import subprocess
-import matplotlib.pyplot as plt
-import copy
-from operator import itemgetter
-from rdkit.Chem import Draw
-from rdkit.Chem import AllChem
-import os.path
-import logging
-import tempfile
-import shutil
-import traceback
-from typing import Optional
+from rdkit.Chem import AllChem, Draw
 
 __all__ = ['GraphGen']
 
@@ -95,7 +95,7 @@ def find_non_cyclic_edges(subgraph):
 logger = logging.getLogger(__name__)
 
 
-class GraphGen(object):
+class GraphGen:
     """This class is used to set and generate the graph used to plan binding free energy calculation
 
     Attributes
@@ -113,7 +113,7 @@ class GraphGen(object):
                  require_cycle_covering,
                  radial: bool,
                  fast: bool,
-                 hub: Optional[str] = None,
+                 hub: str | None = None,
                  ):
 
         """
@@ -1022,7 +1022,7 @@ class GraphGen(object):
             self.layout_info(dbase)
         except Exception as e:
             traceback.print_exc()
-            raise IOError(f"{str(e)}: {dbase.options['name']}.txt")
+            raise OSError(f"{str(e)}: {dbase.options['name']}.txt")
 
         try:
             if not output_no_images:
@@ -1031,7 +1031,7 @@ class GraphGen(object):
                 nx.nx_agraph.write_dot(self.resultGraph, dbase.options['name'] + '.dot')
         except Exception as e:
             traceback.print_exc()
-            raise IOError(f"Problems during the file generation: {str(e)}")
+            raise OSError(f"Problems during the file generation: {str(e)}")
 
         logging.info(30 * '-')
 
@@ -1183,7 +1183,7 @@ class GraphGen(object):
                 # add try exception for cases cannot be draw
                 try:
                     img_mol = Draw.MolToImage(mol, mol_size, kekulize=False)
-                except Exception as ex:
+                except Exception:
                     img_mol = None
                     logging.exception(
                         "This mol cannot be draw using the RDKit Draw function, need to check for more details...")

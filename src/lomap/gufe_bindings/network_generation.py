@@ -1,17 +1,19 @@
-from gufe import(
-    LigandAtomMapping,
-    AtomMapper,
-    LigandNetwork,
-)
-import gufe
 import itertools
 import logging
+from collections.abc import Callable
+from typing import Optional, Union
+
+import gufe
 import networkx as nx
 import numpy as np
-from typing import Callable, Optional, Union
+from gufe import (
+    AtomMapper,
+    LigandAtomMapping,
+    LigandNetwork,
+)
 
+from .._due import Doi, due
 from ..graphgen import GraphGen
-from .._due import due, Doi
 from ..utils import deprecated_kwargs
 
 logger = logging.getLogger(__name__)
@@ -20,16 +22,16 @@ logger = logging.getLogger(__name__)
 @due.dcite(Doi("https://doi.org/10.1007/s10822-013-9678-y"), description="LOMAP")
 def generate_lomap_network(
         ligands: list[gufe.SmallMoleculeComponent],
-        mappers: Union[AtomMapper, list[AtomMapper]],
+        mappers: AtomMapper | list[AtomMapper],
         scorer: Callable,
         distance_cutoff: float = 0.4,
         max_path_length=6,
-        actives: Optional[list[bool]] = None,
+        actives: list[bool] | None = None,
         max_dist_from_active=2,
         require_cycle_covering: bool = True,
         radial: bool = False,
         fast: bool = False,
-        hub: Optional[gufe.SmallMoleculeComponent] = None,
+        hub: gufe.SmallMoleculeComponent | None = None,
     ) -> LigandNetwork:
     """Generate a LigandNetwork according to Lomap's network creation rules
 
@@ -80,7 +82,7 @@ def generate_lomap_network(
         mA, mB = ligands[i], ligands[j]
 
         # pick best score across all mappings from all mappings
-        best_mp: Optional[LigandAtomMapping] = None
+        best_mp: LigandAtomMapping | None = None
         best_score = 0.0
         for mapper in mappers:
             mp: LigandAtomMapping

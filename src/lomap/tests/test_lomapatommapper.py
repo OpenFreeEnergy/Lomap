@@ -27,7 +27,7 @@ def test_to_dict_roundtrip():
     assert m2.seed == ref_vals['seed']
     assert m2.shift == ref_vals['shift']
 
-    
+
 def test_repr():
     m = LomapAtomMapper()
 

@@ -33,15 +33,14 @@ import os
 import pickle
 from typing import Optional
 
-from rdkit.Chem import rdFMCS
 import networkx as nx
 import numpy as np
-from . import graphgen
-from . import mcs
-from rdkit import Chem
-from rdkit import DataStructs
+from rdkit import Chem, DataStructs
+from rdkit.Chem import rdFMCS
 
 import lomap
+
+from . import graphgen, mcs
 
 __all__ = ['DBMolecules', 'SMatrix', 'Molecule']
 
@@ -112,7 +111,7 @@ def _find_common_core(mols, element_change: bool) -> str:
         return res.smartsString
 
 
-class DBMolecules(object):
+class DBMolecules:
     """
 
     This class is used as a container for all the Molecules
@@ -139,10 +138,10 @@ class DBMolecules(object):
                  max: int = 6,
                  cutoff: float = 0.4,
                  radial: bool = False,
-                 hub: Optional[str] = None,
+                 hub: str | None = None,
                  fast: bool = False,
-                 links_file: Optional[str] = None,
-                 known_actives_file: Optional[str] = None,
+                 links_file: str | None = None,
+                 known_actives_file: str | None = None,
                  max_dist_from_actives: int = 2,
                  use_common_core: bool = True,
                  shift: bool = True,
@@ -406,7 +405,7 @@ class DBMolecules(object):
         mol_fnames.sort()
 
         if len(mol_fnames) < 2:
-            raise IOError(f'The directory {self.options["directory"]} must contain at least two mol2/sdf files')
+            raise OSError(f'The directory {self.options["directory"]} must contain at least two mol2/sdf files')
 
         print_cnt = 0
         mol_id_cnt = 0
@@ -457,11 +456,11 @@ class DBMolecules(object):
 
     def parse_links_file(self, links_file):
         try:
-            with open(links_file, "r") as lf:
+            with open(links_file) as lf:
                 for line in lf:
                     mols = line.split()
                     if (len(mols) < 2 or len(mols) > 4):
-                        raise IOError('Syntax error in links file parsing line:' + line)
+                        raise OSError('Syntax error in links file parsing line:' + line)
                     indexa = self.inv_dic_mapping[mols[0]]
                     indexb = self.inv_dic_mapping[mols[1]]
                     score = -2
@@ -469,17 +468,17 @@ class DBMolecules(object):
                         score = float(mols[2])
                     if (len(mols) > 3):
                         if (mols[3] != "force"):
-                            raise IOError('Syntax error parsing fourth argument in links file on line:' + line)
+                            raise OSError('Syntax error parsing fourth argument in links file on line:' + line)
                         score = -score
                     self.prespecified_links[(indexa, indexb)] = score
                     self.prespecified_links[(indexb, indexa)] = score
                     print("Added prespecified link for mols", mols, "->", (indexa, indexb), "score", score)
         except KeyError as e:
-            raise IOError('Filename within the links file "' + links_file + '" not found: ' + str(e)) from None
+            raise OSError('Filename within the links file "' + links_file + '" not found: ' + str(e)) from None
 
     def parse_known_actives_file(self, actives_file):
         try:
-            with open(actives_file, "r") as lf:
+            with open(actives_file) as lf:
                 for line in lf:
                     mols = line.split()
                     indexa = self.inv_dic_mapping[mols[0]]
@@ -487,7 +486,7 @@ class DBMolecules(object):
                     self._list[indexa].setActive(True)
                     logging.info(f"Added known activity for mol {mols[0]} -> {indexa}")
         except KeyError as e:
-            raise IOError('Filename within the actives file "' + actives_file + '" not found: ' + str(e)) from None
+            raise OSError('Filename within the actives file "' + actives_file + '" not found: ' + str(e)) from None
         # Add all combinations of these to the set of prespecified links
         for t in [(x,y) for x in self.known_actives for y in self.known_actives]:
             logging.info(f"Added prespecified link for {t}")
@@ -768,7 +767,7 @@ class DBMolecules(object):
         try:
             file_txt = open(self.options['name'] + '.txt', 'w')
         except Exception:
-            raise IOError('It was not possible to write out the mapping file')
+            raise OSError('It was not possible to write out the mapping file')
         file_txt.write('#ID\tFileName\n')
         for key in self.dic_mapping:
             file_txt.write(f"{key}\t{self.dic_mapping[key]}\n")
@@ -823,11 +822,11 @@ class SMatrix(np.ndarray):
 
         if isinstance(kargs[0], int):
             k = kargs[0]
-            return super(SMatrix, self).__getitem__(k)
+            return super().__getitem__(k)
 
         if isinstance(kargs[0], slice):
             k = kargs[0]
-            return super(SMatrix, self).__getitem__(k)
+            return super().__getitem__(k)
 
         elif len(kargs[0]) > 2:
             raise ValueError('Two indices can be addressed')
@@ -853,7 +852,7 @@ class SMatrix(np.ndarray):
         else:
             k = int((n * (n - 1) / 2) - (n - j) * ((n - j) - 1) / 2 + i - j - 1)
 
-        return super(SMatrix, self).__getitem__(k)
+        return super().__getitem__(k)
 
     def __setitem__(self, *kargs):
         """
@@ -869,12 +868,12 @@ class SMatrix(np.ndarray):
         if isinstance(kargs[0], int):
             k = kargs[0]
             value = kargs[1]
-            return super(SMatrix, self).__setitem__(k, value)
+            return super().__setitem__(k, value)
 
         elif isinstance(kargs[0], slice):
             start, stop, step = kargs[0].indices(len(self))
             value = kargs[1]
-            return super(SMatrix, self).__setitem__(kargs[0], value)
+            return super().__setitem__(kargs[0], value)
 
         elif len(kargs[0]) > 2:
             raise ValueError('Two indices can be addressed')
@@ -897,7 +896,7 @@ class SMatrix(np.ndarray):
             k = int((n * (n - 1) / 2) - (n - i) * ((n - i) - 1) / 2 + j - i - 1)
         else:
             k = int((n * (n - 1) / 2) - (n - j) * ((n - j) - 1) / 2 + i - j - 1)
-        super(SMatrix, self).__setitem__(k, value)
+        super().__setitem__(k, value)
 
     def to_numpy_2D_array(self):
         """
@@ -942,7 +941,7 @@ class SMatrix(np.ndarray):
         return n
 
 
-class Molecule(object):
+class Molecule:
     """
     This Class stores the Rdkit molecule objects, their identification number
     and the total number of instantiated molecules
@@ -1205,7 +1204,7 @@ parser.add_argument('-d', '--display', default=False, action='store_true', \
 graph_group = parser.add_argument_group('Graph setting')
 graph_group.add_argument('-T', '--allow-tree', default=False, action='store_true', \
                          help='Remove the requirement that all molecules be in a cycle, so that the returned '
-                              'graph will be a tree instead.');
+                              'graph will be a tree instead.')
 graph_group.add_argument('-m', '--max', default=6, action=CheckPos, type=int, \
                          help='The maximum diameter of the graph')
 graph_group.add_argument('-A', '--max-dist-from-actives', default=2, action=CheckPos, type=int, \

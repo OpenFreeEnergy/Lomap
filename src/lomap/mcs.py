@@ -13,19 +13,13 @@ potential ligands within a substantial of compounds.
 """
 
 
-from rdkit import Chem
-from rdkit.Chem import rdFMCS
-from rdkit.Chem import AllChem
-from rdkit.Chem.Draw.MolDrawing import DrawingOptions
-from rdkit.Chem import Draw
-from rdkit.Chem import rdmolops
-from rdkit import DataStructs
-from rdkit.Geometry.rdGeometry import Point3D
-
-import math
-from rdkit import RDLogger
 import logging
+import math
 
+from rdkit import Chem, DataStructs, RDLogger
+from rdkit.Chem import AllChem, Draw, rdFMCS, rdmolops
+from rdkit.Chem.Draw.MolDrawing import DrawingOptions
+from rdkit.Geometry.rdGeometry import Point3D
 
 __all__ = ['MCS']
 
@@ -76,7 +70,7 @@ def substructure_centre(mol, mol_sub) -> Point3D:
     return s / len(mol_sub)
 
 
-class MCS(object):
+class MCS:
     """
 
     This class is used to compute the Maximum Common Subgraph (MCS) between two
@@ -361,7 +355,7 @@ class MCS(object):
             # repeat until no more flagged chiral centres remain.
 
             while True:
-                atom_idx = -1;
+                atom_idx = -1
 
                 for atom in self.mcs_mol.GetAtoms():
                     # Note that any atom in the MCS which has inverted chirality between the input mols is
@@ -1084,10 +1078,10 @@ class MCS(object):
         for i in range(0,len(moli_sub)):
             edge_bondsi = [b.GetBeginAtomIdx() for b in moli.GetBonds()
                            if (b.GetEndAtomIdx()==moli_sub[i]
-                               and not b.GetBeginAtomIdx() in moli_sub) ]
-            edge_bondsi += [b.GetEndAtomIdx() for b in moli.GetBonds() if (b.GetBeginAtomIdx()==moli_sub[i] and not b.GetEndAtomIdx() in moli_sub) ]
-            edge_bondsj = [ b.GetBeginAtomIdx() for b in molj.GetBonds() if (b.GetEndAtomIdx()==molj_sub[i] and not b.GetBeginAtomIdx() in molj_sub) ]
-            edge_bondsj += [ b.GetEndAtomIdx() for b in molj.GetBonds() if (b.GetBeginAtomIdx()==molj_sub[i] and not b.GetEndAtomIdx() in molj_sub) ]
+                               and b.GetBeginAtomIdx() not in moli_sub) ]
+            edge_bondsi += [b.GetEndAtomIdx() for b in moli.GetBonds() if (b.GetBeginAtomIdx()==moli_sub[i] and b.GetEndAtomIdx() not in moli_sub) ]
+            edge_bondsj = [ b.GetBeginAtomIdx() for b in molj.GetBonds() if (b.GetEndAtomIdx()==molj_sub[i] and b.GetBeginAtomIdx() not in molj_sub) ]
+            edge_bondsj += [ b.GetEndAtomIdx() for b in molj.GetBonds() if (b.GetBeginAtomIdx()==molj_sub[i] and b.GetEndAtomIdx() not in molj_sub) ]
 
             for edgeAtom_i in edge_bondsi:
                 for edgeAtom_j in edge_bondsj:
@@ -1118,13 +1112,13 @@ class MCS(object):
 
         for i in range(0,len(moli_sub)):
             edge_bondsi = [b.GetBeginAtomIdx() for b in moli.GetBonds()
-                           if (b.GetEndAtomIdx() == moli_sub[i] and not b.GetBeginAtomIdx() in moli_sub)]
+                           if (b.GetEndAtomIdx() == moli_sub[i] and b.GetBeginAtomIdx() not in moli_sub)]
             edge_bondsi += [b.GetEndAtomIdx() for b in moli.GetBonds()
-                            if (b.GetBeginAtomIdx() == moli_sub[i] and not b.GetEndAtomIdx() in moli_sub)]
+                            if (b.GetBeginAtomIdx() == moli_sub[i] and b.GetEndAtomIdx() not in moli_sub)]
             edge_bondsj = [b.GetBeginAtomIdx() for b in molj.GetBonds()
-                           if (b.GetEndAtomIdx() == molj_sub[i] and not b.GetBeginAtomIdx() in molj_sub)]
+                           if (b.GetEndAtomIdx() == molj_sub[i] and b.GetBeginAtomIdx() not in molj_sub)]
             edge_bondsj += [b.GetEndAtomIdx() for b in molj.GetBonds()
-                            if (b.GetBeginAtomIdx() == molj_sub[i] and not b.GetEndAtomIdx() in molj_sub)]
+                            if (b.GetBeginAtomIdx() == molj_sub[i] and b.GetEndAtomIdx() not in molj_sub)]
             #print("Atom",i,"index",moli_sub[i],"edge atoms on mol 1 are",edge_bondsi);
             #print("Atom",i,"index",molj_sub[i],"edge atoms on mol 2 are",edge_bondsj);
 

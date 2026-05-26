@@ -59,17 +59,16 @@ Using
       nx_graph = db_mol.build_graph() 
 """
 from importlib.metadata import version
+
 __version__ = version("lomap2")
 
-from .dbmol import DBMolecules
-from .dbmol import SMatrix
-from .dbmol import Molecule
-from .mcs import MCS
+from .dbmol import DBMolecules, Molecule, SMatrix
 from .gufe_bindings import (
-    generate_lomap_network,
     LomapAtomMapper,
     default_lomap_score,
+    generate_lomap_network,
 )
+from .mcs import MCS
 
 # Issue #127
 del dbmol  # noqa: F821

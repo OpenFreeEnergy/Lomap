@@ -1,12 +1,14 @@
 import importlib.resources
+from functools import partial
+
 import gufe
 import pytest
-from rdkit import Chem
-from functools import partial
 from numpy.testing import assert_equal
+from rdkit import Chem
+
 import lomap
-from lomap.gufe_bindings.scorers import ecr_score
 from lomap import dbmol
+from lomap.gufe_bindings.scorers import ecr_score
 
 
 @pytest.fixture

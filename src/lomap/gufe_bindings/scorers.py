@@ -1,10 +1,11 @@
-from collections import defaultdict
-from lomap import dbmol as _dbmol
-from lomap import mcs as lomap_mcs
 import math
-from rdkit import Chem
+from collections import defaultdict
 
 from gufe import LigandAtomMapping
+from rdkit import Chem
+
+from lomap import dbmol as _dbmol
+from lomap import mcs as lomap_mcs
 
 DEFAULT_ANS_DIFFICULTY = {
     # H to element - not sure this has any effect currently

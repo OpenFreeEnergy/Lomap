@@ -4,6 +4,7 @@ Regression tests for the MCS class
 These might start failing if RDKit changes canonical order of atoms.
 """
 import importlib
+
 import pytest
 from rdkit import Chem
 

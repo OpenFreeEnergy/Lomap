@@ -2,12 +2,13 @@
 The MCS class wrapped to provide a gufe interface
 
 """
+from collections.abc import Iterable
+
 import gufe
 from gufe import AtomMapper, LigandAtomMapping
-from typing import Iterable
 
 from .. import mcs as lomap_mcs
-from .._due import due, Doi
+from .._due import Doi, due
 
 
 class LomapAtomMapper(AtomMapper):
@@ -106,8 +107,8 @@ class LomapAtomMapper(AtomMapper):
         mapping_string = mcs.all_atom_match_list()
         # lomap spits out "1:1,2:2,...,x:y", so split around commas,
         # then colons and coerce to ints
-        mapping_dict = dict((map(int, v.split(':'))
-                             for v in mapping_string.split(',')))
+        mapping_dict = dict(map(int, v.split(':'))
+                             for v in mapping_string.split(','))
 
         yield LigandAtomMapping(
             componentA=componentA,

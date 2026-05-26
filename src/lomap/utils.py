@@ -1,6 +1,7 @@
 import functools
 import warnings
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 
 def rename_kwargs(

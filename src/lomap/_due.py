@@ -27,7 +27,7 @@ License:    BSD-2
 __version__ = '0.0.9'
 
 
-class InactiveDueCreditCollector(object):
+class InactiveDueCreditCollector:
     """Just a stub at the Collector which would not do anything"""
     def _donothing(self, *args, **kwargs):
         """Perform no good and no bad"""
@@ -52,7 +52,7 @@ def _donothing_func(*args, **kwargs):
 
 
 try:
-    from duecredit import due, BibTeX, Doi, Url, Text  # lgtm [py/unused-import]
+    from duecredit import BibTeX, Doi, Text, Url, due  # lgtm [py/unused-import]
     if 'due' in locals() and not hasattr(due, 'cite'):
         raise RuntimeError(
             "Imported due lacks .cite. DueCredit is now disabled")
