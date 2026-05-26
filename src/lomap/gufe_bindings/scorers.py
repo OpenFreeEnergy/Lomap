@@ -55,8 +55,10 @@ def mcsr_score(mapping: LigandAtomMapping, beta: float = 0.1) -> float:
     # get heavy atom mcs count
     n_common = 0
     for i, j in molA_to_molB.items():
-        if (molA.GetAtomWithIdx(i).GetAtomicNum() != 1
-                and molB.GetAtomWithIdx(j).GetAtomicNum() != 1):
+        if (
+            molA.GetAtomWithIdx(i).GetAtomicNum() != 1
+            and molB.GetAtomWithIdx(j).GetAtomicNum() != 1
+        ):
             n_common += 1
 
     mcsr = math.exp(-beta * (n1 + n2 - 2 * n_common))
@@ -80,8 +82,10 @@ def mncar_score(mapping: LigandAtomMapping, ths: int = 4) -> float:
     n2 = molB.GetNumHeavyAtoms()
     n_common = 0
     for i, j in molA_to_molB.items():
-        if (molA.GetAtomWithIdx(i).GetAtomicNum() != 1
-                and molB.GetAtomWithIdx(j).GetAtomicNum() != 1):
+        if (
+            molA.GetAtomWithIdx(i).GetAtomicNum() != 1
+            and molB.GetAtomWithIdx(j).GetAtomicNum() != 1
+        ):
             n_common += 1
 
     ok = (n_common > ths) or (n1 < ths + 3) or (n2 < ths + 3)
@@ -93,8 +97,7 @@ def tmcsr_score(self, mapping: LigandAtomMapping):
     raise NotImplementedError
 
 
-def atomic_number_score(mapping: LigandAtomMapping, beta=0.1,
-                        difficulty=None) -> float:
+def atomic_number_score(mapping: LigandAtomMapping, beta=0.1, difficulty=None) -> float:
     """A score on the elemental changes happening in the mapping
 
     For each transmuted atom, a mismatch score is summed, according to the
@@ -192,52 +195,53 @@ def hybridization_score(mapping: LigandAtomMapping, beta=0.15) -> float:
 
         mismatch = hyb_i != hyb_j
         # Allow Nsp3 to match Nsp2, otherwise guanidines etc become painful
-        if (atom_i.GetAtomicNum() == 7 and atom_j.GetAtomicNum() == 7 and
-                hyb_i in [2, 3] and hyb_j in [2, 3]):
+        if (
+            atom_i.GetAtomicNum() == 7
+            and atom_j.GetAtomicNum() == 7
+            and hyb_i in [2, 3]
+            and hyb_j in [2, 3]
+        ):
             mismatch = False
 
         if mismatch:
             nmismatch += 1
 
-    return math.exp(- beta * nmismatch)
+    return math.exp(-beta * nmismatch)
 
 
 def sulfonamides_score(mapping: LigandAtomMapping, beta=0.4) -> float:
     """Checks if a sulfonamide appears and disallow this.
 
-    Returns ``math.exp(- beta)`` if a sulfonamide group is mutated in or out, 
-    otherwise 1.0. Testing has shown that growing a sulfonamide from scratch 
+    Returns ``math.exp(- beta)`` if a sulfonamide group is mutated in or out,
+    otherwise 1.0. Testing has shown that growing a sulfonamide from scratch
     performs very badly.
 
     Parameters
     ==========
     beta
         A positive float describing how much to penalise a growing sulfonamide.
-        Smaller values indicate exponentially larger penalties. 
+        Smaller values indicate exponentially larger penalties.
     """
     molA = mapping.componentA.to_rdkit()
     molB = mapping.componentB.to_rdkit()
     molA_to_molB = mapping.componentA_to_componentB
 
     def has_sulfonamide(mol):
-        return mol.HasSubstructMatch(Chem.MolFromSmarts('S(=O)(=O)N'))
+        return mol.HasSubstructMatch(Chem.MolFromSmarts("S(=O)(=O)N"))
 
     # create "remainders" of both molA and molB
     remA = Chem.EditableMol(molA)
     # this incremental deletion only works when we go from high to low,
     # as atoms are reindexed as we delete
     for i, j in sorted(molA_to_molB.items(), reverse=True):
-        if (molA.GetAtomWithIdx(i).GetAtomicNum() !=
-                molB.GetAtomWithIdx(j).GetAtomicNum()):
+        if molA.GetAtomWithIdx(i).GetAtomicNum() != molB.GetAtomWithIdx(j).GetAtomicNum():
             continue
         remA.RemoveAtom(i)
     # loop molB separately, sorted by A indices doesn't necessarily sort
     # the B indices too, so these loops are in different orders
     remB = Chem.EditableMol(molB)
-    for i, j in sorted(molA_to_molB.items(), key=lambda x: x[1],
-                       reverse=True):
-        if (molA.GetAtomWithIdx(i).GetAtomicNum() !=
-                molB.GetAtomWithIdx(j).GetAtomicNum()):
+    for i, j in sorted(molA_to_molB.items(), key=lambda x: x[1], reverse=True):
+        if molA.GetAtomWithIdx(i).GetAtomicNum() != molB.GetAtomWithIdx(j).GetAtomicNum():
             continue
         remB.RemoveAtom(j)
 
@@ -260,14 +264,11 @@ def heterocycles_score(mapping: LigandAtomMapping, beta=0.4) -> float:
 
     def creates_heterocyle(mol):
         # these patterns are lifted from lomap2 repo
-        return (mol.HasSubstructMatch(
-            Chem.MolFromSmarts('[n]1[c,n][c,n][c,n][c,n][c,n]1'))
-            or
-            mol.HasSubstructMatch(
-            Chem.MolFromSmarts('[o,n,s]1[n][c,n][c,n][c,n]1'))
-            or
-            mol.HasSubstructMatch(
-            Chem.MolFromSmarts('[o,n,s]1[c,n][n][c,n][c,n]1')))
+        return (
+            mol.HasSubstructMatch(Chem.MolFromSmarts("[n]1[c,n][c,n][c,n][c,n][c,n]1"))
+            or mol.HasSubstructMatch(Chem.MolFromSmarts("[o,n,s]1[n][c,n][c,n][c,n]1"))
+            or mol.HasSubstructMatch(Chem.MolFromSmarts("[o,n,s]1[c,n][n][c,n][c,n]1"))
+        )
 
     # create "remainders" of both molA and molB
     # create "remainders" of both molA and molB
@@ -275,29 +276,24 @@ def heterocycles_score(mapping: LigandAtomMapping, beta=0.4) -> float:
     # this incremental deletion only works when we go from high to low,
     # as atoms are reindexed as we delete
     for i, j in sorted(molA_to_molB.items(), reverse=True):
-        if (molA.GetAtomWithIdx(i).GetAtomicNum() !=
-                molB.GetAtomWithIdx(j).GetAtomicNum()):
+        if molA.GetAtomWithIdx(i).GetAtomicNum() != molB.GetAtomWithIdx(j).GetAtomicNum():
             continue
         remA.RemoveAtom(i)
     # loop molB separately, sorted by A indices doesn't necessarily sort
     # the B indices too, so these loops are in different orders
     remB = Chem.EditableMol(molB)
-    for i, j in sorted(molA_to_molB.items(), key=lambda x: x[1],
-                       reverse=True):
-        if (molA.GetAtomWithIdx(i).GetAtomicNum() !=
-                molB.GetAtomWithIdx(j).GetAtomicNum()):
+    for i, j in sorted(molA_to_molB.items(), key=lambda x: x[1], reverse=True):
+        if molA.GetAtomWithIdx(i).GetAtomicNum() != molB.GetAtomWithIdx(j).GetAtomicNum():
             continue
         remB.RemoveAtom(j)
 
-    if (creates_heterocyle(remA.GetMol()) or
-            creates_heterocyle(remB.GetMol())):
-        return math.exp(- beta)
+    if creates_heterocyle(remA.GetMol()) or creates_heterocyle(remB.GetMol()):
+        return math.exp(-beta)
     else:
         return 1.0
 
 
-def transmuting_methyl_into_ring_score(mapping: LigandAtomMapping,
-                                       beta=0.1, penalty=6.0) -> float:
+def transmuting_methyl_into_ring_score(mapping: LigandAtomMapping, beta=0.1, penalty=6.0) -> float:
     """Penalises having a non-mapped ring atoms become a non-ring
 
     This score would for example penalise R-CH3 to R-Ph where R is the same
@@ -355,7 +351,7 @@ def transmuting_methyl_into_ring_score(mapping: LigandAtomMapping,
     if not ringbreak:
         return 1.0
     else:
-        return math.exp(- beta * penalty)
+        return math.exp(-beta * penalty)
 
 
 def transmuting_ring_sizes_score(mapping: LigandAtomMapping) -> float:
@@ -404,22 +400,20 @@ def transmuting_ring_sizes_score(mapping: LigandAtomMapping) -> float:
                     continue
 
                 # ringdict[idx] will give the list of ringsizes for an atom
-                if set(ringdictA[otherA.GetIdx()]) != set(
-                        ringdictB[otherB.GetIdx()]):
+                if set(ringdictA[otherA.GetIdx()]) != set(ringdictB[otherB.GetIdx()]):
                     is_bad = True
 
     return 0.1 if is_bad else 1.0
 
 
-def default_lomap_score(mapping: LigandAtomMapping,
-                        charge_changes_score=0.1) -> float:
+def default_lomap_score(mapping: LigandAtomMapping, charge_changes_score=0.1) -> float:
     """The default score function from Lomap2
 
 
     This score is a combination of many rules combined and considers factors such as the
     number of heavy atoms in common, if ring sizes are changed or rings are broken,
     or if other alchemically unwise transformations are attempted.
-       
+
     Parameters
     ----------
     mapping : LigandAtomMapping
@@ -434,16 +428,18 @@ def default_lomap_score(mapping: LigandAtomMapping,
     score : float
        A rating of how good this mapping is, from 0.0 (terrible) to 1.0 (great).
     """
-    score = math.prod((
-        ecr_score(mapping, charge_changes_score),
-        mncar_score(mapping),
-        mcsr_score(mapping),
-        atomic_number_score(mapping),
-        hybridization_score(mapping),
-        sulfonamides_score(mapping),
-        heterocycles_score(mapping),
-        transmuting_methyl_into_ring_score(mapping),
-        transmuting_ring_sizes_score(mapping)
-    ))
+    score = math.prod(
+        (
+            ecr_score(mapping, charge_changes_score),
+            mncar_score(mapping),
+            mcsr_score(mapping),
+            atomic_number_score(mapping),
+            hybridization_score(mapping),
+            sulfonamides_score(mapping),
+            heterocycles_score(mapping),
+            transmuting_methyl_into_ring_score(mapping),
+            transmuting_ring_sizes_score(mapping),
+        )
+    )
 
     return score

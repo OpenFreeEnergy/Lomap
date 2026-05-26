@@ -18,21 +18,22 @@ from ..utils import deprecated_kwargs
 
 logger = logging.getLogger(__name__)
 
-@deprecated_kwargs(name_mappings={'molecules':'ligands'})
+
+@deprecated_kwargs(name_mappings={"molecules": "ligands"})
 @due.dcite(Doi("https://doi.org/10.1007/s10822-013-9678-y"), description="LOMAP")
 def generate_lomap_network(
-        ligands: list[gufe.SmallMoleculeComponent],
-        mappers: AtomMapper | list[AtomMapper],
-        scorer: Callable,
-        distance_cutoff: float = 0.4,
-        max_path_length=6,
-        actives: list[bool] | None = None,
-        max_dist_from_active=2,
-        require_cycle_covering: bool = True,
-        radial: bool = False,
-        fast: bool = False,
-        hub: gufe.SmallMoleculeComponent | None = None,
-    ) -> LigandNetwork:
+    ligands: list[gufe.SmallMoleculeComponent],
+    mappers: AtomMapper | list[AtomMapper],
+    scorer: Callable,
+    distance_cutoff: float = 0.4,
+    max_path_length=6,
+    actives: list[bool] | None = None,
+    max_dist_from_active=2,
+    require_cycle_covering: bool = True,
+    radial: bool = False,
+    fast: bool = False,
+    hub: gufe.SmallMoleculeComponent | None = None,
+) -> LigandNetwork:
     """Generate a LigandNetwork according to Lomap's network creation rules
 
     Parameters
@@ -50,7 +51,7 @@ def generate_lomap_network(
     max_path_length : int
       maximum distance between any two molecules in the resulting network. Default is 6.
     actives : list[bool]
-      for each molecule, if it is tagged as an active molecule 
+      for each molecule, if it is tagged as an active molecule
     max_dist_from_active
       when 'actives' is given, constrains the resulting map to be within this this number of edges (e.g. distance) from an active molecule. Default is 2.
     require_cycle_covering : bool
@@ -88,8 +89,7 @@ def generate_lomap_network(
             mp: LigandAtomMapping
             score: float
             try:
-                score, mp = max((scorer(mp), mp)
-                                for mp in (mapper.suggest_mappings(mA, mB)))
+                score, mp = max((scorer(mp), mp) for mp in (mapper.suggest_mappings(mA, mB)))
             except ValueError:
                 # if mapper returned no mappings
                 continue
@@ -105,20 +105,21 @@ def generate_lomap_network(
         logger.debug(f"Mapping for {mA} {mB} has score {best_score}")
 
         mtx[i, j] = mtx[j, i] = best_score
-        mps[i, j] = mps[j, i] = best_mp.with_annotations({'score': best_score})
+        mps[i, j] = mps[j, i] = best_mp.with_annotations({"score": best_score})
 
-    gg = GraphGen(score_matrix=mtx,
-                  ids=list(range(mtx.shape[0])),
-                  names=[m.name for m in ligands],
-                  max_path_length=max_path_length,
-                  actives=actives,
-                  max_dist_from_active=max_dist_from_active,
-                  similarity_cutoff=1 - distance_cutoff,
-                  require_cycle_covering=require_cycle_covering,
-                  radial=radial,
-                  fast=fast,
-                  hub=hub.name if hub else None,
-                  )
+    gg = GraphGen(
+        score_matrix=mtx,
+        ids=list(range(mtx.shape[0])),
+        names=[m.name for m in ligands],
+        max_path_length=max_path_length,
+        actives=actives,
+        max_dist_from_active=max_dist_from_active,
+        similarity_cutoff=1 - distance_cutoff,
+        require_cycle_covering=require_cycle_covering,
+        radial=radial,
+        fast=fast,
+        hub=hub.name if hub else None,
+    )
     n: nx.Graph = gg.resultGraph
 
     ln = LigandNetwork(

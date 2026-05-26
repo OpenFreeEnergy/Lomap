@@ -20,5 +20,3 @@ Lomap Legacy API
 
 .. autoclass:: lomap.graphgen.GraphGen
    :members:
-
-

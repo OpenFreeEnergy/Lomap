@@ -29,7 +29,6 @@ potential ligands within a substantial of compounds.
 # MODULE IMPORTS
 # ****************
 
-
 import argparse
 import logging
 import math
@@ -45,7 +44,7 @@ from rdkit.Chem.Fingerprints import FingerprintMols
 # *******************************
 
 
-__all__ = ['FIGUREPRINT']  # noqa: F822
+__all__ = ["FIGUREPRINT"]  # noqa: F822
 
 
 class Figureprint:
@@ -73,13 +72,13 @@ class Figureprint:
         """
 
         # Set logging level and format
-        logging.basicConfig(format='%(levelname)s:\t%(message)s', level=logging.INFO)
+        logging.basicConfig(format="%(levelname)s:\t%(message)s", level=logging.INFO)
 
         # Local pointers to the passed molecules
         self.moli = moli
         self.molj = molj
 
-        if not options.verbose == 'pedantic':  # noqa: F821
+        if not options.verbose == "pedantic":  # noqa: F821
             lg = RDLogger.logger()
             lg.setLevel(RDLogger.CRITICAL)
 

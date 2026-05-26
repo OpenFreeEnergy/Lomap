@@ -1,6 +1,6 @@
 phenyl.sdf phenylcyclobutyl.sdf 0.1 force
 phenyl.sdf phenylfuran.sdf 0.2 force
-phenyl.sdf toluyl.sdf 0.3 
+phenyl.sdf toluyl.sdf 0.3
 phenylcyclobutyl.sdf phenylfuran.sdf 0.4 force
 phenylcyclobutyl.sdf toluyl.sdf 0.5 force
 phenylfuran.sdf toluyl.sdf 0.6 force

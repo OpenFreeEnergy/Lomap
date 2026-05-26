@@ -9,7 +9,7 @@ import lomap
 # The DBMolecule class must be created with a valid
 # directory name
 
-db_mol = lomap.DBMolecules('../test/basic/', output=True)
+db_mol = lomap.DBMolecules("../test/basic/", output=True)
 
 # db_mol = lomap.DBMolecules('test/basic/', output=True, display=True)
 
@@ -29,11 +29,13 @@ loose_numpy = loose.to_numpy_2D_array()
 # score matrices
 
 nx_graph = db_mol.build_graph()
-#print(nx_graph.edges(data=True))
+# print(nx_graph.edges(data=True))
 
 
 # Calculate the Maximum Common Subgraph (MCS) between
 # the first two molecules in the molecule database
 # ignoring hydrogens and depicting the mapping in a file
 
-MC = lomap.MCS.getMapping(db_mol[0].getMolecule(), db_mol[1].getMolecule(), hydrogens=False, fname='mcs.png')
+MC = lomap.MCS.getMapping(
+    db_mol[0].getMolecule(), db_mol[1].getMolecule(), hydrogens=False, fname="mcs.png"
+)

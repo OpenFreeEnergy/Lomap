@@ -2,6 +2,7 @@
 The MCS class wrapped to provide a gufe interface
 
 """
+
 from collections.abc import Iterable
 
 import gufe
@@ -19,9 +20,16 @@ class LomapAtomMapper(AtomMapper):
     seed: str
     shift: bool
 
-    def __init__(self, *, time: int = 20, threed: bool = True,
-                 max3d: float = 1.0, element_change: bool = True,
-                 seed: str = '', shift: bool = False):
+    def __init__(
+        self,
+        *,
+        time: int = 20,
+        threed: bool = True,
+        max3d: float = 1.0,
+        element_change: bool = True,
+        seed: str = "",
+        shift: bool = False,
+    ):
         """Wraps the MCS atom mapper from Lomap.
 
         Kwargs are passed directly to the MCS class from Lomap for each mapping
@@ -60,12 +68,12 @@ class LomapAtomMapper(AtomMapper):
 
     def _to_dict(self) -> dict:
         return {
-            'time': self.time,
-            'threed': self.threed,
-            'max3d': self.max3d,
-            'element_change': self.element_change,
-            'seed': self.seed,
-            'shift': self.shift,
+            "time": self.time,
+            "threed": self.threed,
+            "max3d": self.max3d,
+            "element_change": self.element_change,
+            "seed": self.seed,
+            "shift": self.shift,
         }
 
     @classmethod
@@ -73,16 +81,18 @@ class LomapAtomMapper(AtomMapper):
         return cls(**d)
 
     def __repr__(self):
-        return (f"<LomapAtomMapper (time={self.time}, threed={self.threed}, "
-                f"max3d={self.max3d}, element_change={self.element_change}, "
-                f"seed='{self.seed}', shift={self.shift})>")
+        return (
+            f"<LomapAtomMapper (time={self.time}, threed={self.threed}, "
+            f"max3d={self.max3d}, element_change={self.element_change}, "
+            f"seed='{self.seed}', shift={self.shift})>"
+        )
 
     @due.dcite(Doi("https://doi.org/10.1007/s10822-013-9678-y"), description="LOMAP")
-    def suggest_mappings(self,
-                         componentA: gufe.SmallMoleculeComponent,
-                         componentB: gufe.SmallMoleculeComponent) -> Iterable[LigandAtomMapping]:
+    def suggest_mappings(
+        self, componentA: gufe.SmallMoleculeComponent, componentB: gufe.SmallMoleculeComponent
+    ) -> Iterable[LigandAtomMapping]:
         """Generate one or more mappings between two small molecules
-        
+
         Parameters
         ----------
         componentA, componentB: gufe.SmallMoleculeComponent
@@ -93,12 +103,16 @@ class LomapAtomMapper(AtomMapper):
           potential mappings
         """
         try:
-            mcs = lomap_mcs.MCS(componentA.to_rdkit(), componentB.to_rdkit(),
-                                time=self.time,
-                                threed=self.threed, max3d=self.max3d,
-                                element_change=self.element_change,
-                                seed=self.seed,
-                                shift=self.shift)
+            mcs = lomap_mcs.MCS(
+                componentA.to_rdkit(),
+                componentB.to_rdkit(),
+                time=self.time,
+                threed=self.threed,
+                max3d=self.max3d,
+                element_change=self.element_change,
+                seed=self.seed,
+                shift=self.shift,
+            )
         except ValueError:
             # if no match found, Lomap throws ValueError, so we just yield
             # generator with no contents
@@ -107,8 +121,7 @@ class LomapAtomMapper(AtomMapper):
         mapping_string = mcs.all_atom_match_list()
         # lomap spits out "1:1,2:2,...,x:y", so split around commas,
         # then colons and coerce to ints
-        mapping_dict = dict(map(int, v.split(':'))
-                             for v in mapping_string.split(','))
+        mapping_dict = dict(map(int, v.split(":")) for v in mapping_string.split(","))
 
         yield LigandAtomMapping(
             componentA=componentA,
