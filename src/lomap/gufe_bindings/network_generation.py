@@ -1,7 +1,6 @@
 import itertools
 import logging
 from collections.abc import Callable
-from typing import Optional, Union
 
 import gufe
 import networkx as nx
