@@ -450,7 +450,7 @@ class DBMolecules(object):
             logging.warning('Skipped molecules:')
             logging.warning(30 * '-')
             for fn in mol_error_list_fn:
-                logging.warning(f"{fn}")
+                logging.warning(str(fn))
             print(30 * '-')
 
         return molid_list
