@@ -20,7 +20,7 @@ repos:
     - id: debug-statements
     - id: destroyed-symlinks
     - id: end-of-file-fixer
-      exclude: '\.(graphml)$'
+      exclude: '\.(graphml|gpickle)$'
 
 - repo: https://github.com/tox-dev/pyproject-fmt
   rev: "v2.21.1"
