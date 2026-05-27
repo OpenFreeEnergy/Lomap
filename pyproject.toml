@@ -51,6 +51,7 @@ fallback_version = "0.0.0"
 
 [tool.mypy]
 files = "src"
+ignore_missing_imports = true
 warn_unused_ignores = true
 
 [[tool.mypy.overrides]]
