@@ -53,6 +53,10 @@ fallback_version = "0.0.0"
 files = "src"
 warn_unused_ignores = true
 
+[[tool.mypy.overrides]]
+module = "lomap._due"
+ignore_errors = true
+
 [tool.ruff]
 target-version = "py311"
 line-length = 100

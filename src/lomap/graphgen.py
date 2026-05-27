@@ -37,6 +37,7 @@ import tempfile
 import traceback
 from operator import itemgetter
 from typing import Optional
+import warnings
 
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -233,23 +234,31 @@ class GraphGen:
             self.connect_subgraphs()
 
     @staticmethod
-    def pick_lead(hub: str, names: list[str], strict_mtx) -> int:
+    def pick_lead(hub: str | None, names: list[str], strict_mtx: np.ndarray) -> int:
         """Pick lead compount
 
         Parameters
         ----------
-        hub : str
+        hub : str | None
           input of desired hub
-        names: list[str]
+        names : list[str]
           names of each molecule
-        strict_mtx
+        strict_mtx : np.ndarray
           scoring matrix
 
         Returns
         -------
         index of lead compound
         """
-        if not hub == "None":
+        # TODO: remove support for "None" string for hub in next release
+        if hub == "None":
+            msg = (
+                "Support for passing hub as str(None) instead of None directly "
+                "to `GraphGen.pick_lead` will be removed in the next release of Lomap"
+            )
+            warnings.warn(msg, DeprecationWarning)
+
+        if not (hub is None or hub == "None"):
             # hub radial option. Use the provided reference compound as a hub
             hub_index = None
             for i, nm in enumerate(names):
