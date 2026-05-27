@@ -121,7 +121,9 @@ class LomapAtomMapper(AtomMapper):
         mapping_string = mcs.all_atom_match_list()
         # lomap spits out "1:1,2:2,...,x:y", so split around commas,
         # then colons and coerce to ints
-        mapping_dict = dict(map(int, v.split(":")) for v in mapping_string.split(","))
+        # Note: ignoring typing here since there's no way mypy can know
+        # that map will return int:int outside of runtime
+        mapping_dict: dict[int, int] = dict(map(int, v.split(":")) for v in mapping_string.split(","))  # type: ignore[misc]
 
         yield LigandAtomMapping(
             componentA=componentA,
