@@ -29,29 +29,25 @@ potential ligands within a substantial of compounds.
 # MODULE IMPORTS
 # ****************
 
-
-from rdkit import Chem
-from rdkit.Chem import rdFMCS
-from rdkit.Chem import AllChem
-from rdkit.Chem.Draw.MolDrawing import DrawingOptions
-from rdkit.Chem import Draw
-from rdkit import DataStructs
-from rdkit.Chem.Fingerprints import FingerprintMols
-import sys
-import math
-from rdkit import RDLogger
-import logging
 import argparse
+import logging
+import math
+import sys
+
+from rdkit import Chem, DataStructs, RDLogger
+from rdkit.Chem import AllChem, Draw, rdFMCS
+from rdkit.Chem.Draw.MolDrawing import DrawingOptions
+from rdkit.Chem.Fingerprints import FingerprintMols
 
 # *******************************
 # Figureprint Class
 # *******************************
 
 
-__all__ = ['FIGUREPRINT']  # noqa: F822
+__all__ = ["FIGUREPRINT"]  # noqa: F822
 
 
-class Figureprint(object):
+class Figureprint:
     """
 
     This class is used to compute the Maximum Common Subgraph (MCS) between two
@@ -76,13 +72,13 @@ class Figureprint(object):
         """
 
         # Set logging level and format
-        logging.basicConfig(format='%(levelname)s:\t%(message)s', level=logging.INFO)
+        logging.basicConfig(format="%(levelname)s:\t%(message)s", level=logging.INFO)
 
         # Local pointers to the passed molecules
         self.moli = moli
         self.molj = molj
 
-        if not options.verbose == 'pedantic':  # noqa: F821
+        if not options.verbose == "pedantic":  # noqa: F821
             lg = RDLogger.logger()
             lg.setLevel(RDLogger.CRITICAL)
 

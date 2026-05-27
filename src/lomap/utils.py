@@ -1,14 +1,15 @@
 import functools
 import warnings
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 
-def rename_kwargs(
-    func_name: str, kwargs: dict[str, Any], name_mappings: dict[str, str]
-):
+def rename_kwargs(func_name: str, kwargs: dict[str, Any], name_mappings: dict[str, str]):
     """Helper function for deprecating function arguments."""
     for old_name, new_name in name_mappings.items():
-        deprecation_msg = f"{func_name} argument '{old_name}' is deprecated, please use '{new_name}' instead."
+        deprecation_msg = (
+            f"{func_name} argument '{old_name}' is deprecated, please use '{new_name}' instead."
+        )
         if old_name in kwargs:
             if new_name in kwargs:
                 raise ValueError(

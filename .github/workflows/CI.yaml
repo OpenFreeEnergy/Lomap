@@ -70,7 +70,7 @@ jobs:
           micromamba list
 
       - name: Test the package
-        run: pytest -vv 
+        run: pytest -vv
 
       - name: Codecov
         uses: codecov/codecov-action@v5
