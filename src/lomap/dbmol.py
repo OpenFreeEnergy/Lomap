@@ -593,7 +593,7 @@ class DBMolecules:
                 loose_scr = strict_scr
                 logging.info(
                     f"MCS molecules: {self[i].getName()} - {self[j].getName()} "
-                    "final score {strict_scr} set in links file"
+                    f"final score {strict_scr} set in links file"
                 )
             else:
                 # The MCS is computed only if the passed molecules have the same charges
