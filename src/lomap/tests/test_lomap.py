@@ -285,72 +285,26 @@ def test_symmetry_matchheavies():
     MCS2 = MCS(mol2, mol3)
     MCS3 = MCS(mol1, mol3)
     assert MCS1.mcs_mol.GetNumHeavyAtoms() == 9
+    # fmt: off
     assert [int(at.GetProp("to_moli")) for at in MCS1.mcs_mol.GetAtoms()] == [
-        0,
-        5,
-        4,
-        3,
-        2,
-        1,
-        7,
-        6,
-        9,
+        0, 5, 4, 3, 2, 1, 7, 6, 9,
     ]
     assert [int(at.GetProp("to_molj")) for at in MCS1.mcs_mol.GetAtoms()] == [
-        0,
-        5,
-        4,
-        3,
-        2,
-        1,
-        7,
-        6,
-        8,
+        0, 5, 4, 3, 2, 1, 7, 6, 8,
     ]
     assert [int(at.GetProp("to_moli")) for at in MCS2.mcs_mol.GetAtoms()] == [
-        0,
-        5,
-        4,
-        3,
-        2,
-        1,
-        7,
-        6,
-        8,
+        0, 5, 4, 3, 2, 1, 7, 6, 8,
     ]
     assert [int(at.GetProp("to_molj")) for at in MCS2.mcs_mol.GetAtoms()] == [
-        4,
-        5,
-        0,
-        1,
-        2,
-        3,
-        7,
-        6,
-        8,
+        4, 5, 0, 1, 2, 3, 7, 6, 8,
     ]
     assert [int(at.GetProp("to_moli")) for at in MCS3.mcs_mol.GetAtoms()] == [
-        4,
-        5,
-        0,
-        1,
-        2,
-        3,
-        7,
-        6,
-        9,
+        4, 5, 0, 1, 2, 3, 7, 6, 9,
     ]
     assert [int(at.GetProp("to_molj")) for at in MCS3.mcs_mol.GetAtoms()] == [
-        0,
-        5,
-        4,
-        3,
-        2,
-        1,
-        7,
-        6,
-        8,
+        0, 5, 4, 3, 2, 1, 7, 6, 8,
     ]
+    # fmt: on
 
 
 # Test to check symmetry equivalence by matching 3D coordinates rather than atomic numbers
