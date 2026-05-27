@@ -35,7 +35,7 @@ jobs:
           create-args: >-
             python=3.12
             mypy
-            gufe
+            types-networkx
           init-shell: bash
 
       - name: "Install steps"
