@@ -1194,20 +1194,22 @@ class GraphGen:
         nx.draw_networkx_labels(self.resultGraph, pos, labels=node_labels, font_size=10)
 
         if edge_labels:
+            # fmt: off
             edge_weight_strict = dict(
                 [
                     ((u, v), d["similarity"])
                     for u, v, d in self.resultGraph.edges(data=True)
                     if d["strict_flag"]
                 ]
-            ) # fmt: skip
+            )
             edge_weight_loose = dict(
                 [
                     ((u, v), d["similarity"])
                     for u, v, d in self.resultGraph.edges(data=True)
                     if not d["strict_flag"]
                 ]
-            ) # fmt: skip
+            )
+            # fmt: on
 
             for key in edge_weight_strict:
                 edge_weight_strict[key] = round(edge_weight_strict[key], 2)
