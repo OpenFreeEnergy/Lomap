@@ -1,0 +1,37 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+
+# comment / label "pre-commit.ci autofix" to a pull request to manually trigger auto-fixing
+ci:
+    autofix_prs: false
+    autoupdate_schedule: monthly
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+    - id: trailing-whitespace
+      exclude: '\.(pdb|gro|top|sdf|xml|cif|graphml|gpickle)$'
+    - id: check-added-large-files
+      args: ["--maxkb=4000"]
+    - id: check-case-conflict
+    - id: check-symlinks
+    - id: check-toml
+    - id: check-yaml
+    - id: debug-statements
+    - id: destroyed-symlinks
+    - id: end-of-file-fixer
+      exclude: '\.(graphml|gpickle|pickle)$'
+
+- repo: https://github.com/tox-dev/pyproject-fmt
+  rev: "v2.21.1"
+  hooks:
+    - id: pyproject-fmt
+
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.15.12
+  hooks:
+    # Run the linter.
+    - id: ruff
+      args: [--fix ]
+    # Run the formatter.
+    - id: ruff-format
