@@ -36,24 +36,25 @@ import subprocess
 import tempfile
 import traceback
 from operator import itemgetter
-from typing import Optional
+from typing import Any
 import warnings
 
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
+from rdkit import Chem
 from rdkit.Chem import AllChem, Draw
 
 __all__ = ["GraphGen"]
 
 
-def find_non_cyclic_nodes(subgraph):
+def find_non_cyclic_nodes(subgraph: nx.Graph) -> set[int]:
     """
     Generates a list of nodes of the subgraph that are not in a cycle
 
     Parameters
     ---------
-    subgraph : NetworkX subgraph obj
+    subgraph : nx.Graph
         the subgraph to check for not cycle nodes
 
     Returns
@@ -71,19 +72,19 @@ def find_non_cyclic_nodes(subgraph):
     return missingNodesSet
 
 
-def find_non_cyclic_edges(subgraph):
+def find_non_cyclic_edges(subgraph: nx.Graph) -> set[tuple[int, int]]:
     """
     Generates a set of edges of the subgraph that are not in a cycle (called
     "bridges" in networkX terminology).
 
     Parameters
     ---------
-    subgraph : NetworkX subgraph obj
+    subgraph : nx.Graph
         the subgraph to check for not cycle nodes
 
     Returns
     -------
-    missingEdgesSet : set of graph edges
+    missingEdgesSet : set[tuple[int, int]]
         the set of edges that are not in a cycle
 
     """
@@ -105,7 +106,7 @@ class GraphGen:
     def __init__(
         self,
         score_matrix: np.ndarray,
-        ids: list,
+        ids: list[int],
         names: list[str],
         max_path_length,
         actives: list[bool],
@@ -157,10 +158,10 @@ class GraphGen:
             self.lead_index = None
 
         # A set of nodes that will be used to save nodes that are not a cycle cover for a given subgraph
-        self.nonCycleNodesSet = set()
+        self.nonCycleNodesSet: set[int] = set()
 
         # A set of edges that will be used to save edges that are acyclic for given subgraph
-        self.nonCycleEdgesSet = set()
+        self.nonCycleEdgesSet: set[tuple[int, int]] = set()
 
         # A count of the number of nodes that are not within self.maxDistFromActive edges
         # of an active
@@ -205,7 +206,8 @@ class GraphGen:
             self.resultGraph = self.add_surrounding_edges(
                 subgraphs=self.workingSubgraphsList,
                 score_matrix=score_matrix,
-                lead_index=self.lead_index,
+                # Note; `self.lead_index` is never None here, safe to ignore typing
+                lead_index=self.lead_index,  # type: ignore[arg-type]
                 similarity_score_limit=similarity_cutoff,
             )
             # after adding the surround edges, some subgraphs may merge into a larger graph and so need to update the
@@ -228,14 +230,14 @@ class GraphGen:
             self.copyResultGraph = self.resultGraph.copy()
 
             # Holds list of edges that were added in the connect components phase
-            self.edgesAddedInFirstTreePass = []
+            self.edgesAddedInFirstTreePass: list[tuple[Any, Any, float]] = []
 
             # Add edges to the resultingGraph to connect its components
             self.connect_subgraphs()
 
     @staticmethod
-    def pick_lead(hub: str | None, names: list[str], strict_mtx: np.ndarray) -> int:
-        """Pick lead compount
+    def pick_lead(hub: str | None, names: list[str], strict_mtx: np.ndarray) -> int | None:
+        """Pick lead compound
 
         Parameters
         ----------
@@ -248,7 +250,8 @@ class GraphGen:
 
         Returns
         -------
-        index of lead compound
+        int | None
+          Optionally, the index of lead compound
         """
         # TODO: remove support for "None" string for hub in next release
         if hub == "None":
@@ -287,7 +290,12 @@ class GraphGen:
 
     @staticmethod
     def generate_initial_subgraph_list(
-        fast_map, strict_mtx, ids, names, is_active, lead_index: int
+        fast_map: bool,
+        strict_mtx: np.ndarray,
+        ids: list[int],
+        names: list[str],
+        is_active: list[bool],
+        lead_index: int | None,
     ):
         """
         This function generates a starting graph connecting with edges all the
@@ -298,23 +306,28 @@ class GraphGen:
         fast_map : bool
           chooses one of two algorithms
         strict_mtx: np.ndarray
-           matrix of scores between molecules
-        ids: list
-           list of identifiers for each molecule
-        names: list
-           names of each molecule
+          matrix of scores between molecules
+        ids: list[int]
+          list of identifiers for each molecule
+        names: list[str]
+          names of each molecule
         is_active : list[bool]
-           for each molecule, whether it is active
-        lead_index : int
+          for each molecule, whether it is active
+        lead_index : int | None
+          the index of the lead compound, cannot
+          be None if `fast_map` is ``True``.
 
         Returns
         -------
-
         initialSubgraphList : list of NetworkX graph
             the list of connected component graphs
 
         """
         compound_graph = nx.Graph()
+
+        if fast_map and (lead_index is None):
+            msg = "`lead_index` must be defined if using the fast map option"
+            raise ValueError(msg)
 
         if not fast_map:
             # if not fast map option, connect all possible nodes to generate the initial graph
@@ -962,7 +975,7 @@ class GraphGen:
                     # 1, modify here to calculate the 2D structure for ligands cannot remove Hydrogens by rdkit
                     # 2, change the graph size to get better resolution
                     try:
-                        mol = AllChem.RemoveHs(mol)
+                        mol = Chem.RemoveHs(mol)
                     except (AllChem.KekulizeException, ValueError):
                         # Note: newer versions of RDKit now use KekulizeException
                         # for backwards compatibility, we also include ValueError which used to be thrown.
@@ -971,7 +984,7 @@ class GraphGen:
                         logging.info(
                             f"Error attempting to remove hydrogens for molecule {dbase[id_mol].getName()} using RDKit. RDKit cannot kekulize the molecule"
                         )
-                    AllChem.Compute2DCoords(mol)
+                    Chem.rdDepictor.Compute2DCoords(mol)
                     from rdkit.Chem.Draw.MolDrawing import DrawingOptions
 
                     DrawingOptions.bondLineWidth = 2.5
@@ -1265,7 +1278,7 @@ class GraphGen:
                 id_mol = self.resultGraph.nodes[each_node]["ID"]
                 # skip remove Hs by rdkit if Hs cannot be removed
                 try:
-                    mol = AllChem.RemoveHs(dbase[id_mol].getMolecule())
+                    mol = Chem.RemoveHs(dbase[id_mol].getMolecule())
                 except (AllChem.KekulizeException, ValueError):
                     # Note: newer versions of RDKit now use KekulizeException
                     # for backwards compatibility, we also include ValueError which used to be thrown.
@@ -1280,7 +1293,7 @@ class GraphGen:
                 # if max_dist > 7.0:
                 #     continue
 
-                AllChem.Compute2DCoords(mol)
+                Chem.rdDepictor.Compute2DCoords(mol)
                 # add try exception for cases cannot be draw
                 try:
                     img_mol = Draw.MolToImage(mol, mol_size, kekulize=False)
@@ -1299,7 +1312,7 @@ class GraphGen:
                 p2_2 = nodesize_2 / 2
                 p2_1 = nodesize_1 / 2
 
-                a = plt.axes([xa - p2_2, ya - p2_1, nodesize_2, nodesize_1])
+                a = plt.axes([xa - p2_2, ya - p2_1, nodesize_2, nodesize_1])  # type: ignore[arg-type]
                 # self.resultGraph.nodes[id_mol]['image'] = img_mol
                 # a.imshow(self.resultGraph.node[each_node]['image'])
                 a.imshow(img_mol)
