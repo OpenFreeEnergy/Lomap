@@ -10,7 +10,8 @@ except ImportError:
 
 @pytest.mark.skipif(HAS_GUFE, reason="requires not having gufe installed")
 def test_lomap_atommaper_no_gufe_error():
-    with pytest.raises(ImportError, match="gufe is required to use"):
+    msg = "gufe is required to use LomapAtomMapper"
+    with pytest.raises(ImportError, match=msg):
         _ = LomapAtomMapper()
 
 
