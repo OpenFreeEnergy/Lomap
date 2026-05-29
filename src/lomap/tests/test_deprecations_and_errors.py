@@ -1,9 +1,10 @@
 from importlib import reload
+
 import numpy as np
 import pytest
 
-from lomap.graphgen import GraphGen
 from lomap import fp
+from lomap.graphgen import GraphGen
 
 
 def test_pick_lead_hub_None_deprecation():
