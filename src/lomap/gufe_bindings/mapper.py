@@ -2,7 +2,7 @@
 The MCS class wrapped to provide a gufe interface
 
 """
-
+from __future__ import annotations
 from collections.abc import Iterable
 
 try:
