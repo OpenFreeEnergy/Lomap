@@ -377,7 +377,7 @@ class GraphGen:
 
         subgraphScoresLists : list of lists
             each list contains a tuple with the graph node indexes and their
-            similatiry as weigth
+            similatiry as weight
 
         """
 
@@ -434,16 +434,16 @@ class GraphGen:
     @staticmethod
     def generate_working_subgraphs_list(subgraph_list):
         """
-        After the deletition of the edges that have a weigth less than the
+        After the deletition of the edges that have a weight less than the
         selected threshould the subgraph maybe disconnected and a new master
-        list of connected subgraphs is genereted
+        list of connected subgraphs is generated
 
         Returns
         -------
 
         workingSubgraphsList : list of lists
             each list contains a tuple with the graph node indexes and their
-            similatiry as weigth
+            similatiry as weight
 
         """
         workingSubgraphsList = []
@@ -477,10 +477,10 @@ class GraphGen:
                 subgraph, self.maxDistFromActive
             )
 
-            if len(subgraph.edges()) > 2:  # Graphs must have at least 3 edges to be minimzed
+            if len(subgraph.edges()) > 2:  # Graphs must have at least 3 edges to be minimized
                 for edge in weightsList:
                     if self.lead_index is not None:
-                        # Here the radial option is appplied, will check if the remove_edge is connect to
+                        # Here the radial option is applied, will check if the remove_edge is connect to
                         # the hub(lead) compound, if the edge is connected to the lead compound,
                         # then add it back into the graph.
                         if self.lead_index not in [edge[0], edge[1]]:
@@ -555,7 +555,7 @@ class GraphGen:
         subgraph : NetworkX subgraph obj
              the subgraph to check for the constraints
         numComp : int
-            the number of connected componets
+            the number of connected components
         require_cycle_covering : bool
             if to enforce cycle covering
 
@@ -748,7 +748,7 @@ class GraphGen:
         -------
         finalGraph : NetworkX graph obj
             the final graph produced merging all the subgraphs. The produced
-            graph may have disconneted parts
+            graph may have disconnected parts
 
         """
 

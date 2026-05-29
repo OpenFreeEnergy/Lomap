@@ -319,7 +319,7 @@ def test_symmetry_match3d():
     MCS2 = MCS(mol2, mol3, time=20, verbose="info", max3d=1000, threed=True)
     MCS3 = MCS(mol1, mol3, time=20, verbose="info", max3d=1000, threed=True)
     assert MCS1.mcs_mol.GetNumHeavyAtoms() == 9
-    # MCS1 and MCS2 are the same as in the matchheavies case, but MCS3 gives a diffrent answer
+    # MCS1 and MCS2 are the same as in the matchheavies case, but MCS3 gives a different answer
     assert [int(at.GetProp("to_moli")) for at in MCS1.mcs_mol.GetAtoms()] == [
         0,
         5,

@@ -12,7 +12,7 @@ free energy calculations between potential ligands within
 a substantial of compounds. The original LOMAP code was mainly
 based on commercial APIs such as OpenEye and Schrodinger. The aim
 of this project is to develop a new version of LOMAP based on free
-avalaible APIs such as RDKit offering the scientific community a
+available APIs such as RDKit offering the scientific community a
 free tool to plan in advance binding free energy calculations.
 
 ## Prerequisites
@@ -81,7 +81,7 @@ db_mol = lomap.DBMolecules("python string pointing to a directory with mol2 file
 #the fast graphing option create the initial graph by connecting the hub ligand with the possible surrounding ligands and add surrounding edges based on the similarities accoss surrounding nodes
 db_mol = lomap.DBMolecules("python string pointing to a directory with mol2 files", output=True, radial=True, hub=filename.mol2, fast=True)
 
-# Calculate the similarity matrix betweeen the database molecules. Two molecules are generated
+# Calculate the similarity matrix between the database molecules. Two molecules are generated
 # related to the scrict rule and loose rule
 
 strict, loose = db_mol.build_matrices()
