@@ -7,7 +7,8 @@ from rdkit import Chem
 try:
     from gufe import LigandAtomMapping
 except ImportError:
-    LigandAtomMapping = None
+    pass
+    # LigandAtomMapping = None
 
 from lomap import dbmol as _dbmol
 from lomap import mcs as lomap_mcs

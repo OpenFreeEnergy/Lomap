@@ -14,10 +14,11 @@ try:
         SmallMoleculeComponent,
     )
 except ImportError:
-    AtomMapper = None
-    LigandAtomMapping = None
-    LigandNetwork = None
-    SmallMoleculeComponent = None
+    pass
+    # AtomMapper = None
+    # LigandAtomMapping = None
+    # LigandNetwork = None
+    # SmallMoleculeComponent = None
 
 from lomap._due import Doi, due
 from lomap.graphgen import GraphGen
