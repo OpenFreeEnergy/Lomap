@@ -1,11 +1,18 @@
+from __future__ import annotations
+
 import math
 from collections import defaultdict
 
-from gufe import LigandAtomMapping
 from rdkit import Chem
+
+try:
+    from gufe import LigandAtomMapping
+except ImportError:
+    pass
 
 from lomap import dbmol as _dbmol
 from lomap import mcs as lomap_mcs
+from lomap.utils import requires_package
 
 DEFAULT_ANS_DIFFICULTY = {
     # H to element - not sure this has any effect currently
@@ -21,6 +28,7 @@ DEFAULT_ANS_DIFFICULTY = {
 }
 
 
+@requires_package("gufe")
 def ecr_score(mapping: LigandAtomMapping, charge_changes_score) -> float:
     molA = mapping.componentA.to_rdkit()
     molB = mapping.componentB.to_rdkit()
@@ -34,6 +42,7 @@ def ecr_score(mapping: LigandAtomMapping, charge_changes_score) -> float:
         return charge_changes_score
 
 
+@requires_package("gufe")
 def mcsr_score(mapping: LigandAtomMapping, beta: float = 0.1) -> float:
     """Maximum command substructure rule
 
@@ -66,6 +75,7 @@ def mcsr_score(mapping: LigandAtomMapping, beta: float = 0.1) -> float:
     return mcsr
 
 
+@requires_package("gufe")
 def mncar_score(mapping: LigandAtomMapping, ths: int = 4) -> float:
     """Minimum number of common atoms rule
 
@@ -93,10 +103,12 @@ def mncar_score(mapping: LigandAtomMapping, ths: int = 4) -> float:
     return 1.0 if ok else 0.0
 
 
-def tmcsr_score(self, mapping: LigandAtomMapping):
+@requires_package("gufe")
+def tmcsr_score(mapping: LigandAtomMapping):
     raise NotImplementedError
 
 
+@requires_package("gufe")
 def atomic_number_score(mapping: LigandAtomMapping, beta=0.1, difficulty=None) -> float:
     """A score on the elemental changes happening in the mapping
 
@@ -160,6 +172,7 @@ def atomic_number_score(mapping: LigandAtomMapping, beta=0.1, difficulty=None) -
     return math.exp(-beta * nmismatch)
 
 
+@requires_package("gufe")
 def hybridization_score(mapping: LigandAtomMapping, beta=0.15) -> float:
     """
 
@@ -209,6 +222,7 @@ def hybridization_score(mapping: LigandAtomMapping, beta=0.15) -> float:
     return math.exp(-beta * nmismatch)
 
 
+@requires_package("gufe")
 def sulfonamides_score(mapping: LigandAtomMapping, beta=0.4) -> float:
     """Checks if a sulfonamide appears and disallow this.
 
@@ -251,6 +265,7 @@ def sulfonamides_score(mapping: LigandAtomMapping, beta=0.4) -> float:
         return 1.0
 
 
+@requires_package("gufe")
 def heterocycles_score(mapping: LigandAtomMapping, beta=0.4) -> float:
     """Checks if a heterocycle is formed from a -H
 
@@ -293,6 +308,7 @@ def heterocycles_score(mapping: LigandAtomMapping, beta=0.4) -> float:
         return 1.0
 
 
+@requires_package("gufe")
 def transmuting_methyl_into_ring_score(mapping: LigandAtomMapping, beta=0.1, penalty=6.0) -> float:
     """Penalises having a non-mapped ring atoms become a non-ring
 
@@ -354,6 +370,7 @@ def transmuting_methyl_into_ring_score(mapping: LigandAtomMapping, beta=0.1, pen
         return math.exp(-beta * penalty)
 
 
+@requires_package("gufe")
 def transmuting_ring_sizes_score(mapping: LigandAtomMapping) -> float:
     """Checks if mapping alters a ring size"""
     molA = mapping.componentA.to_rdkit()
@@ -406,6 +423,7 @@ def transmuting_ring_sizes_score(mapping: LigandAtomMapping) -> float:
     return 0.1 if is_bad else 1.0
 
 
+@requires_package("gufe")
 def default_lomap_score(mapping: LigandAtomMapping, charge_changes_score=0.1) -> float:
     """The default score function from Lomap2
 

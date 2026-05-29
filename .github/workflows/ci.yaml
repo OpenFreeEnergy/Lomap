@@ -25,13 +25,18 @@ defaults:
 
 jobs:
   test:
-    name: Test on ${{ matrix.os }}, Python ${{ matrix.python-version }}
+    name: Test on ${{ matrix.os }}, Python ${{ matrix.python-version }}, Gufe ${{ matrix.gufe }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.11", "3.12", "3.13"]
         os: [ubuntu-latest, macos-15-intel, macos-latest]
+        gufe: ["yes"]
+        include:
+          - os: "ubuntu-latest"
+            python-version: "3.12"
+            gufe: "no"
 
     steps:
       - uses: actions/checkout@v6
@@ -56,6 +61,11 @@ jobs:
           create-args: >-
             python=${{ matrix.python-version }}
           init-shell: bash
+
+      - name: "Install optional gufe"
+        if: ${{ matrix.gufe == 'yes' }}
+        run: |
+          micromamba install -c conda-forge "gufe>=1.6.1"
 
       - name: Install package
         run: python -m pip install --no-deps -v -e .
