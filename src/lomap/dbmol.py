@@ -310,7 +310,7 @@ class DBMolecules:
         self.loose_mtx = SMatrix(shape=(0,))
 
         # Empty pointer to the networkx graph
-        self.Graph = nx.Graph()
+        self.Graph: nx.Graph = nx.Graph()
 
     def __iter__(self):
         """

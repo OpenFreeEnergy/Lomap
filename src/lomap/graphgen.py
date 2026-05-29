@@ -323,7 +323,7 @@ class GraphGen:
             the list of connected component graphs
 
         """
-        compound_graph = nx.Graph()
+        compound_graph: nx.Graph = nx.Graph()
 
         if fast_map and (lead_index is None):
             msg = "`lead_index` must be defined if using the fast map option"
