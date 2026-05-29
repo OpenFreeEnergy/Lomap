@@ -7,6 +7,7 @@ import lomap
 
 try:
     import gufe
+
     HAS_GUFE = True
 except ImportError:
     HAS_GUFE = False

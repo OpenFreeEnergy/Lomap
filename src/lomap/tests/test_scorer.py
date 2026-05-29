@@ -8,21 +8,22 @@ from rdkit import Chem
 import lomap
 from lomap import dbmol
 from lomap.gufe_bindings.scorers import (
+    atomic_number_score,
+    default_lomap_score,
     ecr_score,
+    heterocycles_score,
+    hybridization_score,
     mcsr_score,
     mncar_score,
-    tmcsr_score,
-    atomic_number_score,
-    hybridization_score,
     sulfonamides_score,
-    heterocycles_score,
+    tmcsr_score,
     transmuting_methyl_into_ring_score,
     transmuting_ring_sizes_score,
-    default_lomap_score,
 )
 
 try:
     import gufe
+
     HAS_GUFE = True
 except ImportError:
     HAS_GUFE = False
@@ -38,7 +39,8 @@ def smcs():
 
 
 @pytest.mark.skipif(HAS_GUFE, reason="requires not having gufe installed")
-@pytest.mark.parametrize("method", 
+@pytest.mark.parametrize(
+    "method",
     [
         ecr_score,
         mcsr_score,
@@ -51,7 +53,7 @@ def smcs():
         transmuting_methyl_into_ring_score,
         transmuting_ring_sizes_score,
         default_lomap_score,
-    ]
+    ],
 )
 def test_nogufe_errors(method):
     msg = f"gufe is required to use `{method.__qualname__}` but is not installed."
