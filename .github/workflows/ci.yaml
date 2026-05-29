@@ -65,7 +65,7 @@ jobs:
       - name: "Install optional gufe"
         if: ${{ matrix.gufe == 'yes' }}
         run: |
-          micromamba install -c conda-forge gufe
+          micromamba install -c conda-forge "gufe>1.0"
 
       - name: Install package
         run: python -m pip install --no-deps -v -e .
