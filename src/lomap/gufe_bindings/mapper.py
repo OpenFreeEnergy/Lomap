@@ -8,9 +8,9 @@ from collections.abc import Iterable
 try:
     from gufe import AtomMapper, LigandAtomMapping, SmallMoleculeComponent
 except ImportError:
-    AtomMapper = None  # type: ignore[assignment,misc]
-    LigandAtomMapping = None  # type: ignore[assignment,misc]
-    SmallMoleculeComponent = None  # type: ignore[assignment,misc]
+    AtomMapper = object  # Empty class type to make subclassing simpler
+    LigandAtomMapping = None
+    SmallMoleculeComponent = None
 
 from lomap import mcs as lomap_mcs
 from lomap.utils import requires_package
