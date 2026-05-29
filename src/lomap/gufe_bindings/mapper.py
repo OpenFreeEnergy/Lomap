@@ -8,8 +8,7 @@ from collections.abc import Iterable
 try:
     from gufe import AtomMapper, LigandAtomMapping, SmallMoleculeComponent
 except ImportError:
-    pass
-    # AtomMapper = object  # Empty class type to make subclassing simpler
+    AtomMapper = object  # Empty class type to make subclassing simpler
     # LigandAtomMapping = None
     # SmallMoleculeComponent = None
 
