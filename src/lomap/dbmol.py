@@ -31,7 +31,7 @@ import math
 import multiprocessing
 import os
 import pickle
-from typing import Optional
+from typing import Any
 
 import networkx as nx
 import numpy as np
@@ -226,7 +226,7 @@ class DBMolecules:
         elif not isinstance(radial, bool):
             raise TypeError("The radial flag is not a bool type")
 
-        self.options = dict()
+        self.options: dict[str, Any] = dict()
         CheckDir._check_directory(directory)
         self.options["directory"] = directory
         CheckPos._check(parallel)
@@ -259,7 +259,7 @@ class DBMolecules:
         CheckCutoff._check(cutoff)
         self.options["cutoff"] = cutoff
         self.options["radial"] = bool(radial)
-        self.options["hub"] = str(hub)
+        self.options["hub"] = str(hub) if hub is not None else hub
         self.options["fast"] = bool(fast)
         self.options["links_file"] = links_file
         self.options["known_actives_file"] = known_actives_file
@@ -275,22 +275,22 @@ class DBMolecules:
             self.options["seed"] = ""
 
         # Dictionary which holds the mapping between the generated molecule IDs and molecule file names
-        self.dic_mapping = {}
-        self.inv_dic_mapping = {}
+        self.dic_mapping: dict[int, str] = {}
+        self.inv_dic_mapping: dict[str, int] = {}
 
         # Hold the MCS index map strings for each molecule pair. Indexed by a tuple of molecule IDs (lowest first)
-        self.mcs_map_store = {}
+        self.mcs_map_store: dict[tuple[int, int], str] = {}
 
         # Pre-specified links between molecules - a map of molecule index tuples to score.
         # A value < -1 means "recompute, but force the link to be included"
         # A negative value (>= -1) means "Use the absolute value as the score, but force the link to be included"
         # A positive value means "Use this value as the score, but treat the link as normal in the graph calculation"
-        self.prespecified_links = {}
+        self.prespecified_links: dict[tuple[int, int], float] = {}
 
         # List of which molecules are "known actives". Note that all pairs of known actives
         # are automatically added as prespecified links with a score of -1 (i.e force score to
         # 1 and force link to be included)
-        self.known_actives = []
+        self.known_actives: list[int] = []
 
         for mol in self._list:
             self.dic_mapping[mol.getID()] = mol.getName()
@@ -310,7 +310,7 @@ class DBMolecules:
         self.loose_mtx = SMatrix(shape=(0,))
 
         # Empty pointer to the networkx graph
-        self.Graph = nx.Graph()
+        self.Graph: nx.Graph = nx.Graph()
 
     def __iter__(self):
         """
@@ -1254,7 +1254,7 @@ def _startup_inner(
 parser = argparse.ArgumentParser(
     description="Lead Optimization Mapper 2. A program to plan alchemical relative "
     "binding affinity calculations",
-    prog=f"LOMAP v. {lomap.__version__}",
+    prog=f"LOMAP v. {lomap.__version__}",  # type: ignore[has-type]
 )
 parser.add_argument("directory", action=CheckDir, help="The mol2/sdf file directory")
 parser.add_argument(

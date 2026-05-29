@@ -16,7 +16,7 @@ import logging
 import math
 
 from rdkit import Chem, DataStructs, RDLogger
-from rdkit.Chem import AllChem, Draw, rdFMCS, rdmolops
+from rdkit.Chem import Draw, rdFMCS, rdmolops
 from rdkit.Chem.Draw.MolDrawing import DrawingOptions
 from rdkit.Geometry.rdGeometry import Point3D
 
@@ -76,6 +76,9 @@ class MCS:
     RDkit molecule objects and to score their similarity by using defined rules
 
     """
+
+    # Need to declare type to make mypy happy
+    mcs_mol: Chem.Mol
 
     def __init__(
         self,
@@ -604,11 +607,11 @@ class MCS:
         # Local pointers to the passed molecules without hydrogens
         # These variables are defined as private
         try:
-            self._moli_noh = AllChem.RemoveHs(moli)
-            self._molj_noh = AllChem.RemoveHs(molj)
+            self._moli_noh = Chem.RemoveHs(moli)
+            self._molj_noh = Chem.RemoveHs(molj)
         except Exception:
-            self._moli_noh = AllChem.RemoveHs(moli, sanitize=False)
-            self._molj_noh = AllChem.RemoveHs(molj, sanitize=False)
+            self._moli_noh = Chem.RemoveHs(moli, sanitize=False)
+            self._molj_noh = Chem.RemoveHs(molj, sanitize=False)
 
             Chem.SanitizeMol(self._moli_noh, sanitizeOps=Chem.SanitizeFlags.SANITIZE_SETAROMATICITY)
             Chem.SanitizeMol(self._molj_noh, sanitizeOps=Chem.SanitizeFlags.SANITIZE_SETAROMATICITY)
@@ -653,7 +656,10 @@ class MCS:
 
         # The found MCS pattern (smart strings) is converted to a RDKit molecule
         self.mcs_mol_smarts = __mcs.smartsString
-        self.mcs_mol = Chem.MolFromSmarts(__mcs.smartsString)
+        mcs_mol = Chem.MolFromSmarts(__mcs.smartsString)
+        if mcs_mol is None:
+            raise ValueError("Failed to convert MCS SMARTS to molecule")
+        self.mcs_mol = mcs_mol
 
         # There's a symmetry-related bug here: if there was more than one MCS
         # of the same size and score, we'll get only one at random. We then try
@@ -665,7 +671,7 @@ class MCS:
         for a in self.mcs_mol.GetAtoms():
             if a.DescribeQuery().startswith("AtomOr"):  # Matches more than one element
                 a.SetQuery(
-                    testmol.GetAtoms()[0]
+                    list(testmol.GetAtoms())[0]
                 )  # Set this atom to a copy of the "match anything" atom
 
         try:  # Try to sanitize the MCS molecule
@@ -778,8 +784,8 @@ class MCS:
         molj_c = Chem.Mol(molj)
 
         if not hydrogens:
-            moli_c = AllChem.RemoveHs(moli_c)
-            molj_c = AllChem.RemoveHs(molj_c)
+            moli_c = Chem.RemoveHs(moli_c)
+            molj_c = Chem.RemoveHs(molj_c)
 
         # MCS calculaton. In RDKit the MCS is a smart string. Ring atoms are
         # always mapped in ring atoms.
@@ -835,9 +841,9 @@ class MCS:
 
         # depict the mapping by using a .png file
         if fname:
-            AllChem.Compute2DCoords(moli_c)
-            AllChem.Compute2DCoords(molj_c)
-            AllChem.Compute2DCoords(mcs_mol)
+            Chem.rdDepictor.Compute2DCoords(moli_c)
+            Chem.rdDepictor.Compute2DCoords(molj_c)
+            Chem.rdDepictor.Compute2DCoords(mcs_mol)
 
             DrawingOptions.includeAtomNumbers = True
 
@@ -1426,8 +1432,8 @@ if "__main__" == __name__:
     for at in MC.mcs_mol.GetAtoms():
         moli_idx = int(at.GetProp("to_moli"))
         molj_idx = int(at.GetProp("to_molj"))
-        moli_a = mola.GetAtoms()[moli_idx]
-        molj_a = molb.GetAtoms()[molj_idx]
+        moli_a = list(mola.GetAtoms())[moli_idx]
+        molj_a = list(molb.GetAtoms())[molj_idx]
         print("MCS match: ", moli_idx, moli_a.GetAtomicNum(), molj_idx, molj_a.GetAtomicNum())
 
     print("hybridization change:", hybrid)

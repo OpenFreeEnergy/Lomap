@@ -67,3 +67,9 @@ lint.ignore = [
   "E501", # line-length violations (black enforces these)
   "F401", # unused imports (TODO: fix later)
 ]
+
+[tool.mypy]
+files = "src"
+ignore_missing_imports = true
+warn_unused_ignores = true
+overrides = [ { module = "lomap._due", ignore_errors = true } ]
