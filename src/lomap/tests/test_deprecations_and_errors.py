@@ -1,7 +1,9 @@
+from importlib import reload
 import numpy as np
 import pytest
 
 from lomap.graphgen import GraphGen
+from lomap import fp
 
 
 def test_pick_lead_hub_None_deprecation():
@@ -21,3 +23,9 @@ def test_generate_initial_subgraph_list_lead_error():
         _ = GraphGen.generate_initial_subgraph_list(
             fast_map=True, strict_mtx=None, ids=None, names=None, is_active=None, lead_index=None
         )
+
+
+def test_fp_deprecation():
+    msg = "The fp module and associated Figureprint class are deprecated"
+    with pytest.warns(DeprecationWarning, match=msg):
+        reload(fp)
