@@ -6,10 +6,11 @@ The MCS class wrapped to provide a gufe interface
 from collections.abc import Iterable
 
 try:
-    import gufe
-    from gufe import AtomMapper, LigandAtomMapping
+    from gufe import AtomMapper, LigandAtomMapping, SmallMoleculeComponent
 except ImportError:
-    pass
+    AtomMapper = None  # type: ignore[assignment,misc]
+    LigandAtomMapping = None  # type: ignore[assignment,misc]
+    SmallMoleculeComponent = None  # type: ignore[assignment,misc]
 
 from lomap import mcs as lomap_mcs
 from lomap.utils import requires_package
@@ -94,7 +95,7 @@ class LomapAtomMapper(AtomMapper):
 
     @due.dcite(Doi("https://doi.org/10.1007/s10822-013-9678-y"), description="LOMAP")
     def suggest_mappings(
-        self, componentA: gufe.SmallMoleculeComponent, componentB: gufe.SmallMoleculeComponent
+        self, componentA: SmallMoleculeComponent, componentB: SmallMoleculeComponent
     ) -> Iterable[LigandAtomMapping]:
         """Generate one or more mappings between two small molecules
 
