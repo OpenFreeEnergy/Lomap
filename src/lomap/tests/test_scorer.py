@@ -43,7 +43,7 @@ def smcs():
         ecr_score,
         mcsr_score,
         mncar_score,
-        tmscr_score,
+        tmcsr_score,
         atomic_number_score,
         hybridization_score,
         sulfonamides_score,
