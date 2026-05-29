@@ -47,7 +47,7 @@ def deprecated_kwargs(name_mappings: dict[str, str]) -> Callable:
     return decorator
 
 
-def requires_package(package_name: str) -> Callabe:
+def requires_package(package_name: str) -> Callable:
     """
     Decorator that raises an ImportError if a class or function
     is used and ``package_name`` is not available.
