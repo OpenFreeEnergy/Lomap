@@ -764,7 +764,7 @@ class MCS:
         molj : RDKit molecule object
             the second molecule used to perform the MCS calculation
         hydrogens : bool
-            incluse or not the hydrogens in the MCS calculation
+            include or not the hydrogens in the MCS calculation
         fname : string
             the filename used to output a png file depicting the MCS mapping
         time_out: int
@@ -787,7 +787,7 @@ class MCS:
             moli_c = Chem.RemoveHs(moli_c)
             molj_c = Chem.RemoveHs(molj_c)
 
-        # MCS calculaton. In RDKit the MCS is a smart string. Ring atoms are
+        # MCS calculation. In RDKit the MCS is a smart string. Ring atoms are
         # always mapped in ring atoms.
         mcs = rdFMCS.FindMCS(
             [moli_c, molj_c],
@@ -812,7 +812,7 @@ class MCS:
 
         try:
             Chem.SanitizeMol(mcs_mol)
-        except Exception:  # if not try to recover the atom aromaticity wich is
+        except Exception:  # if not try to recover the atom aromaticity which is
             # important for the ring counter
             sanitFail = Chem.SanitizeMol(
                 mcs_mol, sanitizeOps=Chem.SanitizeFlags.SANITIZE_SETAROMATICITY, catchErrors=True
@@ -901,7 +901,7 @@ class MCS:
         Parameters
         ----------
         ths : float
-            the minumum number of atoms to share
+            the minimum number of atoms to share
 
         Returns
         -------
@@ -909,7 +909,7 @@ class MCS:
             the rule score
         """
 
-        # This rule has been modified from the rule desribed in the Lomap paper
+        # This rule has been modified from the rule described in the Lomap paper
         # to match the LOMAP first implementation provided by schrodinger
 
         nha_mcs_mol = self.mcs_mol.GetNumHeavyAtoms()
@@ -1291,7 +1291,7 @@ class MCS:
             # a heavy to a heavy (as if we were allowed to match these, then they would be
             # in the MCS!
             #
-            # In 3D mode, ensure that maps happen tothe closest atom in 3D coordinates -
+            # In 3D mode, ensure that maps happen to the closest atom in 3D coordinates -
             # this gets mappings to prochiral hydrogens correct (SFT-15791)
 
             # Match H to H first

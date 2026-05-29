@@ -829,7 +829,7 @@ class SMatrix(np.ndarray):
     This class implements a "basic" interface for symmetric matrices
     subclassing ndarray. The class internally stores a bi-dimensional
     numpy array as a linear array A[k], however the user can still
-    access to the matrix elements by using a two indeces notation A[i,j]
+    access to the matrix elements by using a two indices notation A[i,j]
 
     """
 
