@@ -7,7 +7,19 @@ from rdkit import Chem
 
 import lomap
 from lomap import dbmol
-from lomap.gufe_bindings.scorers import ecr_score
+from lomap.gufe_bindings.scorers import (
+    ecr_score,
+    mcsr_score,
+    mncar_score,
+    tmscr_score,
+    atomic_number_score,
+    hybridization_score,
+    sulfonamides_score,
+    heterocycles_score,
+    transmuting_methyl_into_ring_score,
+    transmuting_ring_sizes_score,
+    default_lomap_score,
+)
 
 try:
     import gufe
@@ -23,6 +35,28 @@ def smcs():
     rdmols = [mol for mol in Chem.SDMolSupplier(str(fns), removeHs=False)]
     mols = [gufe.SmallMoleculeComponent.from_rdkit(mol) for mol in rdmols]
     return mols
+
+
+@pytest.mark.skipif(HAS_GUFE, reason="requires not having gufe installed")
+@pytest.mark.parametrize("method", 
+    [
+        ecr_score,
+        mcsr_score,
+        mncar_score,
+        tmscr_score,
+        atomic_number_score,
+        hybridization_score,
+        sulfonamides_score,
+        heterocycles_score,
+        transmuting_methyl_into_ring_score,
+        transmuting_ring_sizes_score,
+        default_lomap_score,
+    ]
+)
+def test_nogufe_errors(method):
+    msg = f"gufe is required to use `{method.__qualname__}`"
+    with pytest.raises(ImportError, match=msg):
+        _ = method(mapping=None)
 
 
 @pytest.mark.skipif(not HAS_GUFE, reason="requires gufe installed")
