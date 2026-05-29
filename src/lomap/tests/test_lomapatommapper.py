@@ -1,8 +1,10 @@
 import pytest
+
 from lomap import LomapAtomMapper
 
 try:
     import gufe
+
     HAS_GUFE = True
 except ImportError:
     HAS_GUFE = False

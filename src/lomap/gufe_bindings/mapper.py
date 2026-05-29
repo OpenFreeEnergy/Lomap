@@ -2,7 +2,9 @@
 The MCS class wrapped to provide a gufe interface
 
 """
+
 from __future__ import annotations
+
 from collections.abc import Iterable
 
 try:
@@ -12,8 +14,8 @@ except ImportError:
     AtomMapper = object
 
 from lomap import mcs as lomap_mcs
-from lomap.utils import requires_package
 from lomap._due import Doi, due
+from lomap.utils import requires_package
 
 
 @requires_package("gufe")

@@ -84,10 +84,7 @@ def requires_package(package_name: str) -> Callable:
         if available:
             return obj
 
-        msg = (
-            f"{package_name} is required to use `{obj.__qualname__}` "
-            "but is not installed."
-        )
+        msg = f"{package_name} is required to use `{obj.__qualname__}` but is not installed."
 
         if inspect.isclass(obj):
             original_init = obj.__init__
@@ -100,6 +97,7 @@ def requires_package(package_name: str) -> Callable:
             return obj
 
         else:
+
             @functools.wraps(obj)
             def wrapper(*args, **kwargs):
                 raise ImportError(msg)
