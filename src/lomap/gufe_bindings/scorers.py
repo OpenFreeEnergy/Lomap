@@ -103,7 +103,7 @@ def mncar_score(mapping: LigandAtomMapping, ths: int = 4) -> float:
 
 
 @requires_package("gufe")
-def tmcsr_score(self, mapping: LigandAtomMapping):
+def tmcsr_score(mapping: LigandAtomMapping):
     raise NotImplementedError
 
 

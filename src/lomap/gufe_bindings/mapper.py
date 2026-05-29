@@ -8,7 +8,8 @@ from collections.abc import Iterable
 try:
     from gufe import AtomMapper, LigandAtomMapping, SmallMoleculeComponent
 except ImportError:
-    AtomMapper = object  # Empty class type to make subclassing simpler
+    # Need to have a definition for the class to avoid subclass failure
+    AtomMapper = object
 
 from lomap import mcs as lomap_mcs
 from lomap.utils import requires_package

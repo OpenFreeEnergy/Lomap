@@ -54,7 +54,7 @@ def smcs():
     ]
 )
 def test_nogufe_errors(method):
-    msg = f"gufe is required to use `{method.__qualname__}`"
+    msg = f"gufe is required to use `{method.__qualname__}` but is not installed."
     with pytest.raises(ImportError, match=msg):
         _ = method(mapping=None)
 

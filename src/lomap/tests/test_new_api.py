@@ -37,7 +37,7 @@ def basic():
 
 @pytest.mark.skipif(HAS_GUFE, reason="requires not having gufe installed")
 def test_generate_network_nogufe_failure():
-    msg = "gufe is required to use `generate_lomap_network`"
+    msg = "gufe is required to use `generate_lomap_network` but is not installed."
     with pytest.raises(ImportError, match=msg):
         _ = lomap.generate_lomap_network(
             ligands=None,
