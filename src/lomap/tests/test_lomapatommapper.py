@@ -8,6 +8,12 @@ except ImportError:
     HAS_GUFE = False
 
 
+@pytest.mark.skipif(HAS_GUFE, reason="requires not having gufe installed")
+def test_lomap_atommaper_no_gufe_error():
+    with pytest.raises(ImportError, match="gufe is required to use"):
+        _ = LomapAtomMapper()
+
+
 @pytest.mark.skipif(not HAS_GUFE, reason="requires gufe installed")
 def test_to_dict_roundtrip():
     ref_vals = {
