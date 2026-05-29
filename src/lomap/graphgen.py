@@ -35,9 +35,9 @@ import shutil
 import subprocess
 import tempfile
 import traceback
+import warnings
 from operator import itemgetter
 from typing import Any
-import warnings
 
 import matplotlib.pyplot as plt
 import networkx as nx

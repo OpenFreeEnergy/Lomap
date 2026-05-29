@@ -123,7 +123,9 @@ class LomapAtomMapper(AtomMapper):
         # then colons and coerce to ints
         # Note: ignoring typing here since there's no way mypy can know
         # that map will return int:int outside of runtime
-        mapping_dict: dict[int, int] = dict(map(int, v.split(":")) for v in mapping_string.split(","))  # type: ignore[misc]
+        mapping_dict: dict[int, int] = dict(
+            map(int, v.split(":")) for v in mapping_string.split(",")
+        )  # type: ignore[misc]
 
         yield LigandAtomMapping(
             componentA=componentA,

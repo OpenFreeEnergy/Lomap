@@ -49,15 +49,6 @@ packages.find.where = [ "src" ]
 [tool.setuptools_scm]
 fallback_version = "0.0.0"
 
-[tool.mypy]
-files = "src"
-ignore_missing_imports = true
-warn_unused_ignores = true
-
-[[tool.mypy.overrides]]
-module = "lomap._due"
-ignore_errors = true
-
 [tool.ruff]
 target-version = "py311"
 line-length = 100
@@ -76,3 +67,9 @@ lint.ignore = [
   "E501", # line-length violations (black enforces these)
   "F401", # unused imports (TODO: fix later)
 ]
+
+[tool.mypy]
+files = "src"
+ignore_missing_imports = true
+warn_unused_ignores = true
+overrides = [ { module = "lomap._due", ignore_errors = true } ]
