@@ -72,7 +72,7 @@ from .gufe_bindings import (
 from .mcs import MCS
 
 # Issue #127
-del dbmol  # noqa: F821  # type: ignore[name-defined]
-del mcs  # noqa: F821  # type: ignore[name-defined]
+del dbmol  # type: ignore[name-defined] # noqa: F821
+del mcs  # type: ignore[name-defined] # noqa: F821
 
 from . import _due

@@ -1254,7 +1254,7 @@ def _startup_inner(
 parser = argparse.ArgumentParser(
     description="Lead Optimization Mapper 2. A program to plan alchemical relative "
     "binding affinity calculations",
-    prog=f"LOMAP v. {lomap.__version__}",
+    prog=f"LOMAP v. {lomap.__version__}",  # type: ignore[has-type]
 )
 parser.add_argument("directory", action=CheckDir, help="The mol2/sdf file directory")
 parser.add_argument(
