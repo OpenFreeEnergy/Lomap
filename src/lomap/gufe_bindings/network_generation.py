@@ -2,22 +2,27 @@ import itertools
 import logging
 from collections.abc import Callable
 
-import gufe
 import networkx as nx
 import numpy as np
-from gufe import (
-    AtomMapper,
-    LigandAtomMapping,
-    LigandNetwork,
-)
 
-from .._due import Doi, due
-from ..graphgen import GraphGen
-from ..utils import deprecated_kwargs
+try:
+    import gufe
+    from gufe import (
+        AtomMapper,
+        LigandAtomMapping,
+        LigandNetwork,
+    )
+except ImportError:
+    pass
+
+from lomap._due import Doi, due
+from lomap.graphgen import GraphGen
+from lomap.utils import deprecated_kwargs, requires_package
 
 logger = logging.getLogger(__name__)
 
 
+@requires_package("gufe")
 @deprecated_kwargs(name_mappings={"molecules": "ligands"})
 @due.dcite(Doi("https://doi.org/10.1007/s10822-013-9678-y"), description="LOMAP")
 def generate_lomap_network(

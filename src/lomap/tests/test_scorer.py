@@ -1,7 +1,6 @@
 import importlib.resources
 from functools import partial
 
-import gufe
 import pytest
 from numpy.testing import assert_equal
 from rdkit import Chem
@@ -9,6 +8,12 @@ from rdkit import Chem
 import lomap
 from lomap import dbmol
 from lomap.gufe_bindings.scorers import ecr_score
+
+try:
+    import gufe
+    HAS_GUFE = True
+except ImportError:
+    HAS_GUFE = False
 
 
 @pytest.fixture
@@ -20,6 +25,7 @@ def smcs():
     return mols
 
 
+@pytest.mark.skipif(not HAS_GUFE, reason="requires gufe installed")
 def test_unconnected_lomap_network(smcs):
     network = lomap.generate_lomap_network(
         molecules=smcs,
@@ -30,6 +36,7 @@ def test_unconnected_lomap_network(smcs):
     assert not network.is_connected()
 
 
+@pytest.mark.skipif(not HAS_GUFE, reason="requires gufe installed")
 def test_connected_lomap_network(smcs):
     # The default charge_changes_score is now 0.1, so a network of ligands
     # with different net charges should now always be connected
@@ -41,6 +48,7 @@ def test_connected_lomap_network(smcs):
     assert network.is_connected()
 
 
+@pytest.mark.skipif(not HAS_GUFE, reason="requires gufe installed")
 def test_ecr_consistency(smcs):
     lig_4 = [m for m in smcs if m.name == "lig_4"][0]
     other_mols = [m for m in smcs if m.name != "lig_4"]
@@ -62,6 +70,7 @@ def test_ecr_consistency(smcs):
     assert all([i == 0.1 for i in score_nonzero])
 
 
+@pytest.mark.skipif(not HAS_GUFE, reason="requires gufe installed")
 def test_default_and_explicit_charge_change_score_same(smcs):
     mapper = lomap.LomapAtomMapper()
     mapping = next(mapper.suggest_mappings(smcs[0], smcs[1]))

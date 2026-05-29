@@ -1,8 +1,12 @@
 import math
 from collections import defaultdict
 
-from gufe import LigandAtomMapping
 from rdkit import Chem
+
+try:
+    from gufe import LigandAtomMapping
+except ImportError:
+    pass
 
 from lomap import dbmol as _dbmol
 from lomap import mcs as lomap_mcs

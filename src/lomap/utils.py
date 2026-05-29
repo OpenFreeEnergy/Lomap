@@ -1,4 +1,6 @@
 import functools
+import importlib
+import inspect
 import warnings
 from collections.abc import Callable
 from typing import Any
@@ -41,5 +43,67 @@ def deprecated_kwargs(name_mappings: dict[str, str]) -> Callable:
             return func(*args, **kwargs)
 
         return wrapper
+
+    return decorator
+
+
+def requires_package(package_name: str) -> Callabe:
+    """
+    Decorator that raises an ImportError if a class or function
+    is used and ``package_name`` is not available.
+
+    Parameters
+    ----------
+    package_name : str
+      Name of the required package (e.g. "gufe")
+
+    Examples
+    --------
+
+    .. code-block:: python
+
+       @requires_package("gufe")
+       def my function(): ...
+
+       @requires_package("gufe")
+       class MyClass: ...
+
+    Notes
+    -----
+    For classes, this decorator effectively decorates the ``__init__``
+    method but can be used on the class constructor directly.
+    """
+    try:
+        importlib.import_module(package_name)
+        available = True
+    except ImportError:
+        available = False
+
+    def decorator(obj):
+
+        if available:
+            return obj
+
+        msg = (
+            f"{package_name} is required to use `{obj.__qualname__}` "
+            "but is not installed."
+        )
+
+        if inspect.isclass(obj):
+            original_init = obj.__init__
+
+            @functools.wraps(original_init)
+            def _init(self, *args, **kwargs):
+                raise ImportError(msg)
+
+            obj.__init__ = _init
+            return obj
+
+        else:
+            @functools.wraps(obj)
+            def wrapper(*args, **kwargs):
+                raise ImportError(msg)
+
+            return wrapper
 
     return decorator
