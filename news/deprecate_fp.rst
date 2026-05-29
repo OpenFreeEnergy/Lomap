@@ -9,7 +9,7 @@
 **Deprecated:**
 
 * The `fp` module and associated `FigurePrint` class are deprecated
-  and will be removed in the next release of Lomap (Issue #133).
+  and will be removed in the next release of Lomap (Issue #129).
 
 **Removed:**
 
