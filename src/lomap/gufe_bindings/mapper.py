@@ -34,7 +34,7 @@ class LomapAtomMapper(AtomMapper):
         threed: bool = True,
         max3d: float = 1.0,
         element_change: bool = True,
-        seed: str = "",
+        seed: str | None = None,
         shift: bool = False,
     ):
         """Wraps the MCS atom mapper from Lomap.
@@ -44,21 +44,20 @@ class LomapAtomMapper(AtomMapper):
 
         Parameters
         ----------
-        time : int, optional
-          timeout of MCS algorithm, passed to RDKit
-          default 20
-        threed : bool, optional
-          if true, positional info is used to choose between symmetrically
-          equivalent mappings and prune the mapping, default True
-        max3d : float, optional
-          maximum discrepancy in Angstroms between atoms before mapping is not
-          allowed, default 1.0
-        element_change: bool, optional
-          whether to allow element changes in the mappings, default True
-        seed: str, optional
+        time : int, default 20
+          Timeout of MCS algorithm, passed to RDKit.
+        threed : bool, default True
+          If true, positional info is used to choose between symmetrically
+          equivalent mappings and prune the mapping.
+        max3d : float, default 1.0
+          Maximum discrepancy in Angstroms between atoms before mapping is not
+          allowed.
+        element_change: bool, default True
+          Whether to allow element changes in the mappings.
+        seed: str, default ""
           SMARTS string to use as seed for MCS searches.  When used across an
-          entire set of ligands, this can speed up calculations considerably
-        shift: bool, optional
+          entire set of ligands, this can speed up calculations considerably.
+        shift: bool, default False
           when determining 3D overlap, if to translate the two molecules MCS to minimise
           RMSD to boost potential alignment.
         """
