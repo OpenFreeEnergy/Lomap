@@ -41,7 +41,7 @@ from rdkit.Chem import rdFMCS
 
 import lomap
 
-from . import graphgen, mcs
+from lomap import graphgen, mcs
 
 __all__ = ["DBMolecules", "SMatrix", "Molecule"]
 
