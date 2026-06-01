@@ -33,6 +33,7 @@ import argparse
 import logging
 import math
 import sys
+import warnings
 
 from rdkit import Chem, DataStructs, RDLogger
 from rdkit.Chem import AllChem, Draw, rdFMCS
@@ -45,6 +46,15 @@ from rdkit.Chem.Fingerprints import FingerprintMols
 
 
 __all__ = ["FIGUREPRINT"]  # noqa: F822
+
+
+warnings.warn(
+    (
+        "The fp module and associated Figureprint class are deprecated "
+        "and will be removed in the next release of Lomap"
+    ),
+    DeprecationWarning,
+)
 
 
 class Figureprint:
