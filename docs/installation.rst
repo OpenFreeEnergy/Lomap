@@ -29,16 +29,16 @@ Then install ``lomap`` locally with:
 Optional Dependencies
 ---------------------
 
-``lomap2`` has optional software dependencies which can be installed to extend
+``lomap`` has optional software dependencies which can be installed to extend
 the package's capabilities:
 
 
 gufe
 ~~~~
 
-The ``lomap2`` package has optional bindings for the `gufe <https://gufe.openfree.energy/en/latest/>`_
+The ``lomap`` package has optional bindings for the `gufe <https://gufe.openfree.energy/en/latest/>`_
 package. These bindings allow the atom mapping, network planning and edge
-scoring functionality in ``lomap2`` to be used seemlessly with other components
+scoring functionality in ``lomap`` to be used seemlessly with other components
 of the `Open Free Energy ecosystem <https://openfree.energy/projects>`_.
 
 This package can be installed via conda:
