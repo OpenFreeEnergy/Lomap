@@ -68,7 +68,12 @@ def mcsr_score(mapping: LigandAtomMapping, beta: float = 0.1) -> float:
         mcsr = exp( - beta * (n1 + n2 - 2 * n_common))
 
     Where n1 and n2 are the number of heavy atoms in each molecule, and
-    n_common the number of heavy atoms in the MCS.
+    n_common the number of heavy atoms in the MCS. This makes the term
+    ``n1 + n2 - 2 * n_commons`` the total number of atoms inserted or
+    deleted in the transformation.
+
+    The exponential is used to ensure the score ranges between 0 and 1,
+    and to strongly favor small structural changes.
 
     Parameters
     ----------
