@@ -31,8 +31,8 @@ import math
 import multiprocessing
 import os
 import pickle
-from typing import Any
 import warnings
+from typing import Any
 
 import networkx as nx
 import numpy as np
