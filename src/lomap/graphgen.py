@@ -12,7 +12,7 @@ discovery efforts. However, applications of these techniques in discovery
 projects have been relatively few, partly because of the difficulty of planning
 and setting up calculations. The Lead Optimization Mapper (LOMAP) is an
 automated algorithm to plan efficient relative free energy calculations between
-potential ligands within a substantial of compounds.
+potential ligands within a substantial set of compounds.
 
 """
 
@@ -24,7 +24,7 @@ potential ligands within a substantial of compounds.
 #
 # This part of the code has been originally made by Jonathan Redmann,
 # and Christopher Summa at Summa Lab, Dept. of Computer Science,
-# University of New Orleans and it has just been adapded to the new Lomap code
+# University of New Orleans and it has just been adapted to the new Lomap code
 #
 # *****************************************************************************
 
@@ -377,7 +377,7 @@ class GraphGen:
 
         subgraphScoresLists : list of lists
             each list contains a tuple with the graph node indexes and their
-            similatiry as weigth
+            similarity as weight
 
         """
 
@@ -434,16 +434,16 @@ class GraphGen:
     @staticmethod
     def generate_working_subgraphs_list(subgraph_list):
         """
-        After the deletition of the edges that have a weigth less than the
-        selected threshould the subgraph maybe disconnected and a new master
-        list of connected subgraphs is genereted
+        After the deletion of the edges that have a weight less than the
+        selected threshold the subgraph maybe disconnected and a new master
+        list of connected subgraphs is generated
 
         Returns
         -------
 
         workingSubgraphsList : list of lists
             each list contains a tuple with the graph node indexes and their
-            similatiry as weigth
+            similarity as weight
 
         """
         workingSubgraphsList = []
@@ -477,10 +477,10 @@ class GraphGen:
                 subgraph, self.maxDistFromActive
             )
 
-            if len(subgraph.edges()) > 2:  # Graphs must have at least 3 edges to be minimzed
+            if len(subgraph.edges()) > 2:  # Graphs must have at least 3 edges to be minimized
                 for edge in weightsList:
                     if self.lead_index is not None:
-                        # Here the radial option is appplied, will check if the remove_edge is connect to
+                        # Here the radial option is applied, will check if the remove_edge is connect to
                         # the hub(lead) compound, if the edge is connected to the lead compound,
                         # then add it back into the graph.
                         if self.lead_index not in [edge[0], edge[1]]:
@@ -555,7 +555,7 @@ class GraphGen:
         subgraph : NetworkX subgraph obj
              the subgraph to check for the constraints
         numComp : int
-            the number of connected componets
+            the number of connected components
         require_cycle_covering : bool
             if to enforce cycle covering
 
@@ -748,7 +748,7 @@ class GraphGen:
         -------
         finalGraph : NetworkX graph obj
             the final graph produced merging all the subgraphs. The produced
-            graph may have disconneted parts
+            graph may have disconnected parts
 
         """
 
@@ -1176,7 +1176,7 @@ class GraphGen:
 
             return max_dist
 
-        # Determine the screen resolution by using dxpyinfo and removing massive qt dependency
+        # Determine the screen resolution by using xdpyinfo and removing massive qt dependency
         command = "xdpyinfo | grep dimensions"
         p = subprocess.run(command, stdout=subprocess.PIPE, shell=True, executable="/bin/bash")
         width = int(p.stdout.split()[1].split(b"x")[0])
@@ -1300,7 +1300,7 @@ class GraphGen:
                 except Exception:
                     img_mol = None
                     logging.exception(
-                        "This mol cannot be draw using the RDKit Draw function, need to check for more details..."
+                        "This mol cannot be drawn using the RDKit Draw function, need to check for more details..."
                     )
 
                 xx, yy = trans(pos[each_node])
