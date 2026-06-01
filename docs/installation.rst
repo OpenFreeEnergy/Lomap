@@ -36,7 +36,7 @@ the package's capabilities:
 gufe
 ~~~~
 
-The ``lomap2`` package has optional bindings for the `gufe <https://gufe.openfree.energy/en/latest/`_
+The ``lomap2`` package has optional bindings for the `gufe <https://gufe.openfree.energy/en/latest/>`_
 package. These bindings allow the atom mapping, network planning and edge
 scoring functionality in ``lomap2`` to be used seemlessly with other components
 of the `Open Free Energy ecosystem <https://openfree.energy/projects>`_.
