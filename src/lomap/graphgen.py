@@ -1094,7 +1094,7 @@ class GraphGen:
             if self.lead_index is not None:
                 morph_txt.write(morph_data)
 
-    @requires_package('pygraphviz')
+    @requires_package("pygraphviz")
     def _write_output_dot_graph(self, filename: str):
         """
         Helper method to write the graph to GraphViz dot format.

@@ -65,4 +65,3 @@ or using `pip`:
 
 .. parsed-literal::
     python -m pip install pygraphviz
-
