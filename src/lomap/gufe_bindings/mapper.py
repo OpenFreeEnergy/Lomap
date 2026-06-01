@@ -34,7 +34,7 @@ class LomapAtomMapper(AtomMapper):
         threed: bool = True,
         max3d: float = 1.0,
         element_change: bool = True,
-        seed: str | None = None,
+        seed: str = "",
         shift: bool = False,
     ):
         """Wraps the MCS atom mapper from Lomap.
