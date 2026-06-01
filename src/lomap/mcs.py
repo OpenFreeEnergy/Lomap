@@ -8,7 +8,7 @@ discovery efforts. However, applications of these techniques in discovery
 projects have been relatively few, partly because of the difficulty of planning
 and setting up calculations. The Lead Optimization Mapper (LOMAP) is an
 automated algorithm to plan efficient relative free energy calculations between
-potential ligands within a substantial of compounds.
+potential ligands within a substantial set of compounds.
 
 """
 
@@ -503,7 +503,7 @@ class MCS:
             # between the mcs molecule and the heavy atom only moli and molj
             # molecules.
             # `to_moli_all` and `to_molj_all`: this gives the atom
-            # correspondence between the mc molecules and the input (pre
+            # correspondence between the MCS molecules and the input (pre
             # removal of hydrogens) molecules.
             # `to_mcs` this gives the correspondence between the full
             # (including hydrogens) molecule and the mcs molecule
@@ -553,7 +553,7 @@ class MCS:
             """
 
             This function is used to attach to each molecule atom a ring counter
-            rc. This parameter is used to asses if a ring has been broken or not
+            rc. This parameter is used to assess if a ring has been broken or not
             during the MCS mapping
 
             Parameters
@@ -729,7 +729,7 @@ class MCS:
     def _heavy_to_all_pos_remap(heavy_mol, all_mol, tolerance=0.5):
         """
         Convenience method to map a molecule without hydrogens
-        (`heavy_mol`) back to it's pre RemoveHs version (`all_mol`).
+        (`heavy_mol`) back to its pre RemoveHs version (`all_mol`).
 
         Parameters
         ----------
@@ -764,7 +764,7 @@ class MCS:
         molj : RDKit molecule object
             the second molecule used to perform the MCS calculation
         hydrogens : bool
-            incluse or not the hydrogens in the MCS calculation
+            include or not the hydrogens in the MCS calculation
         fname : string
             the filename used to output a png file depicting the MCS mapping
         time_out: int
@@ -774,7 +774,7 @@ class MCS:
         -------
         map_moli_molj: python list of tuple [...(i,j)...]
             the list of tuple which contains the atom mapping indexes between
-            the two molecules. The indexes (i,j) are resplectively related to
+            the two molecules. The indexes (i,j) are respectively related to
             the first (moli) and the second (molj) passed molecules
 
         """
@@ -787,7 +787,7 @@ class MCS:
             moli_c = Chem.RemoveHs(moli_c)
             molj_c = Chem.RemoveHs(molj_c)
 
-        # MCS calculaton. In RDKit the MCS is a smart string. Ring atoms are
+        # MCS calculation. In RDKit the MCS is a smart string. Ring atoms are
         # always mapped in ring atoms.
         mcs = rdFMCS.FindMCS(
             [moli_c, molj_c],
@@ -812,7 +812,7 @@ class MCS:
 
         try:
             Chem.SanitizeMol(mcs_mol)
-        except Exception:  # if not try to recover the atom aromaticity wich is
+        except Exception:  # if not try to recover the atom aromaticity which is
             # important for the ring counter
             sanitFail = Chem.SanitizeMol(
                 mcs_mol, sanitizeOps=Chem.SanitizeFlags.SANITIZE_SETAROMATICITY, catchErrors=True
@@ -894,14 +894,14 @@ class MCS:
 
     def mncar(self, ths=4):
         """
-        This rule cut the similarity score between two molecules if they do
+        This rule cuts the similarity score between two molecules if they do
         not share the selected number of atoms
 
 
         Parameters
         ----------
         ths : float
-            the minumum number of atoms to share
+            the minimum number of atoms to share
 
         Returns
         -------
@@ -909,7 +909,7 @@ class MCS:
             the rule score
         """
 
-        # This rule has been modified from the rule desribed in the Lomap paper
+        # This rule has been modified from the rule described in the Lomap paper
         # to match the LOMAP first implementation provided by schrodinger
 
         nha_mcs_mol = self.mcs_mol.GetNumHeavyAtoms()
@@ -923,14 +923,14 @@ class MCS:
     # TMCRS rule (Trim rule)
     # MDM Note: we don't use this as we don't have the same limitation on partial ring
     # deletion as Schrodinger
-    # NB removed the chirality check - the MCS is now trimmed to remive chirality
+    # NB removed the chirality check - the MCS is now trimmed to remove chirality
     def tmcsr(self, strict_flag=True):
         return 1.0
 
     def atomic_number_rule(self):
         """
         This rule checks how many elements have been changed in the MCS
-        and a score based on the fraction of MCS matches that are the same atomic number.
+        and returns a score based on the fraction of MCS matches that are the same atomic number.
         When used with beta=0.1 and multiplied by mcsr, this is equivalent to counting
         mismatched atoms at only half weight.
 
@@ -1260,7 +1260,7 @@ class MCS:
                     j = b.GetEndAtomIdx()
                     if j == i:
                         j = b.GetBeginAtomIdx()
-                    # OK, so j is the atom at the other end of the bond atom atom i. Is it in the MCS?
+                    # OK, so j is the atom at the other end of the bond from atom i. Is it in the MCS?
                     inMCS = mol.GetAtomWithIdx(j).HasProp("to_mcs")
                     if not inMCS:
                         attached.append(j)
@@ -1291,7 +1291,7 @@ class MCS:
             # a heavy to a heavy (as if we were allowed to match these, then they would be
             # in the MCS!
             #
-            # In 3D mode, ensure that maps happen tothe closest atom in 3D coordinates -
+            # In 3D mode, ensure that maps happen to the closest atom in 3D coordinates -
             # this gets mappings to prochiral hydrogens correct (SFT-15791)
 
             # Match H to H first

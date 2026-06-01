@@ -67,7 +67,7 @@ class Figureprint:
 
     def __init__(self, moli, molj):
         """
-        Inizialization function
+        Initialization function
 
         Parameters
         ----------

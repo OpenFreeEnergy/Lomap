@@ -30,7 +30,7 @@ Using
 
       db_mol = lomap.DBMolecules("lomap/test/basic", output=True)
 
-      # Calculate the similarity matrix betweeen the database
+      # Calculate the similarity matrix between the database
       # molecules. Two molecules are generated related to the
       # scrict rule and loose rule
 

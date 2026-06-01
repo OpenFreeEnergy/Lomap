@@ -9,10 +9,10 @@ rare, partly because of the difficulty of planning and setting up
 calculations. The lead optimization mapper (LOMAP) was
 introduced as an automated algorithm to plan efficient relative
 free energy calculations between potential ligands within
-a substantial of compounds. The original LOMAP code was mainly
+a substantial set of compounds. The original LOMAP code was mainly
 based on commercial APIs such as OpenEye and Schrodinger. The aim
-of this project is to develop a new version of LOMAP based on free
-avalaible APIs such as RDKit offering the scientific community a
+of this project is to develop a new version of LOMAP based on freely
+available APIs such as RDKit offering the scientific community a
 free tool to plan in advance binding free energy calculations.
 
 ## Prerequisites
@@ -71,18 +71,18 @@ import lomap
 db_mol = lomap.DBMolecules("python string pointing to a directory with mol2 files", output=True)
 
 #More graphing options:
-# Use the complete radial graph option. The ligand with the most structural similarity to all of the others will be picked as the 'lead compounds' and used as the central compound.
+# Use the complete radial graph option. The ligand with the most structural similarity to all of the others will be picked as the 'lead compound' and used as the central compound.
 db_mol = lomap.DBMolecules("python string pointing to a directory with mol2 files", output=True, radial=True)
 
 # Use a radial graph with a manually specified hub compound
 db_mol = lomap.DBMolecules("python string pointing to a directory with mol2 files", output=True, radial=True, hub=filename.mol2)
 
 # Use a radial graph with a manually specified hub compound and fast graphing option
-#the fast graphing option create the initial graph by connecting the hub ligand with the possible surrounding ligands and add surrounding edges based on the similarities accoss surrounding nodes
+#the fast graphing option creates the initial graph by connecting the hub ligand with the possible surrounding ligands and adds surrounding edges based on the similarities across surrounding nodes
 db_mol = lomap.DBMolecules("python string pointing to a directory with mol2 files", output=True, radial=True, hub=filename.mol2, fast=True)
 
-# Calculate the similarity matrix betweeen the database molecules. Two molecules are generated
-# related to the scrict rule and loose rule
+# Calculate the similarity matrix between the database molecules. Two molecules are generated
+# related to the strict rule and loose rule
 
 strict, loose = db_mol.build_matrices()
 
@@ -100,7 +100,7 @@ MC = lomap.MCS.getMapping(db_mol[0].getMolecule(), db_mol[1].getMolecule(), hydr
 # Alchemical transformation are usually performed between molecules with
 # the same charges. However, it is possible to allow this transformation
 # manually setting the electrostatic score for the whole set of molecules
-# producing a connected graph. The electrostatic scrore must be in the
+# producing a connected graph. The electrostatic score must be in the
 # range [0,1]
 
 
