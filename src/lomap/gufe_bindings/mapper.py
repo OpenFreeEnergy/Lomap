@@ -52,12 +52,12 @@ class LomapAtomMapper(AtomMapper):
         max3d : float, default 1.0
           Maximum discrepancy in Angstroms between atoms before mapping is not
           allowed.
-        element_change: bool, default True
+        element_change : bool, default True
           Whether to allow element changes in the mappings.
-        seed: str, default ""
+        seed : str, default ""
           SMARTS string to use as seed for MCS searches.  When used across an
           entire set of ligands, this can speed up calculations considerably.
-        shift: bool, default False
+        shift : bool, default False
           when determining 3D overlap, if to translate the two molecules MCS to minimise
           RMSD to boost potential alignment.
         """
@@ -101,12 +101,13 @@ class LomapAtomMapper(AtomMapper):
 
         Parameters
         ----------
-        componentA, componentB: gufe.SmallMoleculeComponent
+        componentA, componentB : gufe.SmallMoleculeComponent
+          The SmallMoleculeComponents to suggest mappings between.
 
         Returns
         -------
         mapping : Iterable[LigandAtomMapping]
-          potential mappings
+          Potential mappings between ``componentA`` and ``componentB``.
         """
         try:
             mcs = lomap_mcs.MCS(
