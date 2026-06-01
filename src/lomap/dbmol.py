@@ -40,7 +40,6 @@ from rdkit import Chem, DataStructs
 from rdkit.Chem import rdFMCS
 
 import lomap
-
 from lomap import graphgen, mcs
 
 __all__ = ["DBMolecules", "SMatrix", "Molecule"]
