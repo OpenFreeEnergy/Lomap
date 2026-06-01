@@ -42,9 +42,9 @@ urls = { Homepage = "https://github.com/OpenFreeEnergy/Lomap" }
 scripts.lomap = "lomap.dbmol:startup"
 
 [tool.setuptools]
-zip-safe = false
-include-package-data = true
 packages.find.where = [ "src" ]
+include-package-data = true
+zip-safe = false
 
 [tool.setuptools_scm]
 fallback_version = "0.0.0"

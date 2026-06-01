@@ -23,12 +23,12 @@ repos:
       exclude: '\.(graphml|gpickle|pickle)$'
 
 - repo: https://github.com/tox-dev/pyproject-fmt
-  rev: "v2.21.1"
+  rev: "v2.23.0"
   hooks:
     - id: pyproject-fmt
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.15.12
+  rev: v0.15.15
   hooks:
     # Run the linter.
     - id: ruff
