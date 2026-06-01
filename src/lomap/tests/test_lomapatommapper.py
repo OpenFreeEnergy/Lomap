@@ -1,6 +1,23 @@
+import pytest
+
 from lomap import LomapAtomMapper
 
+try:
+    import gufe
 
+    HAS_GUFE = True
+except ImportError:
+    HAS_GUFE = False
+
+
+@pytest.mark.skipif(HAS_GUFE, reason="requires not having gufe installed")
+def test_lomap_atommaper_no_gufe_error():
+    msg = "gufe is required to use `LomapAtomMapper` but is not installed."
+    with pytest.raises(ImportError, match=msg):
+        _ = LomapAtomMapper()
+
+
+@pytest.mark.skipif(not HAS_GUFE, reason="requires gufe installed")
 def test_to_dict_roundtrip():
     ref_vals = {
         "time": 19,
@@ -26,6 +43,7 @@ def test_to_dict_roundtrip():
     assert m2.shift == ref_vals["shift"]
 
 
+@pytest.mark.skipif(not HAS_GUFE, reason="requires gufe installed")
 def test_repr():
     m = LomapAtomMapper()
 
