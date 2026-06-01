@@ -63,15 +63,24 @@ def generate_lomap_network(
       When 'actives' is given, constrains the resulting map to be within this this
       number of edges (e.g. distance) from an active molecule.
     require_cycle_covering : bool, default True
-      Aim to add cycles for each subgraph in the network
-    radial : bool
-      construct a radial/starmap network.  Note that this the map will not necessarily be a true radial map; edges
-      will still obey the distance_cutoff and if 'require_cycle_covering' is true, this radial map will still
-      feature cycles, default False
-    fast : bool
-      hmmm...
-    hub : SmallMoleculeComponent, optional
-      if radial, force this ligand to be the centre/hub of the radial graph
+      If ``True``, attemping to make it so that every ligand has
+      redundant paths to its neighbours, giving the network robustness against
+      individual perturbation failures. This is achieved by rejecting edge
+      removals that would leave a node outside a cycle or create a new bridge
+      (an edge whose removal disconnects the graph). If ``False``, this constraint is
+      relaxed and the resulting network may have no cycles.
+    radial : bool, default False
+      construct a radial/starmap network.  Note that this the map will not necessarily
+      be a true radial map; edges will still obey the ``distance_cutoff` and if
+      ``require_cycle_covering`` is ``True``, this radial map will still feature cycles.
+    fast : bool, default False
+      When both ``fast`` and ``radial`` are ``True``, switch the initial
+      graph construction to only consider hub-spoke edges (every ligand
+      connected to the hub/lead) rather than all pairwise edges. This
+      makes network construction faster, at the potential cost of a
+      less optimal network.
+    hub : SmallMoleculeComponent | None, default None
+      If radial is ``True``, force this ligand to be the centre/hub of the radial graph.
     """
     if not mappers:
         raise ValueError("At least one Mapper must be provided")
