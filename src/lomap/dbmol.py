@@ -32,6 +32,7 @@ import multiprocessing
 import os
 import pickle
 from typing import Any
+import warnings
 
 import networkx as nx
 import numpy as np
@@ -1151,6 +1152,13 @@ class CheckEcrscore(argparse.Action):
 
 
 def startup():
+    # Emit user-facing warning that the CLI is deprecated and will be removed
+    warnings.warn(
+        "The dbmol CLI is deprecated and will be removed in the next major release. "
+        "Please let us know if you keeping this CLI entry point is important to you, "
+        "see https://github.com/OpenFreeEnergy/Lomap/issues/138 for more details.",
+        category=DeprecationWarning,
+    )
     # This is the CLI entrypoint
     # Options and arguments passed by the user
     ops = parser.parse_args()
