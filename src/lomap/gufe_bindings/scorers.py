@@ -32,8 +32,8 @@ DEFAULT_ANS_DIFFICULTY = {
 def ecr_score(mapping: LigandAtomMapping, charge_changes_score) -> float:
     """Equal charge rule (ECR) score.
 
-    Returns 1.0 if both molecules have the same formal charge (via the
-    underlying ECR calculation), otherwise returns ``charge_changes_score``.
+    Returns 1.0 if both molecules have the same formal charge,
+    otherwise returns ``charge_changes_score``.
 
     Parameters
     ----------
