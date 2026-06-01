@@ -63,7 +63,9 @@ def ecr_score(mapping: LigandAtomMapping, charge_changes_score) -> float:
 def mcsr_score(mapping: LigandAtomMapping, beta: float = 0.1) -> float:
     """Maximum common substructure rule (MCSR) score.
 
-    This rule is defined as::
+    This rule is defined as:
+
+    .. code-block:: none
 
         mcsr = exp( - beta * (n1 + n2 - 2 * n_common))
 
@@ -161,10 +163,12 @@ def atomic_number_score(mapping: LigandAtomMapping, beta=0.1, difficulty=None) -
     """A score on the elemental changes happening in the mapping
 
     For each transmuted atom, a mismatch score is summed, according to the
-    difficulty scores (see difficult parameter).  The final score is then
+    difficulty scores (see difficult parameter). The final score is then
     given as:
 
-    score = exp(-beta * mismatch)
+    .. code-block:: none
+
+        score = exp(-beta * mismatch)
 
     Parameters
     ----------
@@ -332,9 +336,9 @@ def sulfonamides_score(mapping: LigandAtomMapping, beta=0.4) -> float:
 def heterocycles_score(mapping: LigandAtomMapping, beta=0.4) -> float:
     """Heterocycle score — penalises mappings that form a heterocycle from a hydrogen.
 
-    Pyrrole, furan, and thiophene are permitted. Returns ``math.exp(-beta)``
-    if a disallowed heterocycle appears in the unmapped remainder of either
-    molecule, otherwise 1.0.
+    Returns ``math.exp(-beta)`` if we are. This means that if this rule is used we penalise
+    this transition. Testing has shown that growing a pyridine or other heterocycle
+    is unlikely to work (better to grow phenyl then mutate)
 
     Parameters
     ----------
@@ -389,16 +393,20 @@ def transmuting_methyl_into_ring_score(mapping: LigandAtomMapping, beta=0.1, pen
 
     This score would for example penalise R-CH3 to R-Ph where R is the same
     mapped atom and both CH3 and Ph are unmapped. Does not penalise R-H to R-Ph.
-    If any atoms trigger the rule returns a score of::
+    If any atoms trigger the rule returns a score of:
 
-      exp(-1 * beta * penalty)
+    .. code-block:: none
+
+        exp(-1 * beta * penalty)
 
     Parameters
     ----------
     mapping : LigandAtomMapping
       Mapping between the two ligands in the edge.
     beta : float
+      Score scaling factor.
     penalty : float
+      Score scaling factor.
 
     Returns
     -------
@@ -452,7 +460,7 @@ def transmuting_ring_sizes_score(mapping: LigandAtomMapping) -> float:
 
     Checks first-degree neighbours of mapped atoms; if a non-mapped neighbour
     is in a ring in both molecules but the ring sizes differ, the mapping is
-    penalised.
+    penalised an a value of 0.1 is returned. Otherwise 1.0 is returned.
 
     Parameters
     ----------
