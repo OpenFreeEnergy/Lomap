@@ -1,6 +1,6 @@
 .. _gufe bindings api:
 
-Lomap gufe bindings API guide
+Lomap `gufe <https://gufe.openfree.energy/en/latest/>`_ bindings API guide
 =============================
 
 
