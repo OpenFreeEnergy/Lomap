@@ -12,7 +12,7 @@ discovery efforts. However, applications of these techniques in discovery
 projects have been relatively few, partly because of the difficulty of planning
 and setting up calculations. The Lead Optimization Mapper (LOMAP) is an
 automated algorithm to plan efficient relative free energy calculations between
-potential ligands within a substantial of compounds.
+potential ligands within a substantial set of compounds.
 
 """
 
@@ -64,15 +64,15 @@ def ecr(mol_i, mol_j):
     Parameters
     ----------
     mol_i : Rdkit molecule object
-       the first molecules used to calculate the ECR rule
+       the first molecule used to calculate the ECR rule
     mol_j : Rdkit molecule object
-       the second molecules used to calculate the ECR rule
+       the second molecule used to calculate the ECR rule
 
     Returns
     -------
     scr_ecr: float
         the calculated similarity score (1 if mol_i and mol_j have the
-        same total charges, 0  otherwire)
+        same total charges, 0 otherwise)
 
     """
     total_charge_mol_i = formal_charge(mol_i)
@@ -151,7 +151,7 @@ class DBMolecules:
         shift: bool = True,
     ):
         """
-        Initialization of  the Molecule Database Class
+        Initialization of the Molecule Database Class
 
         Parameters
         ----------
@@ -572,12 +572,12 @@ class DBMolecules:
         # Looping over all the elements of the selected matrix chunk
         for k in range(a, b + 1):
             # The linear index k is converted into the row and column indexes of
-            # an hypothetical bidimensional symmetric matrix
+            # a hypothetical bidimensional symmetric matrix
             i = int(n - 2 - math.floor(math.sqrt(-8 * k + 4 * n * (n - 1) - 7) / 2.0 - 0.5))
             j = int(k + i + 1 - n * (n - 1) / 2 + (n - i) * ((n - i) - 1) / 2)
             # print 'k = %d , i = %d , j = %d' % (k,i,j)
 
-            # The Rdkit molecules moli and molj are extracted form the molecule database
+            # The Rdkit molecules moli and molj are extracted from the molecule database
             moli = self[i].getMolecule()
             molj = self[j].getMolecule()
 
@@ -784,7 +784,7 @@ class DBMolecules:
             hub=self.options["hub"],
         )
 
-        # Writing the results is files
+        # Writing the results to files
         if self.options["output"]:
             try:
                 Gr.write_graph(
@@ -795,7 +795,7 @@ class DBMolecules:
             except Exception as e:
                 logging.error(str(e))
 
-        # Handle to the the NetworkX generated graph
+        # Handle to the NetworkX generated graph
         self.Graph = Gr.resultGraph
 
         # print self.Graph.nodes(data=True)
@@ -1290,7 +1290,7 @@ mcs_group.add_argument(
     default=0.0,
     action=CheckEcrscore,
     type=float,
-    help="If different from 0.0 the value is use to set the electrostatic score between two molecules with different charges",
+    help="If different from 0.0 the value is used to set the electrostatic score between two molecules with different charges",
 )
 mcs_group.add_argument(
     "-3",
@@ -1336,13 +1336,13 @@ out_group.add_argument(
     "--output-no-images",
     default=False,
     action="store_true",
-    help="Disable the generation on the image files, removed the dependency on Pillow",
+    help="Disable the generation of the image files, removed the dependency on Pillow",
 )
 out_group.add_argument(
     "--output-no-graph",
     default=False,
     action="store_true",
-    help="Disable the generation on the graph (.dot) file, removed the dependency on pygraphviz",
+    help="Disable the generation of the graph (.dot) file, removed the dependency on pygraphviz",
 )
 
 parser.add_argument(
@@ -1425,7 +1425,7 @@ graph_group.add_argument(
     "--common-core",
     type=bool,
     default=True,
-    help="Calculate a common core among all input molecules before calculations pairwise",
+    help="Calculate a common core among all input molecules before pairwise calculations",
 )
 
 # ------------------------------------------------------------------

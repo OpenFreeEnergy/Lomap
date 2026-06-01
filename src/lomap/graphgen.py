@@ -12,7 +12,7 @@ discovery efforts. However, applications of these techniques in discovery
 projects have been relatively few, partly because of the difficulty of planning
 and setting up calculations. The Lead Optimization Mapper (LOMAP) is an
 automated algorithm to plan efficient relative free energy calculations between
-potential ligands within a substantial of compounds.
+potential ligands within a substantial set of compounds.
 
 """
 
@@ -24,7 +24,7 @@ potential ligands within a substantial of compounds.
 #
 # This part of the code has been originally made by Jonathan Redmann,
 # and Christopher Summa at Summa Lab, Dept. of Computer Science,
-# University of New Orleans and it has just been adapded to the new Lomap code
+# University of New Orleans and it has just been adapted to the new Lomap code
 #
 # *****************************************************************************
 
@@ -377,7 +377,7 @@ class GraphGen:
 
         subgraphScoresLists : list of lists
             each list contains a tuple with the graph node indexes and their
-            similatiry as weight
+            similarity as weight
 
         """
 
@@ -434,8 +434,8 @@ class GraphGen:
     @staticmethod
     def generate_working_subgraphs_list(subgraph_list):
         """
-        After the deletition of the edges that have a weight less than the
-        selected threshould the subgraph maybe disconnected and a new master
+        After the deletion of the edges that have a weight less than the
+        selected threshold the subgraph maybe disconnected and a new master
         list of connected subgraphs is generated
 
         Returns
@@ -443,7 +443,7 @@ class GraphGen:
 
         workingSubgraphsList : list of lists
             each list contains a tuple with the graph node indexes and their
-            similatiry as weight
+            similarity as weight
 
         """
         workingSubgraphsList = []
@@ -1176,7 +1176,7 @@ class GraphGen:
 
             return max_dist
 
-        # Determine the screen resolution by using dxpyinfo and removing massive qt dependency
+        # Determine the screen resolution by using xdpyinfo and removing massive qt dependency
         command = "xdpyinfo | grep dimensions"
         p = subprocess.run(command, stdout=subprocess.PIPE, shell=True, executable="/bin/bash")
         width = int(p.stdout.split()[1].split(b"x")[0])
@@ -1300,7 +1300,7 @@ class GraphGen:
                 except Exception:
                     img_mol = None
                     logging.exception(
-                        "This mol cannot be draw using the RDKit Draw function, need to check for more details..."
+                        "This mol cannot be drawn using the RDKit Draw function, need to check for more details..."
                     )
 
                 xx, yy = trans(pos[each_node])
