@@ -45,6 +45,8 @@ import numpy as np
 from rdkit import Chem
 from rdkit.Chem import AllChem, Draw
 
+from lomap.utils import requires_package
+
 __all__ = ["GraphGen"]
 
 
@@ -1126,6 +1128,7 @@ class GraphGen:
 
         logging.info(30 * "-")
 
+    @requires_package("pygraphviz")
     def draw(self, dbase, max_images: int = 2000, max_nodes: int = 100, edge_labels: bool = True):
         """This function plots the NetworkX graph by using Matplotlib
 
