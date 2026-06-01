@@ -1,5 +1,11 @@
-Lomap API guide
-===============
+.. _gufe bindings api:
+
+Lomap `gufe <https://gufe.openfree.energy/en/latest/>`_ bindings API guide
+==========================================================================
+
+This section describes the optional `gufe <https://gufe.openfree.energy/en/latest/>`_
+bindings API. These allow Lomap to be seemlessly used with other components
+of the `Open Free Energy ecosystem <https://openfree.energy/projects>`_.
 
 
 .. autoclass:: lomap.LomapAtomMapper
