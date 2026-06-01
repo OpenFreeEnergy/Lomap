@@ -101,8 +101,11 @@ logger = logging.getLogger(__name__)
 class GraphGen:
     """This class is used to set and generate the graph used to plan binding free energy calculation
 
-    Attributes
-    ----------
+    Notes
+    -----
+    To use the :class:`GraphGen` :meth:`draw`, :meth:`generate_depictions`,
+    and :meth:`_write_output_dot_graph` methods, you will need to
+    install the optional dependency ``pygraphviz``.
     """
 
     def __init__(
@@ -915,6 +918,7 @@ class GraphGen:
         else:
             return False
 
+    @requires_package("pygraphviz")
     def generate_depictions(
         self, dbase, max_images: int = 2000, max_mol_size: float = 50.0, edge_labels: bool = True
     ):
@@ -1090,6 +1094,18 @@ class GraphGen:
             if self.lead_index is not None:
                 morph_txt.write(morph_data)
 
+    @requires_package('pygraphviz')
+    def _write_output_dot_graph(self, filename: str):
+        """
+        Helper method to write the graph to GraphViz dot format.
+
+        Parameters
+        ----------
+        filename : str
+          Name of the file to write the dot file to.
+        """
+        nx.nx_agraph.write_dot(self.resultGraph, filename)
+
     def write_graph(self, dbase, output_no_images, output_no_graph):
         """
 
@@ -1111,7 +1127,7 @@ class GraphGen:
             if not output_no_images:
                 self.generate_depictions(dbase)
             if not output_no_graph:
-                nx.nx_agraph.write_dot(self.resultGraph, dbase.options["name"] + ".dot")
+                self._write_output_dot_graph(dbase.options["name"] + ".dot")
         except Exception as e:
             traceback.print_exc()
             raise OSError(f"Problems during the file generation: {str(e)}")
@@ -1140,6 +1156,10 @@ class GraphGen:
         max_nodes: int
           Max number of displayed nodes in the graph
         edge_labels: bool
+
+        Notes
+        -----
+        This requires the optional dependency ``pygraphviz``.
         """
 
         logging.info("\nDrawing....")

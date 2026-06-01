@@ -1,5 +1,7 @@
-Lomap API guide
-===============
+.. _gufe bindings api:
+
+Lomap gufe bindings API guide
+=============================
 
 
 .. autoclass:: lomap.LomapAtomMapper
