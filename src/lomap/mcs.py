@@ -570,7 +570,7 @@ class MCS:
 
             rings = rginfo.AtomRings()
 
-            rings_set = set([idx for ring in rings for idx in ring])
+            rings_set = {idx for ring in rings for idx in ring}
 
             for idx in rings_set:
                 for ring in rings:

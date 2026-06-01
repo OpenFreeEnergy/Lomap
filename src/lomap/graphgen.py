@@ -69,7 +69,7 @@ def find_non_cyclic_nodes(subgraph: nx.Graph) -> set[int]:
 
     cycleNodes = [node for cycle in cycleList for node in cycle]
 
-    missingNodesSet = set([node for node in subgraph.nodes() if node not in cycleNodes])
+    missingNodesSet = {node for node in subgraph.nodes() if node not in cycleNodes}
 
     return missingNodesSet
 
@@ -1231,7 +1231,7 @@ class GraphGen:
             (u, v) for (u, v, d) in self.resultGraph.edges(data=True) if not d["strict_flag"]
         ]
 
-        node_labels = dict([(u, d["ID"]) for u, d in self.resultGraph.nodes(data=True)])
+        node_labels = {u: d["ID"] for u, d in self.resultGraph.nodes(data=True)}
 
         # Draw nodes
         nx.draw_networkx_nodes(self.resultGraph, pos, node_size=500, node_color="r")
@@ -1240,20 +1240,16 @@ class GraphGen:
 
         if edge_labels:
             # fmt: off
-            edge_weight_strict = dict(
-                [
-                    ((u, v), d["similarity"])
+            edge_weight_strict = {
+                    (u, v): d["similarity"]
                     for u, v, d in self.resultGraph.edges(data=True)
                     if d["strict_flag"]
-                ]
-            )
-            edge_weight_loose = dict(
-                [
-                    ((u, v), d["similarity"])
+            }
+            edge_weight_loose = {
+                    (u, v): d["similarity"]
                     for u, v, d in self.resultGraph.edges(data=True)
                     if not d["strict_flag"]
-                ]
-            )
+            }
             # fmt: on
 
             for key in edge_weight_strict:
