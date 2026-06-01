@@ -1,27 +1,34 @@
+from __future__ import annotations
+
 import itertools
 import logging
 from collections.abc import Callable
 
-import gufe
 import networkx as nx
 import numpy as np
-from gufe import (
-    AtomMapper,
-    LigandAtomMapping,
-    LigandNetwork,
-)
 
-from .._due import Doi, due
-from ..graphgen import GraphGen
-from ..utils import deprecated_kwargs
+try:
+    from gufe import (
+        AtomMapper,
+        LigandAtomMapping,
+        LigandNetwork,
+        SmallMoleculeComponent,
+    )
+except ImportError:
+    pass
+
+from lomap._due import Doi, due
+from lomap.graphgen import GraphGen
+from lomap.utils import deprecated_kwargs, requires_package
 
 logger = logging.getLogger(__name__)
 
 
+@requires_package("gufe")
 @deprecated_kwargs(name_mappings={"molecules": "ligands"})
 @due.dcite(Doi("https://doi.org/10.1007/s10822-013-9678-y"), description="LOMAP")
 def generate_lomap_network(
-    ligands: list[gufe.SmallMoleculeComponent],
+    ligands: list[SmallMoleculeComponent],
     mappers: AtomMapper | list[AtomMapper],
     scorer: Callable,
     distance_cutoff: float = 0.4,
@@ -31,7 +38,7 @@ def generate_lomap_network(
     require_cycle_covering: bool = True,
     radial: bool = False,
     fast: bool = False,
-    hub: gufe.SmallMoleculeComponent | None = None,
+    hub: SmallMoleculeComponent | None = None,
 ) -> LigandNetwork:
     """Generate a LigandNetwork according to Lomap's network creation rules
 
@@ -66,7 +73,7 @@ def generate_lomap_network(
     """
     if not mappers:
         raise ValueError("At least one Mapper must be provided")
-    if isinstance(mappers, gufe.AtomMapper):
+    if isinstance(mappers, AtomMapper):
         mappers = [mappers]
     if actives is None:
         actives = [False] * len(ligands)
