@@ -67,7 +67,7 @@ def mcsr_score(mapping: LigandAtomMapping, beta: float = 0.1) -> float:
 
     .. math::
 
-        mcsr = exp( - beta * (n1 + n2 - 2 * n_common))
+        mcsr = exp( - beta * (n1 + n2 - 2 * n\_common))
 
     Where n1 and n2 are the number of heavy atoms in each molecule, and
     n_common is the number of heavy atoms in the MCS. This makes the term
