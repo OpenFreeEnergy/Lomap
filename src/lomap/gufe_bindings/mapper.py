@@ -58,7 +58,7 @@ class LomapAtomMapper(AtomMapper):
           SMARTS string to use as seed for MCS searches.  When used across an
           entire set of ligands, this can speed up calculations considerably.
         shift : bool, default False
-          If ``True``, translate the two molecules' MCS to minimise the
+          If ``True``, translate the two molecules' MCS to minimize the
           RMSD. This can boost potential alignment when determining 3D overlap.
         """
         self.time = time

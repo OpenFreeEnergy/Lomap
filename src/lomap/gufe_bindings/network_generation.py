@@ -50,7 +50,7 @@ def generate_lomap_network(
        One or more Mapper functions to use to propose edge mappings.
     scorer : Callable
        Scoring function for edges. Should be a function which takes an
-       AtomMapping and returns a value from 1.0 (best) to 0.0 (worst).
+       AtomMapping and returns a value from 0.0 (worst) to 1.0 (best), inclusive.
        These values are used as the "distance" between two molecules,
        and compared against the 'distance_cutoff' parameter.
     distance_cutoff : float, default 0.4
@@ -63,14 +63,14 @@ def generate_lomap_network(
       When 'actives' is given, constrains the resulting map to be within this
       number of edges (e.g. distance) from an active molecule.
     require_cycle_covering : bool, default True
-      If ``True``, attempting to make it so that every ligand has
-      redundant paths to its neighbours, giving the network robustness against
+      If ``True``, attempt to ensure that every ligand has
+      redundant paths to its neighbors, giving the network robustness against
       individual perturbation failures. This is achieved by rejecting edge
       removals that would leave a node outside a cycle or create a new bridge
       (an edge whose removal disconnects the graph). If ``False``, this constraint is
       relaxed and the resulting network may have no cycles.
     radial : bool, default False
-      construct a radial/starmap network.  Note that the map will not necessarily
+      construct a radial (star) network. Note that the map will not necessarily
       be a true radial map; edges will still obey the ``distance_cutoff`` and if
       ``require_cycle_covering`` is ``True``, this radial map will still feature cycles.
     fast : bool, default False
@@ -80,7 +80,7 @@ def generate_lomap_network(
       makes network construction faster, at the potential cost of a
       less optimal network.
     hub : SmallMoleculeComponent | None, default None
-      If radial is ``True``, force this ligand to be the centre/hub of the radial graph.
+      If radial is ``True``, force this ligand to be the center/hub of the radial graph.
     """
     if not mappers:
         raise ValueError("At least one Mapper must be provided")

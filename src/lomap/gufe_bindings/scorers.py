@@ -227,7 +227,7 @@ def atomic_number_score(mapping: LigandAtomMapping, beta=0.1, difficulty=None) -
 
 @requires_package("gufe")
 def hybridization_score(mapping: LigandAtomMapping, beta=0.15) -> float:
-    """Hybridization score — penalises atom hybridization mismatches in the mapping.
+    """Hybridization score — penalizes atom hybridization mismatches in the mapping.
 
     For each mapped heavy atom pair with differing hybridization states,
     a mismatch is counted. N sp3/sp2 interchanges are permitted. The final
@@ -284,7 +284,7 @@ def hybridization_score(mapping: LigandAtomMapping, beta=0.15) -> float:
 
 @requires_package("gufe")
 def sulfonamides_score(mapping: LigandAtomMapping, beta=0.4) -> float:
-    """Sulfonamide score — penalises mappings that mutate a sulfonamide group in or out.
+    """Sulfonamide score — penalizes mappings that mutate a sulfonamide group in or out.
 
     Testing has shown that growing a sulfonamide from scratch performs very
     badly. Returns ``math.exp(-beta)`` if a sulfonamide group appears in the
@@ -334,7 +334,7 @@ def sulfonamides_score(mapping: LigandAtomMapping, beta=0.4) -> float:
 
 @requires_package("gufe")
 def heterocycles_score(mapping: LigandAtomMapping, beta=0.4) -> float:
-    """Heterocycle score — penalises mappings that form a heterocycle from a hydrogen.
+    """Heterocycle score — penalizes mappings that form a heterocycle from a hydrogen.
 
     Returns ``math.exp(-beta)`` if a heterocycle is formed from a hydrogen.
     Testing has shown that growing a pyridine or other heterocycle
@@ -456,11 +456,11 @@ def transmuting_methyl_into_ring_score(mapping: LigandAtomMapping, beta=0.1, pen
 
 @requires_package("gufe")
 def transmuting_ring_sizes_score(mapping: LigandAtomMapping) -> float:
-    """Ring size score — penalises mappings that alter a ring size.
+    """Ring size score — penalizes mappings that alter a ring size.
 
-    Checks first-degree neighbours of mapped atoms; if a non-mapped neighbour
-    is in a ring in both molecules but the ring sizes differ, the mapping is
-    penalised; a value of 0.1 is returned. Otherwise 1.0 is returned.
+    Checks first-degree neighbors of mapped atoms; if a non-mapped neighbor
+    is in a ring in both molecules but the ring sizes differ, a value of 0.1
+    is returned, otherwise 1.0 is returned.
 
     Parameters
     ----------
