@@ -409,9 +409,9 @@ def transmuting_methyl_into_ring_score(
     ----------
     mapping : LigandAtomMapping
       Mapping between the two ligands in the edge.
-    beta : float
+    beta : float, default 0.1
       Score scaling factor.
-    penalty : float
+    penalty : float, default 6.0
       Score scaling factor.
 
     Returns
@@ -541,7 +541,7 @@ def default_lomap_score(mapping: LigandAtomMapping, charge_changes_score: float 
     ----------
     mapping : LigandAtomMapping
       Mapping between the two ligands in the edge.
-    charge_changes_score: float
+    charge_changes_score: float, default 0.1
       The electrostatic score to be assigned for mappings of ligands that
       differ in net charge.
       Default: 0.1 (e.g. allowing net charge changes)
