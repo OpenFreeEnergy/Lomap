@@ -65,12 +65,12 @@ def mcsr_score(mapping: LigandAtomMapping, beta: float = 0.1) -> float:
 
     This rule is defined as:
 
-    .. code-block:: none
+    .. math::
 
         mcsr = exp( - beta * (n1 + n2 - 2 * n_common))
 
     Where n1 and n2 are the number of heavy atoms in each molecule, and
-    n_common the number of heavy atoms in the MCS. This makes the term
+    n_common is the number of heavy atoms in the MCS. This makes the term
     ``n1 + n2 - 2 * n_common`` the total number of atoms inserted or
     deleted in the transformation.
 
@@ -81,8 +81,8 @@ def mcsr_score(mapping: LigandAtomMapping, beta: float = 0.1) -> float:
     ----------
     mapping : LigandAtomMapping
       Mapping between the two ligands in the edge.
-    beta : float, optional
-      Scaling factor, default 0.1.
+    beta : float, default 0.1
+      Scaling factor.
 
     Returns
     -------
@@ -121,7 +121,7 @@ def mncar_score(mapping: LigandAtomMapping, ths: int = 4) -> float:
     ----------
     mapping : LigandAtomMapping
       Mapping between the two ligands in the edge.
-    ths : int, optional
+    ths : int, default 4
       Minimum number of common heavy atoms required, default 4.
 
     Returns
@@ -159,14 +159,18 @@ def tmcsr_score(mapping: LigandAtomMapping):
 
 
 @requires_package("gufe")
-def atomic_number_score(mapping: LigandAtomMapping, beta=0.1, difficulty=None) -> float:
+def atomic_number_score(
+    mapping: LigandAtomMapping,
+    beta=0.1,
+    difficulty: dict[int, dict[int, float]] | None = None
+) -> float:
     """A score on the elemental changes happening in the mapping
 
     For each transmuted atom, a mismatch score is summed, according to the
     difficulty scores (see difficult parameter). The final score is then
     given as:
 
-    .. code-block:: none
+    .. math::
 
         score = exp(-beta * mismatch)
 
@@ -174,10 +178,10 @@ def atomic_number_score(mapping: LigandAtomMapping, beta=0.1, difficulty=None) -
     ----------
     mapping : LigandAtomMapping
       Mapping between the two ligands in the edge.
-    beta : float, optional
-      scaling factor for this rule, default 0.1
-    difficulty : dict, optional
-      a dict of dicts, mapping atomic number of one species, to another,
+    beta : float, default 0.1
+      Scaling factor for this rule, default 0.1
+    difficulty : dict[int, dict[int, float] | None, default None
+      A dict of dicts, mapping atomic number of one species, to another,
       to a mismatch in the identity of these elements.  1.0 indicates two
       elements are considered interchangeable, 0.0 indicates two elements
       are incompatible, a default of 0.5 is used.
@@ -233,7 +237,7 @@ def hybridization_score(mapping: LigandAtomMapping, beta=0.15) -> float:
     a mismatch is counted. N sp3/sp2 interchanges are permitted. The final
     score is:
 
-    .. code-block:: none
+    .. math::
 
         score = exp(-beta * nmismatch)
 
@@ -241,8 +245,8 @@ def hybridization_score(mapping: LigandAtomMapping, beta=0.15) -> float:
     ----------
     mapping : LigandAtomMapping
       Mapping between the two ligands in the edge.
-    beta : float, optional
-      Scaling factor, default 0.15.
+    beta : float, default 0.15
+      Scaling factor.
 
     Returns
     -------
@@ -294,9 +298,9 @@ def sulfonamides_score(mapping: LigandAtomMapping, beta=0.4) -> float:
     ----------
     mapping : LigandAtomMapping
       Mapping between the two ligands in the edge.
-    beta : float, optional
+    beta : float, default 0.4
       Scaling factor controlling the size of the penalty. Smaller values give
-      larger penalties, default 0.4.
+      larger penalties.
 
     Returns
     -------
@@ -344,8 +348,8 @@ def heterocycles_score(mapping: LigandAtomMapping, beta=0.4) -> float:
     ----------
     mapping : LigandAtomMapping
       Mapping between the two ligands in the edge.
-    beta : float, optional
-      Scaling factor controlling the size of the penalty, default 0.4.
+    beta : float, default 0.4
+      Scaling factor controlling the size of the penalty.
 
     Returns
     -------
@@ -395,7 +399,7 @@ def transmuting_methyl_into_ring_score(mapping: LigandAtomMapping, beta=0.1, pen
     mapped atom and both CH3 and Ph are unmapped. Does not penalise R-H to R-Ph.
     If any atoms trigger the rule returns a score of:
 
-    .. code-block:: none
+    .. math::
 
         exp(-1 * beta * penalty)
 

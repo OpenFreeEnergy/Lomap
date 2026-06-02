@@ -45,7 +45,7 @@ class LomapAtomMapper(AtomMapper):
         Parameters
         ----------
         time : int, default 20
-          Timeout of MCS algorithm, passed to RDKit.
+          Timeout of MCS algorithm in seconds, passed to RDKit.
         threed : bool, default True
           If ``True``, positional info is used to choose between symmetrically
           equivalent mappings and prune the mapping.

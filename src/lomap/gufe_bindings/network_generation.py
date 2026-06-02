@@ -52,7 +52,7 @@ def generate_lomap_network(
        Scoring function for edges. Should be a function which takes an
        AtomMapping and returns a value from 0.0 (worst) to 1.0 (best), inclusive.
        These values are used as the "distance" between two molecules,
-       and compared against the 'distance_cutoff' parameter.
+       and compared against the ``distance_cutoff`` parameter.
     distance_cutoff : float, default 0.4
        Edges with a score < 1 - distance_cutoff will be rejected.
     max_path_length : int, default 6
@@ -70,7 +70,7 @@ def generate_lomap_network(
       (an edge whose removal disconnects the graph). If ``False``, this constraint is
       relaxed and the resulting network may have no cycles.
     radial : bool, default False
-      construct a radial (star) network. Note that the map will not necessarily
+      Construct a radial (star) network. Note that the map will not necessarily
       be a true radial map; edges will still obey the ``distance_cutoff`` and if
       ``require_cycle_covering`` is ``True``, this radial map will still feature cycles.
     fast : bool, default False
