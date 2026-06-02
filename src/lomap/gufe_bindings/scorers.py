@@ -61,7 +61,7 @@ def ecr_score(mapping: LigandAtomMapping, charge_changes_score: float) -> float:
 
 @requires_package("gufe")
 def mcsr_score(mapping: LigandAtomMapping, beta: float = 0.1) -> float:
-    """Maximum common substructure rule (MCSR) score.
+    r"""Maximum common substructure rule (MCSR) score.
 
     This rule is defined as:
 
