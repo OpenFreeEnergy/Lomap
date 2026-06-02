@@ -122,7 +122,7 @@ def test_mncar_score_ths_equality(smcs):
     mapping = gufe.LigandAtomMapping(
         componentA=smcs[0],
         componentB=smcs[1],
-        componentA_to_componentB={0:0, 1:1, 2:2, 3:3, 4:4},
+        componentA_to_componentB={0: 0, 1: 1, 2: 2, 3: 3, 4: 4},
     )
 
     result_default = mncar_score(mapping)
