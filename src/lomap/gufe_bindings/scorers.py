@@ -29,7 +29,7 @@ DEFAULT_ANS_DIFFICULTY = {
 
 
 @requires_package("gufe")
-def ecr_score(mapping: LigandAtomMapping, charge_changes_score) -> float:
+def ecr_score(mapping: LigandAtomMapping, charge_changes_score: float) -> float:
     """Equal charge rule (ECR) score.
 
     Returns 1.0 if both molecules have the same formal charge,
@@ -161,7 +161,7 @@ def tmcsr_score(mapping: LigandAtomMapping):
 @requires_package("gufe")
 def atomic_number_score(
     mapping: LigandAtomMapping,
-    beta=0.1,
+    beta: float = 0.1,
     difficulty: dict[int, dict[int, float]] | None = None
 ) -> float:
     """A score on the elemental changes happening in the mapping
@@ -230,7 +230,7 @@ def atomic_number_score(
 
 
 @requires_package("gufe")
-def hybridization_score(mapping: LigandAtomMapping, beta=0.15) -> float:
+def hybridization_score(mapping: LigandAtomMapping, beta: float = 0.15) -> float:
     """Hybridization score — penalizes atom hybridization mismatches in the mapping.
 
     For each mapped heavy atom pair with differing hybridization states,
@@ -287,7 +287,7 @@ def hybridization_score(mapping: LigandAtomMapping, beta=0.15) -> float:
 
 
 @requires_package("gufe")
-def sulfonamides_score(mapping: LigandAtomMapping, beta=0.4) -> float:
+def sulfonamides_score(mapping: LigandAtomMapping, beta: float = 0.4) -> float:
     """Sulfonamide score — penalizes mappings that mutate a sulfonamide group in or out.
 
     Testing has shown that growing a sulfonamide from scratch performs very
@@ -337,7 +337,7 @@ def sulfonamides_score(mapping: LigandAtomMapping, beta=0.4) -> float:
 
 
 @requires_package("gufe")
-def heterocycles_score(mapping: LigandAtomMapping, beta=0.4) -> float:
+def heterocycles_score(mapping: LigandAtomMapping, beta: float = 0.4) -> float:
     """Heterocycle score — penalizes mappings that form a heterocycle from a hydrogen.
 
     Returns ``math.exp(-beta)`` if a heterocycle is formed from a hydrogen.
@@ -392,7 +392,7 @@ def heterocycles_score(mapping: LigandAtomMapping, beta=0.4) -> float:
 
 
 @requires_package("gufe")
-def transmuting_methyl_into_ring_score(mapping: LigandAtomMapping, beta=0.1, penalty=6.0) -> float:
+def transmuting_methyl_into_ring_score(mapping: LigandAtomMapping, beta: float = 0.1, penalty: float = 6.0) -> float:
     """Penalises having a non-mapped ring atoms become a non-ring
 
     This score would for example penalise R-CH3 to R-Ph where R is the same
@@ -527,7 +527,7 @@ def transmuting_ring_sizes_score(mapping: LigandAtomMapping) -> float:
 
 
 @requires_package("gufe")
-def default_lomap_score(mapping: LigandAtomMapping, charge_changes_score=0.1) -> float:
+def default_lomap_score(mapping: LigandAtomMapping, charge_changes_score: float = 0.1) -> float:
     """The default score function from Lomap2
 
 
