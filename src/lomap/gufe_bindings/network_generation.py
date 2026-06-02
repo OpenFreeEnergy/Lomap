@@ -48,7 +48,7 @@ def generate_lomap_network(
        Molecules to include in the network.
     mappers : list[AtomMapper] or AtomMapper
        One or more Mapper functions to use to propose edge mappings.
-    scorer: Callable
+    scorer : Callable
        Scoring function for edges. Should be a function which takes an
        AtomMapping and returns a value from 1.0 (best) to 0.0 (worst).
        These values are used as the "distance" between two molecules,
@@ -59,19 +59,19 @@ def generate_lomap_network(
       Maximum edge distance between any two molecules in the resulting network.
     actives : list[bool] | None, default None
       If defined, a tag for each ligand which defines if it is an active molecule.
-    max_dist_from_active: int, default 2
-      When 'actives' is given, constrains the resulting map to be within this this
+    max_dist_from_active : int, default 2
+      When 'actives' is given, constrains the resulting map to be within this
       number of edges (e.g. distance) from an active molecule.
     require_cycle_covering : bool, default True
-      If ``True``, attemping to make it so that every ligand has
+      If ``True``, attempting to make it so that every ligand has
       redundant paths to its neighbours, giving the network robustness against
       individual perturbation failures. This is achieved by rejecting edge
       removals that would leave a node outside a cycle or create a new bridge
       (an edge whose removal disconnects the graph). If ``False``, this constraint is
       relaxed and the resulting network may have no cycles.
     radial : bool, default False
-      construct a radial/starmap network.  Note that this the map will not necessarily
-      be a true radial map; edges will still obey the ``distance_cutoff` and if
+      construct a radial/starmap network.  Note that the map will not necessarily
+      be a true radial map; edges will still obey the ``distance_cutoff`` and if
       ``require_cycle_covering`` is ``True``, this radial map will still feature cycles.
     fast : bool, default False
       When both ``fast`` and ``radial`` are ``True``, switch the initial

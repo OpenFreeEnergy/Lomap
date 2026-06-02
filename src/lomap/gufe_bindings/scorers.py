@@ -71,7 +71,7 @@ def mcsr_score(mapping: LigandAtomMapping, beta: float = 0.1) -> float:
 
     Where n1 and n2 are the number of heavy atoms in each molecule, and
     n_common the number of heavy atoms in the MCS. This makes the term
-    ``n1 + n2 - 2 * n_commons`` the total number of atoms inserted or
+    ``n1 + n2 - 2 * n_common`` the total number of atoms inserted or
     deleted in the transformation.
 
     The exponential is used to ensure the score ranges between 0 and 1,
@@ -336,9 +336,9 @@ def sulfonamides_score(mapping: LigandAtomMapping, beta=0.4) -> float:
 def heterocycles_score(mapping: LigandAtomMapping, beta=0.4) -> float:
     """Heterocycle score — penalises mappings that form a heterocycle from a hydrogen.
 
-    Returns ``math.exp(-beta)`` if we are. This means that if this rule is used we penalise
-    this transition. Testing has shown that growing a pyridine or other heterocycle
-    is unlikely to work (better to grow phenyl then mutate)
+    Returns ``math.exp(-beta)`` if a heterocycle is formed from a hydrogen.
+    Testing has shown that growing a pyridine or other heterocycle
+    is unlikely to work (better to grow phenyl than mutate).
 
     Parameters
     ----------
@@ -460,7 +460,7 @@ def transmuting_ring_sizes_score(mapping: LigandAtomMapping) -> float:
 
     Checks first-degree neighbours of mapped atoms; if a non-mapped neighbour
     is in a ring in both molecules but the ring sizes differ, the mapping is
-    penalised an a value of 0.1 is returned. Otherwise 1.0 is returned.
+    penalised; a value of 0.1 is returned. Otherwise 1.0 is returned.
 
     Parameters
     ----------
@@ -535,7 +535,6 @@ def default_lomap_score(mapping: LigandAtomMapping, charge_changes_score=0.1) ->
     ----------
     mapping : LigandAtomMapping
       Mapping between the two ligands in the edge.
-      The atom mapping to score.
     charge_changes_score: float
       The electrostatic score to be assigned for mappings of ligands that
       differ in net charge.
