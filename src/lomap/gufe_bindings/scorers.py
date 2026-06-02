@@ -29,7 +29,24 @@ DEFAULT_ANS_DIFFICULTY = {
 
 
 @requires_package("gufe")
-def ecr_score(mapping: LigandAtomMapping, charge_changes_score) -> float:
+def ecr_score(mapping: LigandAtomMapping, charge_changes_score: float) -> float:
+    """Equal charge rule (ECR) score.
+
+    Returns 1.0 if both molecules have the same formal charge,
+    otherwise returns ``charge_changes_score``.
+
+    Parameters
+    ----------
+    mapping : LigandAtomMapping
+      Mapping between the two ligands in the edge.
+    charge_changes_score : float
+      Score assigned when the two molecules differ in net formal charge.
+
+    Returns
+    -------
+    score : float
+      Value in the range [0, 1.0].
+    """
     molA = mapping.componentA.to_rdkit()
     molB = mapping.componentB.to_rdkit()
 
@@ -44,16 +61,33 @@ def ecr_score(mapping: LigandAtomMapping, charge_changes_score) -> float:
 
 @requires_package("gufe")
 def mcsr_score(mapping: LigandAtomMapping, beta: float = 0.1) -> float:
-    """Maximum command substructure rule
+    r"""Maximum common substructure rule (MCSR) score.
 
-    This rule is defined as::
+    This rule is defined as:
 
-        mcsr = exp( - beta * (n1 + n2 - 2 * n_common))
+    .. math::
 
-    Where n1 and n2 are the number of atoms in each molecule, and n_common
-    the number of atoms in the MCS.
+        mcsr = exp( - beta * (n1 + n2 - 2 * n\_common))
 
-    Giving a value in the range [0, 1.0], with 1.0 being complete agreement
+    Where n1 and n2 are the number of heavy atoms in each molecule, and
+    n_common is the number of heavy atoms in the MCS. This makes the term
+    ``n1 + n2 - 2 * n_common`` the total number of atoms inserted or
+    deleted in the transformation.
+
+    The exponential is used to ensure the score ranges between 0 and 1,
+    and to strongly favor small structural changes.
+
+    Parameters
+    ----------
+    mapping : LigandAtomMapping
+      Mapping between the two ligands in the edge.
+    beta : float, default 0.1
+      Scaling factor.
+
+    Returns
+    -------
+    score : float
+      Value in the range [0, 1.0], with 1.0 indicating complete overlap.
     """
     molA = mapping.componentA.to_rdkit()
     molB = mapping.componentB.to_rdkit()
@@ -77,12 +111,23 @@ def mcsr_score(mapping: LigandAtomMapping, beta: float = 0.1) -> float:
 
 @requires_package("gufe")
 def mncar_score(mapping: LigandAtomMapping, ths: int = 4) -> float:
-    """Minimum number of common atoms rule
+    """Minimum number of common atoms rule (MNCAR) score.
+
+    The two molecules must share at least ``ths`` heavy atoms to be regarded
+    as similar. Returns 1.0 if this condition is met, or if either molecule
+    is small (fewer than ``ths + 3`` heavy atoms), otherwise returns 0.0.
 
     Parameters
     ----------
-    ths : int
-      the minimum number of atoms to share
+    mapping : LigandAtomMapping
+      Mapping between the two ligands in the edge.
+    ths : int, default 4
+      Minimum number of common heavy atoms required, default 4.
+
+    Returns
+    -------
+    score : float
+      1.0 if the constraint is satisfied, 0.0 otherwise.
     """
     molA = mapping.componentA.to_rdkit()
     molB = mapping.componentB.to_rdkit()
@@ -105,26 +150,38 @@ def mncar_score(mapping: LigandAtomMapping, ths: int = 4) -> float:
 
 @requires_package("gufe")
 def tmcsr_score(mapping: LigandAtomMapping):
+    """Trimmed maximum common substructure rule (TMCSR) score.
+
+    .. warning::
+       Not yet implemented.
+    """
     raise NotImplementedError
 
 
 @requires_package("gufe")
-def atomic_number_score(mapping: LigandAtomMapping, beta=0.1, difficulty=None) -> float:
+def atomic_number_score(
+    mapping: LigandAtomMapping,
+    beta: float = 0.1,
+    difficulty: dict[int, dict[int, float]] | None = None,
+) -> float:
     """A score on the elemental changes happening in the mapping
 
     For each transmuted atom, a mismatch score is summed, according to the
-    difficulty scores (see difficult parameter).  The final score is then
+    difficulty scores (see difficult parameter). The final score is then
     given as:
 
-    score = exp(-beta * mismatch)
+    .. math::
+
+        score = exp(-beta * mismatch)
 
     Parameters
     ----------
     mapping : LigandAtomMapping
-    beta : float, optional
-      scaling factor for this rule, default 0.1
-    difficulty : dict, optional
-      a dict of dicts, mapping atomic number of one species, to another,
+      Mapping between the two ligands in the edge.
+    beta : float, default 0.1
+      Scaling factor for this rule, default 0.1
+    difficulty : dict[int, dict[int, float] | None, default None
+      A dict of dicts, mapping atomic number of one species, to another,
       to a mismatch in the identity of these elements.  1.0 indicates two
       elements are considered interchangeable, 0.0 indicates two elements
       are incompatible, a default of 0.5 is used.
@@ -142,7 +199,7 @@ def atomic_number_score(mapping: LigandAtomMapping, beta=0.1, difficulty=None) -
     if difficulty is None:
         difficulty = DEFAULT_ANS_DIFFICULTY
 
-    nmismatch = 0
+    nmismatch: float = 0.0
     for i, j in molA_to_molB.items():
         atom_i = molA.GetAtomWithIdx(i)
         atom_j = molB.GetAtomWithIdx(j)
@@ -167,28 +224,35 @@ def atomic_number_score(mapping: LigandAtomMapping, beta=0.1, difficulty=None) -
         if diff == -1:
             diff = 0.5
 
-        nmismatch += 1 - diff
+        nmismatch += 1.0 - diff
 
     return math.exp(-beta * nmismatch)
 
 
 @requires_package("gufe")
-def hybridization_score(mapping: LigandAtomMapping, beta=0.15) -> float:
-    """
+def hybridization_score(mapping: LigandAtomMapping, beta: float = 0.15) -> float:
+    """Hybridization score — penalizes atom hybridization mismatches in the mapping.
 
-    Score calculated as:
+    For each mapped heavy atom pair with differing hybridization states,
+    a mismatch is counted. N sp3/sp2 interchanges are permitted. The final
+    score is:
 
-    math.exp(-beta * nmismatch)
+    .. math::
+
+        score = exp(-beta * nmismatch)
 
     Parameters
     ----------
     mapping : LigandAtomMapping
-    beta : float, optional
-      default 0.15
+      Mapping between the two ligands in the edge.
+    beta : float, default 0.15
+      Scaling factor.
 
     Returns
     -------
     score : float
+      Value in the range [0, 1.0], with 1.0 indicating no hybridization
+      mismatches.
     """
     mol1 = mapping.componentA.to_rdkit()
     mol2 = mapping.componentB.to_rdkit()
@@ -223,18 +287,25 @@ def hybridization_score(mapping: LigandAtomMapping, beta=0.15) -> float:
 
 
 @requires_package("gufe")
-def sulfonamides_score(mapping: LigandAtomMapping, beta=0.4) -> float:
-    """Checks if a sulfonamide appears and disallow this.
+def sulfonamides_score(mapping: LigandAtomMapping, beta: float = 0.4) -> float:
+    """Sulfonamide score — penalizes mappings that mutate a sulfonamide group in or out.
 
-    Returns ``math.exp(- beta)`` if a sulfonamide group is mutated in or out,
-    otherwise 1.0. Testing has shown that growing a sulfonamide from scratch
-    performs very badly.
+    Testing has shown that growing a sulfonamide from scratch performs very
+    badly. Returns ``math.exp(-beta)`` if a sulfonamide group appears in the
+    unmapped remainder of either molecule, otherwise 1.0.
 
     Parameters
-    ==========
-    beta
-        A positive float describing how much to penalise a growing sulfonamide.
-        Smaller values indicate exponentially larger penalties.
+    ----------
+    mapping : LigandAtomMapping
+      Mapping between the two ligands in the edge.
+    beta : float, default 0.4
+      Scaling factor controlling the size of the penalty. Smaller values give
+      larger penalties.
+
+    Returns
+    -------
+    score : float
+      ``math.exp(-beta)`` if a sulfonamide is mutated in or out, else 1.0.
     """
     molA = mapping.componentA.to_rdkit()
     molB = mapping.componentB.to_rdkit()
@@ -266,12 +337,24 @@ def sulfonamides_score(mapping: LigandAtomMapping, beta=0.4) -> float:
 
 
 @requires_package("gufe")
-def heterocycles_score(mapping: LigandAtomMapping, beta=0.4) -> float:
-    """Checks if a heterocycle is formed from a -H
+def heterocycles_score(mapping: LigandAtomMapping, beta: float = 0.4) -> float:
+    """Heterocycle score — penalizes mappings that form a heterocycle from a hydrogen.
 
-    Pyrrole, furan and thiophene *are* pemitted however
+    Returns ``math.exp(-beta)`` if a heterocycle is formed from a hydrogen.
+    Testing has shown that growing a pyridine or other heterocycle
+    is unlikely to work (better to grow phenyl than mutate).
 
-    Returns ``math.exp(-beta)`` if this happens, else 1.0
+    Parameters
+    ----------
+    mapping : LigandAtomMapping
+      Mapping between the two ligands in the edge.
+    beta : float, default 0.4
+      Scaling factor controlling the size of the penalty.
+
+    Returns
+    -------
+    score : float
+      ``math.exp(-beta)`` if a disallowed heterocycle is formed, else 1.0.
     """
     molA = mapping.componentA.to_rdkit()
     molB = mapping.componentB.to_rdkit()
@@ -309,20 +392,27 @@ def heterocycles_score(mapping: LigandAtomMapping, beta=0.4) -> float:
 
 
 @requires_package("gufe")
-def transmuting_methyl_into_ring_score(mapping: LigandAtomMapping, beta=0.1, penalty=6.0) -> float:
+def transmuting_methyl_into_ring_score(
+    mapping: LigandAtomMapping, beta: float = 0.1, penalty: float = 6.0
+) -> float:
     """Penalises having a non-mapped ring atoms become a non-ring
 
     This score would for example penalise R-CH3 to R-Ph where R is the same
     mapped atom and both CH3 and Ph are unmapped. Does not penalise R-H to R-Ph.
-    If any atoms trigger the rule returns a score of::
+    If any atoms trigger the rule returns a score of:
 
-      exp(-1 * beta * penalty)
+    .. math::
+
+        exp(-1 * beta * penalty)
 
     Parameters
     ----------
     mapping : LigandAtomMapping
-    beta : float
-    penalty : float
+      Mapping between the two ligands in the edge.
+    beta : float, default 0.1
+      Score scaling factor.
+    penalty : float, default 6.0
+      Score scaling factor.
 
     Returns
     -------
@@ -372,7 +462,22 @@ def transmuting_methyl_into_ring_score(mapping: LigandAtomMapping, beta=0.1, pen
 
 @requires_package("gufe")
 def transmuting_ring_sizes_score(mapping: LigandAtomMapping) -> float:
-    """Checks if mapping alters a ring size"""
+    """Ring size score — penalizes mappings that alter a ring size.
+
+    Checks first-degree neighbors of mapped atoms; if a non-mapped neighbor
+    is in a ring in both molecules but the ring sizes differ, a value of 0.1
+    is returned, otherwise 1.0 is returned.
+
+    Parameters
+    ----------
+    mapping : LigandAtomMapping
+      Mapping between the two ligands in the edge.
+
+    Returns
+    -------
+    score : float
+      0.1 if any ring size change is detected, else 1.0.
+    """
     molA = mapping.componentA.to_rdkit()
     molB = mapping.componentB.to_rdkit()
     molA_to_molB = mapping.componentA_to_componentB
@@ -424,7 +529,7 @@ def transmuting_ring_sizes_score(mapping: LigandAtomMapping) -> float:
 
 
 @requires_package("gufe")
-def default_lomap_score(mapping: LigandAtomMapping, charge_changes_score=0.1) -> float:
+def default_lomap_score(mapping: LigandAtomMapping, charge_changes_score: float = 0.1) -> float:
     """The default score function from Lomap2
 
 
@@ -435,8 +540,8 @@ def default_lomap_score(mapping: LigandAtomMapping, charge_changes_score=0.1) ->
     Parameters
     ----------
     mapping : LigandAtomMapping
-      The atom mapping to score.
-    charge_changes_score: float
+      Mapping between the two ligands in the edge.
+    charge_changes_score: float, default 0.1
       The electrostatic score to be assigned for mappings of ligands that
       differ in net charge.
       Default: 0.1 (e.g. allowing net charge changes)

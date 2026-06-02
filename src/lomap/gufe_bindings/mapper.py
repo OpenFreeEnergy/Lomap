@@ -44,23 +44,22 @@ class LomapAtomMapper(AtomMapper):
 
         Parameters
         ----------
-        time : int, optional
-          timeout of MCS algorithm, passed to RDKit
-          default 20
-        threed : bool, optional
-          if true, positional info is used to choose between symmetrically
-          equivalent mappings and prune the mapping, default True
-        max3d : float, optional
-          maximum discrepancy in Angstroms between atoms before mapping is not
-          allowed, default 1.0
-        element_change: bool, optional
-          whether to allow element changes in the mappings, default True
-        seed: str, optional
+        time : int, default 20
+          Timeout of MCS algorithm in seconds, passed to RDKit.
+        threed : bool, default True
+          If ``True``, positional info is used to choose between symmetrically
+          equivalent mappings and prune the mapping.
+        max3d : float, default 1.0
+          Maximum discrepancy in Angstroms between atoms before mapping is not
+          allowed.
+        element_change : bool, default True
+          If ``True``, allow element changes in the mappings.
+        seed : str, default ""
           SMARTS string to use as seed for MCS searches.  When used across an
-          entire set of ligands, this can speed up calculations considerably
-        shift: bool, optional
-          when determining 3D overlap, if to translate the two molecules MCS to minimise
-          RMSD to boost potential alignment.
+          entire set of ligands, this can speed up calculations considerably.
+        shift : bool, default False
+          If ``True``, translate the two molecules' MCS to minimize the
+          RMSD. This can boost potential alignment when determining 3D overlap.
         """
         self.time = time
         self.threed = threed
@@ -102,12 +101,13 @@ class LomapAtomMapper(AtomMapper):
 
         Parameters
         ----------
-        componentA, componentB: gufe.SmallMoleculeComponent
+        componentA, componentB : gufe.SmallMoleculeComponent
+          The SmallMoleculeComponents to suggest mappings between.
 
         Returns
         -------
         mapping : Iterable[LigandAtomMapping]
-          potential mappings
+          Potential mappings between ``componentA`` and ``componentB``.
         """
         try:
             mcs = lomap_mcs.MCS(
