@@ -160,9 +160,7 @@ def tmcsr_score(mapping: LigandAtomMapping):
 
 @requires_package("gufe")
 def atomic_number_score(
-    mapping: LigandAtomMapping,
-    beta=0.1,
-    difficulty: dict[int, dict[int, float]] | None = None
+    mapping: LigandAtomMapping, beta=0.1, difficulty: dict[int, dict[int, float]] | None = None
 ) -> float:
     """A score on the elemental changes happening in the mapping
 
