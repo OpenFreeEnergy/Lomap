@@ -31,6 +31,7 @@ import math
 import multiprocessing
 import os
 import pickle
+import warnings
 from typing import Any
 
 import networkx as nx
@@ -39,8 +40,7 @@ from rdkit import Chem, DataStructs
 from rdkit.Chem import rdFMCS
 
 import lomap
-
-from . import graphgen, mcs
+from lomap import graphgen, mcs
 
 __all__ = ["DBMolecules", "SMatrix", "Molecule"]
 
@@ -1151,6 +1151,13 @@ class CheckEcrscore(argparse.Action):
 
 
 def startup():
+    # Emit user-facing warning that the CLI is deprecated and will be removed
+    warnings.warn(
+        "The dbmol CLI is deprecated and will be removed in the next major release. "
+        "Please let us know if you keeping this CLI entry point is important to you, "
+        "see https://github.com/OpenFreeEnergy/Lomap/issues/138 for more details.",
+        category=DeprecationWarning,
+    )
     # This is the CLI entrypoint
     # Options and arguments passed by the user
     ops = parser.parse_args()

@@ -143,7 +143,7 @@ def mncar_score(mapping: LigandAtomMapping, ths: int = 4) -> float:
         ):
             n_common += 1
 
-    ok = (n_common > ths) or (n1 < ths + 3) or (n2 < ths + 3)
+    ok = (n_common >= ths) or (n1 < ths + 3) or (n2 < ths + 3)
 
     return 1.0 if ok else 0.0
 

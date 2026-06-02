@@ -45,6 +45,8 @@ import numpy as np
 from rdkit import Chem
 from rdkit.Chem import AllChem, Draw
 
+from lomap.utils import requires_package
+
 __all__ = ["GraphGen"]
 
 
@@ -67,7 +69,7 @@ def find_non_cyclic_nodes(subgraph: nx.Graph) -> set[int]:
 
     cycleNodes = [node for cycle in cycleList for node in cycle]
 
-    missingNodesSet = set([node for node in subgraph.nodes() if node not in cycleNodes])
+    missingNodesSet = {node for node in subgraph.nodes() if node not in cycleNodes}
 
     return missingNodesSet
 
@@ -99,8 +101,11 @@ logger = logging.getLogger(__name__)
 class GraphGen:
     """This class is used to set and generate the graph used to plan binding free energy calculation
 
-    Attributes
-    ----------
+    Notes
+    -----
+    To use the :class:`GraphGen` :meth:`draw`, :meth:`generate_depictions`,
+    and :meth:`_write_output_dot_graph` methods, you will need to
+    install the optional dependency ``pygraphviz``.
     """
 
     def __init__(
@@ -913,6 +918,7 @@ class GraphGen:
         else:
             return False
 
+    @requires_package("pygraphviz")
     def generate_depictions(
         self, dbase, max_images: int = 2000, max_mol_size: float = 50.0, edge_labels: bool = True
     ):
@@ -1088,6 +1094,18 @@ class GraphGen:
             if self.lead_index is not None:
                 morph_txt.write(morph_data)
 
+    @requires_package("pygraphviz")
+    def _write_output_dot_graph(self, filename: str):
+        """
+        Helper method to write the graph to GraphViz dot format.
+
+        Parameters
+        ----------
+        filename : str
+          Name of the file to write the dot file to.
+        """
+        nx.nx_agraph.write_dot(self.resultGraph, filename)
+
     def write_graph(self, dbase, output_no_images, output_no_graph):
         """
 
@@ -1109,7 +1127,7 @@ class GraphGen:
             if not output_no_images:
                 self.generate_depictions(dbase)
             if not output_no_graph:
-                nx.nx_agraph.write_dot(self.resultGraph, dbase.options["name"] + ".dot")
+                self._write_output_dot_graph(dbase.options["name"] + ".dot")
         except Exception as e:
             traceback.print_exc()
             raise OSError(f"Problems during the file generation: {str(e)}")
@@ -1126,6 +1144,7 @@ class GraphGen:
 
         logging.info(30 * "-")
 
+    @requires_package("pygraphviz")
     def draw(self, dbase, max_images: int = 2000, max_nodes: int = 100, edge_labels: bool = True):
         """This function plots the NetworkX graph by using Matplotlib
 
@@ -1137,6 +1156,10 @@ class GraphGen:
         max_nodes: int
           Max number of displayed nodes in the graph
         edge_labels: bool
+
+        Notes
+        -----
+        This requires the optional dependency ``pygraphviz``.
         """
 
         logging.info("\nDrawing....")
@@ -1208,7 +1231,7 @@ class GraphGen:
             (u, v) for (u, v, d) in self.resultGraph.edges(data=True) if not d["strict_flag"]
         ]
 
-        node_labels = dict([(u, d["ID"]) for u, d in self.resultGraph.nodes(data=True)])
+        node_labels = {u: d["ID"] for u, d in self.resultGraph.nodes(data=True)}
 
         # Draw nodes
         nx.draw_networkx_nodes(self.resultGraph, pos, node_size=500, node_color="r")
@@ -1217,20 +1240,16 @@ class GraphGen:
 
         if edge_labels:
             # fmt: off
-            edge_weight_strict = dict(
-                [
-                    ((u, v), d["similarity"])
+            edge_weight_strict = {
+                    (u, v): d["similarity"]
                     for u, v, d in self.resultGraph.edges(data=True)
                     if d["strict_flag"]
-                ]
-            )
-            edge_weight_loose = dict(
-                [
-                    ((u, v), d["similarity"])
+            }
+            edge_weight_loose = {
+                    (u, v): d["similarity"]
                     for u, v, d in self.resultGraph.edges(data=True)
                     if not d["strict_flag"]
-                ]
-            )
+            }
             # fmt: on
 
             for key in edge_weight_strict:
