@@ -53,13 +53,13 @@ class LomapAtomMapper(AtomMapper):
           Maximum discrepancy in Angstroms between atoms before mapping is not
           allowed.
         element_change : bool, default True
-          If ``True`` allow element changes in the mappings.
+          If ``True``, allow element changes in the mappings.
         seed : str, default ""
           SMARTS string to use as seed for MCS searches.  When used across an
           entire set of ligands, this can speed up calculations considerably.
         shift : bool, default False
-          If ``True`` translate the two molecules MCS to minimise
-          RMSD to boost potential alignment when determining 3D overlap.
+          If ``True``, translate the two molecules' MCS to minimise the
+          RMSD. This can boost potential alignment when determining 3D overlap.
         """
         self.time = time
         self.threed = threed
