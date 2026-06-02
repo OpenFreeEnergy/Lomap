@@ -162,7 +162,7 @@ def tmcsr_score(mapping: LigandAtomMapping):
 def atomic_number_score(
     mapping: LigandAtomMapping,
     beta: float = 0.1,
-    difficulty: dict[int, dict[int, float]] | None = None
+    difficulty: dict[int, dict[int, float]] | None = None,
 ) -> float:
     """A score on the elemental changes happening in the mapping
 
@@ -392,7 +392,9 @@ def heterocycles_score(mapping: LigandAtomMapping, beta: float = 0.4) -> float:
 
 
 @requires_package("gufe")
-def transmuting_methyl_into_ring_score(mapping: LigandAtomMapping, beta: float = 0.1, penalty: float = 6.0) -> float:
+def transmuting_methyl_into_ring_score(
+    mapping: LigandAtomMapping, beta: float = 0.1, penalty: float = 6.0
+) -> float:
     """Penalises having a non-mapped ring atoms become a non-ring
 
     This score would for example penalise R-CH3 to R-Ph where R is the same
