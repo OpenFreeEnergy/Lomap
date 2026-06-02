@@ -199,7 +199,7 @@ def atomic_number_score(
     if difficulty is None:
         difficulty = DEFAULT_ANS_DIFFICULTY
 
-    nmismatch = 0
+    nmismatch: float = 0.0
     for i, j in molA_to_molB.items():
         atom_i = molA.GetAtomWithIdx(i)
         atom_j = molB.GetAtomWithIdx(j)
@@ -224,7 +224,7 @@ def atomic_number_score(
         if diff == -1:
             diff = 0.5
 
-        nmismatch += 1 - diff
+        nmismatch += 1.0 - diff
 
     return math.exp(-beta * nmismatch)
 
