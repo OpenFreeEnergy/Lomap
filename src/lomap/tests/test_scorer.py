@@ -114,3 +114,22 @@ def test_default_and_explicit_charge_change_score_same(smcs):
     result_explicit = lomap.default_lomap_score(mapping, charge_changes_score=0.1)
 
     assert result_default == result_explicit
+
+
+@pytest.mark.skipif(not HAS_GUFE, reason="requires gufe installed")
+def test_mncar_score_ths_equality(smcs):
+
+    mapping = gufe.LigandAtomMapping(
+        componentA=smcs[0],
+        componentB=smcs[1],
+        componentA_to_componentB={0: 0, 1: 1, 2: 2, 3: 3, 4: 4},
+    )
+
+    result_default = mncar_score(mapping)
+    assert result_default == 1.0
+
+    result_equal = mncar_score(mapping, ths=5)
+    assert result_equal == 1.0
+
+    result_more = mncar_score(mapping, ths=6)
+    assert result_more == 0.0
