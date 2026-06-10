@@ -73,11 +73,11 @@ def substructure_centre(mol: Chem.Mol, mol_sub: tuple[int, ...]) -> Point3D:
 
     This function takes a molecule and a list of atom indices
     in that molecule and returns an RDKit Point3D representing
-    the geometric centre of the atoms in the list
+    the geometric centre of the atoms in the list.
 
     Parameters
     ----------
-    mol: Chem.Mol
+    mol : Chem.Mol
       Molecule to get the substructure atoms from.
     mol_sub : tuple[int, ...]
       Atom indices for the substructure.
@@ -97,7 +97,7 @@ class MCS:
     """
 
     This class is used to compute the Maximum Common Subgraph (MCS) between two
-    RDkit molecule objects and to score their similarity by using defined rules
+    RDKit molecule objects and to score their similarity by using defined rules.
 
     """
 
@@ -149,7 +149,7 @@ class MCS:
           of elemental changes is minimised.
         element_change : bool, default True
           If ``True``, allow elemental changes in mappings.
-        seed : string, default ""
+        seed : str, default ""
           SMARTS string to use as seed for MCS searches.  When used across an
           entire set of ligands, this can speed up calculations considerably.
         shift : bool, default True
@@ -203,10 +203,10 @@ class MCS:
 
             # Sanity checking
             if not moli.HasSubstructMatch(self.mcs_mol):
-                raise ValueError("RDkit MCS Subgraph first molecule search failed")
+                raise ValueError("RDKit MCS Subgraph first molecule search failed")
 
             if not molj.HasSubstructMatch(self.mcs_mol):
-                raise ValueError("RDkit MCS Subgraph second molecule search failed")
+                raise ValueError("RDKit MCS Subgraph second molecule search failed")
 
             moli_sub = moli.GetSubstructMatches(self.mcs_mol, uniquify=False)
             molj_sub = molj.GetSubstructMatches(self.mcs_mol, uniquify=False)
@@ -587,7 +587,7 @@ class MCS:
             for a in self.molj.GetAtoms():
                 a.ClearProp("to_mcs")
 
-            # An RDkit atomic property is defined to store the mapping to moli
+            # An RDKit atomic property is defined to store the mapping to moli
             for idx in map_mcs_mol_to_moli_sub:
                 self.mcs_mol.GetAtomWithIdx(idx[0]).SetProp("to_moli", str(idx[1]))
                 self.mcs_mol.GetAtomWithIdx(idx[0]).SetProp(
@@ -603,7 +603,7 @@ class MCS:
             # Map between the two molecules
             self._map_moli_molj = list(zip(moli_sub, molj_sub))
 
-            # An RDkit atomic property is defined to store the mapping to molj
+            # An RDKit atomic property is defined to store the mapping to molj
             for idx in map_mcs_mol_to_molj_sub:
                 self.mcs_mol.GetAtomWithIdx(idx[0]).SetProp("to_molj", str(idx[1]))
                 self.mcs_mol.GetAtomWithIdx(idx[0]).SetProp(
@@ -848,14 +848,14 @@ class MCS:
           The second molecule used to perform the MCS calculation.
         hydrogens : bool, default False
           Include or not the hydrogens in the MCS calculation.
-        fname : string | None, default None
+        fname : str | None, default None
           The filename used to output a png file depicting the MCS mapping.
-        time_out: int, default 150
+        time_out : int, default 150
           The maximum time in seconds which can be used to compute the MCS.
 
         Returns
         -------
-        map_moli_molj: Iterator[tuple[int, int]]
+        map_moli_molj : Iterator[tuple[int, int]]
           Iterator of tuples which contains the atom mapping indexes between
           the two molecules. The indexes (i,j) are respectively related to
           the first (moli) and the second (molj) passed molecules.
@@ -906,17 +906,17 @@ class MCS:
         if moli_c.HasSubstructMatch(mcs_mol):
             moli_sub = moli_c.GetSubstructMatch(mcs_mol)
         else:
-            raise ValueError("RDkit MCS Subgraph first molecule search failed")
+            raise ValueError("RDKit MCS Subgraph first molecule search failed")
         # mcs indexes mapped back to the second molecule molj
         if molj_c.HasSubstructMatch(mcs_mol):
             molj_sub = molj_c.GetSubstructMatch(mcs_mol)
         else:
-            raise ValueError("RDkit MCS Subgraph second molecule search failed")
+            raise ValueError("RDKit MCS Subgraph second molecule search failed")
 
         if mcs_mol.HasSubstructMatch(mcs_mol):
             mcs_sub = mcs_mol.GetSubstructMatch(mcs_mol)
         else:
-            raise ValueError("RDkit MCS Subgraph search failed")
+            raise ValueError("RDKit MCS Subgraph search failed")
 
         # Map between the two molecules
         map_moli_to_molj = zip(moli_sub, molj_sub)
@@ -1166,7 +1166,7 @@ class MCS:
             """
 
             if not mol.HasSubstructMatch(self.mcs_mol):
-                raise ValueError("RDkit MCS Subgraph molecule search failed in sulfonamide check")
+                raise ValueError("RDKit MCS Subgraph molecule search failed in sulfonamide check")
 
             rwm = rdmolops.DeleteSubstructs(mol, self.mcs_mol)
             return rwm.HasSubstructMatch(Chem.MolFromSmarts("S(=O)(=O)N"))
@@ -1212,7 +1212,7 @@ class MCS:
             """
 
             if not mol.HasSubstructMatch(self.mcs_mol):
-                raise ValueError("RDkit MCS Subgraph molecule search failed in heterocycle check")
+                raise ValueError("RDKit MCS Subgraph molecule search failed in heterocycle check")
 
             rwm = rdmolops.DeleteSubstructs(mol, self.mcs_mol)
             # Only picking up N/C containing heterocycles - odd cases like pyran derivatives are not caught
@@ -1237,8 +1237,8 @@ class MCS:
 
     def transmuting_methyl_into_ring_rule(self, penalty: int = 6) -> float:
         """
-         Rule to prevent turning a methyl into a ring atom and similar transformations
-         (you can grow a ring, but you can't transmute into one)
+        Rule to prevent turning a methyl into a ring atom and similar transformations
+        (you can grow a ring, but you can't transmute into one).
 
         Parameters
         ----------
@@ -1411,7 +1411,7 @@ class MCS:
         """
 
         def get_attached_atoms_not_in_mcs(mol: Chem.Mol, i: int) -> list[int]:
-            """Get atoms attached to atom i which are not in the MCS"""
+            """Get atoms attached to atom i which are not in the MCS."""
             attached = []
             for b in mol.GetBonds():
                 if b.GetEndAtomIdx() == i or b.GetBeginAtomIdx() == i:
