@@ -809,6 +809,12 @@ class MCS:
           RDKit Molecule with all atoms present (i.e. pre-RemoveHs).
         tolerance : float, default 0.5
           Maximum deviation acceptable between corresponding atoms in Angstroms.
+
+        Returns
+        -------
+        mapping : dict[int, int]
+          Dictionary mapping the atom indices of the heavy molecule
+          to the all-atom molecule.
         """
         mapping: dict[int, int] = {}
         for at in heavy_mol.GetAtoms():
@@ -970,8 +976,7 @@ class MCS:
     def mncar(self, ths: int = 4) -> float:
         """
         This rule cuts the similarity score between two molecules if they do
-        not share the selected number of atoms
-
+        not share the selected number of atoms.
 
         Parameters
         ----------
@@ -997,19 +1002,20 @@ class MCS:
 
     def tmcsr(self, strict_flag: bool = True) -> float:
         """
-        TMCRS (Trim) rule.
+        TMCSR (Trim) rule.
         This score is no longer implemented and now always returns 1.0.
 
         Notes
         -----
         * MDM - we don't use this as we don't have the same limitation on
           partial ring deletion as Schrodinger.
-        * Removed the chirality ccheck, the MCS is now trimmed to remove
+        * Removed the chirality check, the MCS is now trimmed to remove
           chirality.
         """
         warnings.warn(
             "The TMCSR is deprecated and will be removed in a future release",
             DeprecationWarning,
+            stacklevel=2,
         )
         return 1.0
 
@@ -1087,7 +1093,7 @@ class MCS:
           1 means that the atom is effectively removed from the MCS for scoring
           purposes, 0 means that the hybridization changes are free.
           When used with ``beta`` of ``0.1``, and multiplied by ``mcsr``,
-          this is equivalent to couting mismatched atoms at a weight of
+          this is equivalent to counting mismatched atoms at a weight of
           ``(1 - penalty_weight)``.
 
         Returns
@@ -1191,7 +1197,17 @@ class MCS:
         def adds_heterocycle(mol: Chem.Mol) -> bool:
             """
             Returns true if the removal of the MCS from the provided molecule
-            leaves a heterocycle
+            leaves a heterocycle.
+
+            Parameters
+            ----------
+            mol : Chem.Mol
+              Molecule to inspect.
+
+            Returns
+            -------
+            bool
+              True if a heterocycle is left after removing the MCS.
             """
 
             if not mol.HasSubstructMatch(self.mcs_mol):
