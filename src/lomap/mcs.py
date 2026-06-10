@@ -130,9 +130,9 @@ class MCS:
 
         Parameters
         ----------
-        moli : RDKit molecule object
+        moli : Chem.Mol
           The first molecule used to perform the MCS calculation.
-        molj : RDKit molecule object
+        molj : Chem.Mol
           The second molecule used to perform the MCS calculation.
         time : int, default 20
           Timeout of MCS algorithm in seconds, passed to RDKit.
@@ -980,7 +980,7 @@ class MCS:
 
         Parameters
         ----------
-        ths : float
+        ths : int
           The minimum number of atoms to share.
 
         Returns
@@ -1161,7 +1161,7 @@ class MCS:
             Returns
             -------
             bool
-              If removing the MCS from the Molecule leaves a sulfonamide.
+              ``True`` if removing the MCS from the Molecule leaves a sulfonamide.
             """
 
             if not mol.HasSubstructMatch(self.mcs_mol):
