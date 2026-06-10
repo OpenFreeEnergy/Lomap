@@ -138,11 +138,11 @@ class MCS:
           Timeout of MCS algorithm in seconds, passed to RDKit.
         verbose : Literal["debug", "info", "warning", "error", "critical"], default 'info'
           Logging level, defines verbosity of generated logs.
-        max3d : float, 1000.0
+        max3d : float, default 1000.0
           The MCS is trimmed to remove atoms which are further apart than
           this distance (in units of Angstrom). The default, 1000.0, essentially
           tries not to trim.
-        threed : bool, False
+        threed : bool, default False
           When disambiguating the substructure found back to the original
           molecules, if ``True`` 3D coordinates are used, otherwise the number
           of elemental changes is minimised.
@@ -1207,7 +1207,7 @@ class MCS:
             Returns
             -------
             bool
-              True if a heterocycle is left after removing the MCS.
+              ``True`` if a heterocycle is left after removing the MCS.
             """
 
             if not mol.HasSubstructMatch(self.mcs_mol):
