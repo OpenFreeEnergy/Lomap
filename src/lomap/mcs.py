@@ -14,8 +14,9 @@ potential ligands within a substantial set of compounds.
 
 import logging
 import math
-from typing import Iterator, Literal
 import warnings
+from collections.abc import Iterator
+from typing import Literal
 
 from rdkit import Chem, DataStructs, RDLogger
 from rdkit.Chem import Draw, rdFMCS, rdmolops
