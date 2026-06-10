@@ -27,7 +27,7 @@ potential ligands within a substantial set of compounds.
 # University of New Orleans and it has just been adapted to the new Lomap code
 #
 # *****************************************************************************
-
+from __future__ import annotations
 import copy
 import logging
 import os.path
@@ -933,7 +933,7 @@ class GraphGen:
     @requires_package("pygraphviz")
     def generate_depictions(
         self,
-        dbase: "DBMolecules",
+        dbase: DBMolecules,
         max_images: int = 2000,
         max_mol_size: float = 50.0,
         edge_labels: bool = True,
@@ -1044,7 +1044,7 @@ class GraphGen:
 
     # The function to output the score and connectivity txt file
 
-    def layout_info(self, dbase: "DBMolecules") -> None:
+    def layout_info(self, dbase: DBMolecules) -> None:
         # pass the lead compound index if the radial option is on and generate the
         # morph type of output required by FESetup
         if self.lead_index is not None:
@@ -1123,7 +1123,7 @@ class GraphGen:
         nx.nx_agraph.write_dot(self.resultGraph, filename)
 
     def write_graph(
-        self, dbase: "DBMolecules", output_no_images: bool, output_no_graph: bool
+        self, dbase: DBMolecules, output_no_images: bool, output_no_graph: bool
     ) -> None:
         """
 
@@ -1165,7 +1165,7 @@ class GraphGen:
     @requires_package("pygraphviz")
     def draw(
         self,
-        dbase: "DBMolecules",
+        dbase: DBMolecules,
         max_images: int = 2000,
         max_nodes: int = 100,
         edge_labels: bool = True,
