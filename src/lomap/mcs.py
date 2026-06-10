@@ -146,12 +146,12 @@ class MCS:
           When disambiguating the substructure found back to the original
           molecules, if ``True`` 3D coordinates are used, otherwise the number
           of elemental changes is minimised.
-        element_change : bool, True
+        element_change : bool, default True
           If ``True``, allow elemental changes in mappings.
-        seed : string, ""
+        seed : string, default ""
           SMARTS string to use as seed for MCS searches.  When used across an
           entire set of ligands, this can speed up calculations considerably.
-        shift : bool, True
+        shift : bool, default True
           If ``True``, when ``threed`` is also ``True``, translate the
           molecules' coordinates to maximise 3D overlap.
 
