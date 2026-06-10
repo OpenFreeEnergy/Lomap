@@ -37,7 +37,10 @@ import tempfile
 import traceback
 import warnings
 from operator import itemgetter
-from typing import Any
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from lomap.dbmol import DBMolecules
 
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -113,11 +116,11 @@ class GraphGen:
         score_matrix: np.ndarray,
         ids: list[int],
         names: list[str],
-        max_path_length,
+        max_path_length: int,
         actives: list[bool],
         max_dist_from_active: int,
         similarity_cutoff: float,
-        require_cycle_covering,
+        require_cycle_covering: bool,
         radial: bool,
         fast: bool,
         hub: str | None = None,
@@ -208,11 +211,11 @@ class GraphGen:
 
         if fast and radial:
             # if we use the fast and radial option, just need to add the surrounding edges from the initial graph
+            assert self.lead_index is not None  # radial=True guarantees pick_lead sets this
             self.resultGraph = self.add_surrounding_edges(
                 subgraphs=self.workingSubgraphsList,
                 score_matrix=score_matrix,
-                # Note; `self.lead_index` is never None here, safe to ignore typing
-                lead_index=self.lead_index,  # type: ignore[arg-type]
+                lead_index=self.lead_index,
                 similarity_score_limit=similarity_cutoff,
             )
             # after adding the surround edges, some subgraphs may merge into a larger graph and so need to update the
@@ -235,7 +238,7 @@ class GraphGen:
             self.copyResultGraph = self.resultGraph.copy()
 
             # Holds list of edges that were added in the connect components phase
-            self.edgesAddedInFirstTreePass: list[tuple[Any, Any, float]] = []
+            self.edgesAddedInFirstTreePass: list[tuple[int, int, float]] = []
 
             # Add edges to the resultingGraph to connect its components
             self.connect_subgraphs()
@@ -301,7 +304,7 @@ class GraphGen:
         names: list[str],
         is_active: list[bool],
         lead_index: int | None,
-    ):
+    ) -> list[nx.Graph]:
         """
         This function generates a starting graph connecting with edges all the
         compounds with a positive strict similarity score
@@ -370,7 +373,9 @@ class GraphGen:
         return initialSubgraphList
 
     @staticmethod
-    def generate_subgraph_scores_lists(subgraphList):
+    def generate_subgraph_scores_lists(
+        subgraphList: list[nx.Graph],
+    ) -> list[list[tuple[int, int, float]]]:
         """
         This function generate a list of lists where each inner list is the
         weights of each edge in a given subgraph in the subgraphList,
@@ -402,7 +407,11 @@ class GraphGen:
         return subgraphScoresLists
 
     @staticmethod
-    def remove_edges_below_hard_limit(subgraphlist, scores, similarity_scores_limit):
+    def remove_edges_below_hard_limit(
+        subgraphlist: list[nx.Graph],
+        scores: list[list[tuple[int, int, float]]],
+        similarity_scores_limit: float,
+    ) -> None:
         """
 
         This function removes edges below the set hard limit from each subGraph
@@ -437,7 +446,7 @@ class GraphGen:
             totalEdges = totalEdges + subgraph.number_of_edges()
 
     @staticmethod
-    def generate_working_subgraphs_list(subgraph_list):
+    def generate_working_subgraphs_list(subgraph_list: list[nx.Graph]) -> list[nx.Graph]:
         """
         After the deletion of the edges that have a weight less than the
         selected threshold the subgraph maybe disconnected and a new master
@@ -463,7 +472,7 @@ class GraphGen:
 
         return workingSubgraphsList
 
-    def minimize_edges(self, require_cycle_covering):
+    def minimize_edges(self, require_cycle_covering: bool) -> None:
         """
         Minimize edges in each subgraph while ensuring constraints are met
         """
@@ -514,11 +523,11 @@ class GraphGen:
 
     def add_surrounding_edges(
         self,
-        subgraphs: list,
+        subgraphs: list[nx.Graph],
         score_matrix: np.ndarray,
         lead_index: int,
         similarity_score_limit: float,
-    ):
+    ) -> nx.Graph:
         """
         Add surrounding edges in each subgraph to make sure all nodes are in cycle
         """
@@ -549,8 +558,9 @@ class GraphGen:
                             strict_flag=True,
                         )
                 return subgraph
+        raise ValueError(f"lead_index {lead_index} not found in any subgraph")
 
-    def check_constraints(self, subgraph, numComp, require_cycle_covering):
+    def check_constraints(self, subgraph: nx.Graph, numComp: int, require_cycle_covering: bool) -> bool:
         """
         Determine if the given subgraph still meets the constraints
 
@@ -593,7 +603,7 @@ class GraphGen:
         return constraintsMet
 
     @staticmethod
-    def remains_connected(subgraph, numComponents) -> bool:
+    def remains_connected(subgraph: nx.Graph, numComponents: int) -> bool:
         """
         Determine if the subgraph remains connected after an edge has been
         removed
@@ -617,7 +627,7 @@ class GraphGen:
         return is_connected
 
     @staticmethod
-    def check_cycle_covering(subgraph, non_cycle_edges_set):
+    def check_cycle_covering(subgraph: nx.Graph, non_cycle_edges_set: set[tuple[int, int]]) -> bool:
         """
         Checks if the subgraph has a cycle covering. Note that this has been extended from
         the original algorithm: we not only care if the number of acyclic nodes has
@@ -647,7 +657,7 @@ class GraphGen:
         return hasCovering
 
     @staticmethod
-    def check_max_distance(subgraph, max_path_length) -> bool:
+    def check_max_distance(subgraph: nx.Graph, max_path_length: int) -> bool:
         """
         Check to see if the graph has paths from all compounds to all other
         compounds within the specified limit
@@ -675,7 +685,7 @@ class GraphGen:
         return withinMaxDistance
 
     @staticmethod
-    def count_distance_to_active_failures(subgraph, max_dist_from_active):
+    def count_distance_to_active_failures(subgraph: nx.Graph, max_dist_from_active: int) -> int:
         """
         Count the number of compounds that don't have a minimum-length path to an active
         within the specified limit
@@ -716,8 +726,8 @@ class GraphGen:
         return failures
 
     def check_distance_to_active(
-        self, subgraph, distance_to_active_failures, max_distance_from_active
-    ):
+        self, subgraph: nx.Graph, distance_to_active_failures: int, max_distance_from_active: int
+    ) -> bool:
         """
         Check to see if we have increased the number of distance-to-active failures
 
@@ -745,7 +755,7 @@ class GraphGen:
         return not failed
 
     @staticmethod
-    def merge_all_subgraphs(working_subgraphs):
+    def merge_all_subgraphs(working_subgraphs: list[nx.Graph]) -> nx.Graph:
         """Generates a single networkx graph object from the subgraphs that have
         been processed
 
@@ -764,7 +774,7 @@ class GraphGen:
 
         return finalGraph
 
-    def connect_subgraphs(self):
+    def connect_subgraphs(self) -> None:
         """
 
         Adds edges to the resultGraph to connect as many components of the final
@@ -785,7 +795,7 @@ class GraphGen:
         while connectSuccess:
             connectSuccess = self.connect_graph_components_brute_force_2()
 
-    def connect_graph_components_brute_force(self):
+    def connect_graph_components_brute_force(self) -> bool:
         """
         Adds edges to the resultGraph to connect all components that can be
         connected, only one edge is added per component, to form a tree like
@@ -852,7 +862,7 @@ class GraphGen:
         else:
             return False
 
-    def connect_graph_components_brute_force_2(self):
+    def connect_graph_components_brute_force_2(self) -> bool:
         """
         Adds a second edge between each of the (former) components of the
         resultGraph to try to provide cycles between (former) components
@@ -920,8 +930,12 @@ class GraphGen:
 
     @requires_package("pygraphviz")
     def generate_depictions(
-        self, dbase, max_images: int = 2000, max_mol_size: float = 50.0, edge_labels: bool = True
-    ):
+        self,
+        dbase: "DBMolecules",
+        max_images: int = 2000,
+        max_mol_size: float = 50.0,
+        edge_labels: bool = True,
+    ) -> None:
         """
         Parameters
         ----------
@@ -1028,7 +1042,7 @@ class GraphGen:
 
     # The function to output the score and connectivity txt file
 
-    def layout_info(self, dbase):
+    def layout_info(self, dbase: "DBMolecules") -> None:
         # pass the lead compound index if the radial option is on and generate the
         # morph type of output required by FESetup
         if self.lead_index is not None:
@@ -1095,7 +1109,7 @@ class GraphGen:
                 morph_txt.write(morph_data)
 
     @requires_package("pygraphviz")
-    def _write_output_dot_graph(self, filename: str):
+    def _write_output_dot_graph(self, filename: str) -> None:
         """
         Helper method to write the graph to GraphViz dot format.
 
@@ -1106,7 +1120,9 @@ class GraphGen:
         """
         nx.nx_agraph.write_dot(self.resultGraph, filename)
 
-    def write_graph(self, dbase, output_no_images, output_no_graph):
+    def write_graph(
+        self, dbase: "DBMolecules", output_no_images: bool, output_no_graph: bool
+    ) -> None:
         """
 
         This function writes to a file the final generated NetworkX graph as
@@ -1145,7 +1161,13 @@ class GraphGen:
         logging.info(30 * "-")
 
     @requires_package("pygraphviz")
-    def draw(self, dbase, max_images: int = 2000, max_nodes: int = 100, edge_labels: bool = True):
+    def draw(
+        self,
+        dbase: "DBMolecules",
+        max_images: int = 2000,
+        max_nodes: int = 100,
+        edge_labels: bool = True,
+    ) -> None:
         """This function plots the NetworkX graph by using Matplotlib
 
         Parameters
