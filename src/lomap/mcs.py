@@ -18,7 +18,7 @@ import warnings
 from collections.abc import Iterator
 from typing import Literal
 
-from rdkit import Chem, DataStructs, RDLogger
+from rdkit import Chem, RDLogger
 from rdkit.Chem import Draw, rdFMCS, rdmolops
 from rdkit.Chem.Draw.MolDrawing import DrawingOptions
 from rdkit.Geometry.rdGeometry import Point3D
@@ -30,8 +30,8 @@ logger = logging.getLogger(__name__)
 
 def atom_hybridization(a: Chem.Atom) -> int:
     """
-    RDKit has an un-useful hybridization definition. Instead, just look at the number
-    of multiple bonds from an atom.
+    Atom hybridization based on bond information.
+    This is an alternative to RDKit's definition of hybridization.
 
     Parameters
     ----------
@@ -988,11 +988,13 @@ class MCS:
         -------
         scr_mncar : float
           The MNCAR rule score.
+
+        Notes
+        -----
+        This rule has been modified from the rule originally described
+        in the Lomap paper so that it can match the first LOMAP
+        implementation provided by Schrodinger.
         """
-
-        # This rule has been modified from the rule described in the Lomap paper
-        # to match the LOMAP first implementation provided by schrodinger
-
         nha_mcs_mol = self.mcs_mol.GetNumHeavyAtoms()
         nha_moli = self.moli.GetNumHeavyAtoms()
         nha_molj = self.molj.GetNumHeavyAtoms()
@@ -1035,13 +1037,12 @@ class MCS:
         an_score : float
           Atomic number rule score.
         """
-
         # A value of 0.5 is the same behaviour as before, a value of 1 means that the
         # atoms are perfectly equivalent, a value of 0 means that the atoms are perfectly
         # non-equivalent (i.e the penalty should basically remove this atom pair from the
         # MCS). The default for pairs not in this data structure is 0.5.
         #
-        # Note that we don't need the symmetry equivalent values: we will use the large of
+        # Note that we don't need the symmetry equivalent values: we will use the largest of
         # [i][j] and [j][i]
         transform_difficulty = {
             # H to element - not sure this has any effect currently
