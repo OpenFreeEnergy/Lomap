@@ -560,7 +560,9 @@ class GraphGen:
                 return subgraph
         raise ValueError(f"lead_index {lead_index} not found in any subgraph")
 
-    def check_constraints(self, subgraph: nx.Graph, numComp: int, require_cycle_covering: bool) -> bool:
+    def check_constraints(
+        self, subgraph: nx.Graph, numComp: int, require_cycle_covering: bool
+    ) -> bool:
         """
         Determine if the given subgraph still meets the constraints
 
