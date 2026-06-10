@@ -14,7 +14,8 @@ potential ligands within a substantial set of compounds.
 
 import logging
 import math
-from typing import Iterator
+from typing import Iterator, Literal
+import warnings
 
 from rdkit import Chem, DataStructs, RDLogger
 from rdkit.Chem import Draw, rdFMCS, rdmolops
@@ -29,7 +30,17 @@ logger = logging.getLogger(__name__)
 def atom_hybridization(a: Chem.Atom) -> int:
     """
     RDKit has an un-useful hybridization definition. Instead, just look at the number
-    of multiple bonds from an atom
+    of multiple bonds from an atom.
+
+    Parameters
+    ----------
+    a : Chem.Atom
+      Atom to get the hybridization for.
+
+    Returns
+    -------
+    int
+      The hybridization of the atom.
     """
     if a.GetIsAromatic():
         return 2
@@ -63,6 +74,17 @@ def substructure_centre(mol: Chem.Mol, mol_sub: tuple[int, ...]) -> Point3D:
     in that molecule and returns an RDKit Point3D representing
     the geometric centre of the atoms in the list
 
+    Parameters
+    ----------
+    mol: Chem.Mol
+      Molecule to get the substructure atoms from.
+    mol_sub : tuple[int, ...]
+      Atom indices for the substructure.
+
+    Returns
+    -------
+    Point3D
+      Geometric center of the substructure atoms.
     """
     s = Point3D()
     for i in mol_sub:
@@ -96,7 +118,7 @@ class MCS:
         moli: Chem.Mol,
         molj: Chem.Mol,
         time: int = 20,
-        verbose: str = "info",
+        verbose: Literal["debug", "info", "warning", "error", "critical"] = "info",
         max3d: float = 1000.0,
         threed: bool = False,
         element_change: bool = True,
@@ -108,29 +130,30 @@ class MCS:
 
         Parameters
         ----------
-
         moli : RDKit molecule object
-            the first molecule used to perform the MCS calculation
+          The first molecule used to perform the MCS calculation.
         molj : RDKit molecule object
-            the second molecule used to perform the MCS calculation
-        time : int, optional
-            timeout on MCS, default 20
-        verbose : str, optional
-            logging level, default 'info'
-        max3d : float, optional
-            The MCS is trimmed to remove atoms which are further apart than
-            this distance (in units of Angstrom), default 1,000.0 (i.e. do
-            not trim)
-        threed : bool, optional
-            When disambiguating the substructure found back to the original
-            molecules, if True 3D coordinates are used, otherwise the number
-            of elemental changes is minimised. default False.
-        element_change : bool, optional
-            whether to allow elemental changes in mappings, default True
-        seed : string, optional
-            Initial SMARTS seed for MCS search.
-        shift : bool, optional
-            When using threed, if to shift the molecules coordinates to maximise overlap, default True
+          The second molecule used to perform the MCS calculation.
+        time : int, default 20
+          Timeout of MCS algorithm in seconds, passed to RDKit.
+        verbose : Literal["debug", "info", "warning", "error", "critical"], default 'info'
+          Logging level, defines verbosity of generated logs.
+        max3d : float, 1000.0
+          The MCS is trimmed to remove atoms which are further apart than
+          this distance (in units of Angstrom). The default, 1000.0, essentially
+          tries not to trim.
+        threed : bool, False
+          When disambiguating the substructure found back to the original
+          molecules, if ``True`` 3D coordinates are used, otherwise the number
+          of elemental changes is minimised.
+        element_change : bool, True
+          If ``True``, allow elemental changes in mappings.
+        seed : string, ""
+          SMARTS string to use as seed for MCS searches.  When used across an
+          entire set of ligands, this can speed up calculations considerably.
+        shift : bool, True
+          If ``True``, when ``threed`` is also ``True``, translate the
+          molecules' coordinates to maximise 3D overlap.
 
         .. versionchanged:: 2.1.0
            Added element_change kwarg
@@ -157,12 +180,24 @@ class MCS:
         ) -> tuple[tuple[int, ...], tuple[int, ...]]:
             """
             This function looks over all of the substructure matches and returns the one
-            with the best 3D correspondence (if by_rmsd is true), or the fewest number
-            of atomic number mismatches (if by_rmsd is false)
+            with the best 3D correspondence (if ``by_rmsd`` is ``True``), or the fewest number
+            of atomic number mismatches (if ``by_rmsd`` is ``False``).
 
-            If use_shift, the 3D correspondence does a translational centreing (but
-            does not rotate).
+            Parameters
+            ----------
+            moli, molj : Chem.Mol
+              Molecules to get the substructure match for.
+            by_rmsd : bool
+              If ``True``, prune substructure matches by 3D correspondence.
+              If ``False``, prune substructure by the number of atomic mismatches.
+            use_shift : bool
+              If ``True``, translate the 3D coordinates for the substructure by
+              center of geometry distance. Note that this does not do any rotation.
 
+            Returns
+            -------
+            besti, bestj : tuple[int, ...]
+              Best substructure matches for ``moli`` and ``molj``.
             """
 
             # Sanity checking
@@ -218,10 +253,10 @@ class MCS:
             Parameters
             ----------
             max_deviation : float
-              the maximum difference in Angstroms between mapped atoms to allow
+              The maximum difference in Angstroms between mapped atoms to allow.
             use_shift : bool
-              if to translate the two molecules to maximise overlap before calculating distances
-
+              If ``True``, translate the two molecules by the center of geometry
+              of the substructure match to maximise overlap before calculating distances.
             """
 
             while True:
@@ -263,7 +298,6 @@ class MCS:
 
         def trim_mcs_fix_broken_rdkit_code() -> None:
             """
-
             Detect cases where the RDKit has generated an incorrect MCS (for alpha vs beta naphthyl, for
             instance), and delete some atoms to break the ring. The excess atoms will then be
             removed later by delete_broken_ring()
@@ -272,7 +306,6 @@ class MCS:
 
             Algorithm: find a bond in moli where the atoms are both in the MCS, they are bonded in
             moli, but are not bonded in the MCS.
-
             """
 
             to_remove = []
@@ -321,6 +354,16 @@ class MCS:
                 """
                 Returns the parity of the provided permutation tuple/array: even parity
                 is True, odd parity is False.
+
+                Parameters
+                ----------
+                perm : list[int]
+                  The list of permutations.
+
+                Returns
+                -------
+                bool
+                  ``True`` if parity is even, otherwise ``False``.
                 """
                 parity = True
                 for i in range(len(perm) - 1):
@@ -335,6 +378,16 @@ class MCS:
                 Take the neighbours of chiral atom a. Get the index of each of these atoms
                 in the MCS. Combine the parity of this list with the chirality flag for
                 a to determine the "MCS parity".
+
+                Parameters
+                ----------
+                a : Chem.Atom
+                  The chiral atom to inspect.
+
+                Returns
+                -------
+                Chem.rdchem.ChiralType
+                  The MCS chiral parity of the atom.
                 """
                 nbrs = []
                 for aj in a.GetNeighbors():
@@ -499,10 +552,8 @@ class MCS:
 
         def map_mcs_mol() -> None:
             """
-
             This function is used to define a map between the generated mcs, the
             molecules and vice versa
-
             """
 
             # Get self-mapping for the MCS
@@ -569,15 +620,14 @@ class MCS:
 
         def set_ring_counter(mol: Chem.Mol) -> None:
             """
-
             This function is used to attach to each molecule atom a ring counter
             rc. This parameter is used to assess if a ring has been broken or not
             during the MCS mapping
 
             Parameters
             ----------
-            mol : RDKit Molecule obj
-                the molecule used to define the atom ring counters
+            mol : Chem.Mol
+              The RDKit Molecule used to define the atom ring counters.
             """
 
             # set to zero the atom ring counters
@@ -749,16 +799,16 @@ class MCS:
     ) -> dict[int, int]:
         """
         Convenience method to map a molecule without hydrogens
-        (`heavy_mol`) back to its pre RemoveHs version (`all_mol`).
+        (``heavy_mol``) back to its pre RemoveHs version (``all_mol``).
 
         Parameters
         ----------
-        heavy_mol : RDKit molecule object
-            Heavy atom molecule version of `all_mol`.
-        all_mol : RDKit molecule object
-            Molecule with all atoms present (i.e. pre-RemoveHs).
-        tolerance : float
-            Maximum deviation acceptable between corresponding atoms.
+        heavy_mol : Chem.Mol
+          Heavy atom RDKit Molecule version of ``all_mol``.
+        all_mol : Chem.Mol
+          RDKit Molecule with all atoms present (i.e. pre-RemoveHs).
+        tolerance : float, default 0.5
+          Maximum deviation acceptable between corresponding atoms in Angstroms.
         """
         mapping: dict[int, int] = {}
         for at in heavy_mol.GetAtoms():
@@ -785,24 +835,23 @@ class MCS:
 
         Parameters
         ----------
-        moli : RDKit molecule object
-            the first molecule used to perform the MCS calculation
-        molj : RDKit molecule object
-            the second molecule used to perform the MCS calculation
-        hydrogens : bool
-            include or not the hydrogens in the MCS calculation
-        fname : string
-            the filename used to output a png file depicting the MCS mapping
-        time_out: int
-            the max time in seconds used to compute the MCS
+        moli : Chem.Mol
+          The first molecule used to perform the MCS calculation.
+        molj : Chem.Mol
+          The second molecule used to perform the MCS calculation.
+        hydrogens : bool, default False
+          Include or not the hydrogens in the MCS calculation.
+        fname : string | None, default None
+          The filename used to output a png file depicting the MCS mapping.
+        time_out: int, default 150
+          The maximum time in seconds which can be used to compute the MCS.
 
         Returns
         -------
-        map_moli_molj: python list of tuple [...(i,j)...]
-            the list of tuple which contains the atom mapping indexes between
-            the two molecules. The indexes (i,j) are respectively related to
-            the first (moli) and the second (molj) passed molecules
-
+        map_moli_molj: Iterator[tuple[int, int]]
+          Iterator of tuples which contains the atom mapping indexes between
+          the two molecules. The indexes (i,j) are respectively related to
+          the first (moli) and the second (molj) passed molecules.
         """
 
         # Molecule copies
@@ -894,12 +943,12 @@ class MCS:
     def mcsr(self) -> float:
         """
         This rule computes the similarity between the two passed molecules
-        used to compute the MCS
+        used to compute the MCS.
 
         Returns
         -------
         scr_mcsr : float
-            the rule score
+          The MCSR rule score.
         """
 
         # The number of heavy atoms in each molecule
@@ -927,12 +976,12 @@ class MCS:
         Parameters
         ----------
         ths : float
-            the minimum number of atoms to share
+          The minimum number of atoms to share.
 
         Returns
         -------
         scr_mncar : float
-            the rule score
+          The MNCAR rule score.
         """
 
         # This rule has been modified from the rule described in the Lomap paper
@@ -946,11 +995,22 @@ class MCS:
 
         return scr_mncar
 
-    # TMCRS rule (Trim rule)
-    # MDM Note: we don't use this as we don't have the same limitation on partial ring
-    # deletion as Schrodinger
-    # NB removed the chirality check - the MCS is now trimmed to remove chirality
     def tmcsr(self, strict_flag: bool = True) -> float:
+        """
+        TMCRS (Trim) rule.
+        This score is no longer implemented and now always returns 1.0.
+
+        Notes
+        -----
+        * MDM - we don't use this as we don't have the same limitation on
+          partial ring deletion as Schrodinger.
+        * Removed the chirality ccheck, the MCS is now trimmed to remove
+          chirality.
+        """
+        warnings.warn(
+            "The TMCSR is deprecated and will be removed in a future release",
+            DeprecationWarning,
+        )
         return 1.0
 
     def atomic_number_rule(self) -> float:
@@ -963,6 +1023,10 @@ class MCS:
         This has been extended to modify the amount of mismatch according to the
         atoms being mapped.
 
+        Returns
+        -------
+        an_score : float
+          Atomic number rule score.
         """
 
         # A value of 0.5 is the same behaviour as before, a value of 1 means that the
@@ -1015,12 +1079,21 @@ class MCS:
     def hybridization_rule(self, penalty_weight: float = 1.5) -> float:
         """
         This rule checks how many atoms have changed hybridization state.
-        The penalty weight means how many "atoms" different a hybridization state change
-        is: 1 means that the atom is effectively removed from the MCS for scoring purposes,
-        0 means that hybridization changes are free.
-        When used with beta=0.1 and multiplied by mcsr, this is equivalent to counting
-        mismatched atoms at a weight of (1-penalty_weight)
 
+        Parameters
+        ----------
+        penalty_weight : float, default 1.5
+          How many "atoms" different a hybridization state change has.
+          1 means that the atom is effectively removed from the MCS for scoring
+          purposes, 0 means that the hybridization changes are free.
+          When used with ``beta`` of ``0.1``, and multiplied by ``mcsr``,
+          this is equivalent to couting mismatched atoms at a weight of
+          ``(1 - penalty_weight)``.
+
+        Returns
+        -------
+        hyb_score : float
+          The hybridization rule score.
         """
         nmismatch: int = 0
         for at in self.mcs_mol.GetAtoms():
@@ -1061,14 +1134,28 @@ class MCS:
 
         Parameters
         ----------
-        penalty : the number of atom mismatches that failing this rule will lower the score by
+        penalty : int, default 4
+          The number of atom mismatches that failing this rule will lower the score by.
 
+        Returns
+        -------
+        sulf_score : float
+          The sulfonamides rule score.
         """
 
         def adds_sulfonamide(mol: Chem.Mol) -> bool:
             """
-            Returns true if the removal of the MCS from the provided molecule
-            leaves a sulfonamide
+            Check if the transformation would add a new sulfonamide group.
+
+            Parameters
+            ----------
+            mol : Chem.Mol
+              The Molecule to inspect.
+
+            Returns
+            -------
+            bool
+              If removing the MCS from the Molecule leaves a sulfonamide.
             """
 
             if not mol.HasSubstructMatch(self.mcs_mol):
@@ -1092,9 +1179,13 @@ class MCS:
 
         Parameters
         ----------
-        penalty : the number of atom mismatches that failing this rule will lower the score by
+        penalty : int, default 4
+          The number of atom mismatches that failing this rule will lower the score by.
 
-
+        Returns
+        -------
+        het_score : float
+          The heterocycles rule score.
         """
 
         def adds_heterocycle(mol: Chem.Mol) -> bool:
@@ -1134,9 +1225,13 @@ class MCS:
 
         Parameters
         ----------
-        penalty : the number of atom mismatches that failing this rule will lower the score by
+        penalty : int, default 6
+          The number of atom mismatches that failing this rule will lower the score by.
 
-
+        Returns
+        -------
+        mescore : float
+          The methyl to ring transmuting score.
         """
         moli = self._moli_noh
         molj = self._molj_noh
@@ -1189,6 +1284,10 @@ class MCS:
 
         Hard rule: sets score to near zero if violated
 
+        Returns
+        -------
+        float
+          The ring size transmuting rule score.
         """
         moli = self._moli_noh
         molj = self._molj_noh
@@ -1249,7 +1348,12 @@ class MCS:
     def heavy_atom_mcs_map(self) -> list[tuple[int, int]]:
         """
         Gives a list of tuples mapping atoms from moli to molj
-        Heavy atoms only, returned sorted by first index
+        Heavy atoms only, returned sorted by first index.
+
+        Returns
+        -------
+        maplist : list[tuple[int, int]]
+          List of paired heavy atom indices.
         """
         maplist = []
         for at in self.mcs_mol.GetAtoms():
@@ -1264,7 +1368,12 @@ class MCS:
         Gives a string listing the MCS match between the two molecules as
           `atom_m1:atom_m2,atom_m1:atom_m2,...`
 
-        Heavy atoms only
+        Heavy atoms only.
+
+        Returns
+        -------
+        str
+          Comma separated string of paired heavy atom indices.
         """
         return ",".join([str(i) + ":" + str(j) for (i, j) in self.heavy_atom_mcs_map()])
 
@@ -1276,6 +1385,12 @@ class MCS:
         All atoms including hydrogens. The string is sorted by first index.
         We need to be careful that this function is symmetric, and that hydrogens
         are mapped correctly.
+
+        Returns
+        -------
+        str
+          Comma separated string of paired atom indices, sorted by
+          the first index.
         """
 
         def get_attached_atoms_not_in_mcs(mol: Chem.Mol, i: int) -> list[int]:
