@@ -33,6 +33,13 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Physics",
 ]
 dynamic = [ "version" ]
+dependencies = [
+  "matplotlib",
+  "networkx",
+  "numpy",
+  "rdkit",
+]
+optional-dependencies.credits = [ "duecredit" ]
 optional-dependencies.graphviz = [ "pygraphviz" ]
 optional-dependencies.test = [
   "codecov",
