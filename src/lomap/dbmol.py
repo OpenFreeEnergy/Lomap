@@ -24,6 +24,8 @@ potential ligands within a substantial set of compounds.
 #
 # *****************************************************************************
 
+from __future__ import annotations
+
 import argparse
 import glob
 import logging
@@ -32,6 +34,7 @@ import multiprocessing
 import os
 import pickle
 import warnings
+from collections.abc import Iterator
 from typing import Any
 
 import networkx as nx
@@ -45,7 +48,23 @@ from lomap import graphgen, mcs
 __all__ = ["DBMolecules", "SMatrix", "Molecule"]
 
 
-def formal_charge(mol):
+def formal_charge(mol: Chem.Mol) -> float:
+    """
+    Compute the total formal charge of a molecule.
+
+    For mol2 files, sums the ``_TriposPartialCharge`` atom property; for SDF
+    files, sums RDKit formal charges.
+
+    Parameters
+    ----------
+    mol : Chem.Mol
+      The molecule whose total charge is required.
+
+    Returns
+    -------
+    float
+      Total formal charge of the molecule.
+    """
     try:
         # Assume mol2
         total_charge_mol = sum(float(a.GetProp("_TriposPartialCharge")) for a in mol.GetAtoms())
@@ -56,24 +75,23 @@ def formal_charge(mol):
     return total_charge_mol
 
 
-def ecr(mol_i, mol_j):
+def ecr(mol_i: Chem.Mol, mol_j: Chem.Mol) -> float:
     """
-    This function computes the similarity score between the passed molecules
-    by using the EleCtrostatic Rule (ECR)
+    Compute the similarity score between two molecules using the
+    EleCtrostatic Rule (ECR).
 
     Parameters
     ----------
-    mol_i : Rdkit molecule object
-       the first molecule used to calculate the ECR rule
-    mol_j : Rdkit molecule object
-       the second molecule used to calculate the ECR rule
+    mol_i : Chem.Mol
+      The first molecule used to calculate the ECR score.
+    mol_j : Chem.Mol
+      The second molecule used to calculate the ECR score.
 
     Returns
     -------
-    scr_ecr: float
-        the calculated similarity score (1 if mol_i and mol_j have the
-        same total charges, 0 otherwise)
-
+    float
+      1.0 if ``mol_i`` and ``mol_j`` have the same total formal charge,
+      0.0 otherwise.
     """
     total_charge_mol_i = formal_charge(mol_i)
     total_charge_mol_j = formal_charge(mol_j)
@@ -86,8 +104,25 @@ def ecr(mol_i, mol_j):
     return scr_ecr
 
 
-def _find_common_core(mols, element_change: bool) -> str:
-    """Find common core among input molecules to speed up future MCS"""
+def _find_common_core(mols: list[Chem.Mol], element_change: bool) -> str:
+    """
+    Find the common core SMARTS among all input molecules.
+
+    Used to seed pairwise MCS searches and speed up calculations.
+
+    Parameters
+    ----------
+    mols : list[Chem.Mol]
+      Input molecules to search for a common core.
+    element_change : bool
+      If ``True``, allow element changes when finding the common core.
+
+    Returns
+    -------
+    str
+      SMARTS string for the common core, or an empty string if no common
+      core is found within the timeout.
+    """
     # strip hydrogens off
     mols2 = [Chem.RemoveHs(m) for m in mols]
 
@@ -120,7 +155,7 @@ class DBMolecules:
 
     """
 
-    _list: list["Molecule"]
+    _list: list[Molecule]
 
     # Initialization function
     def __init__(
@@ -151,60 +186,67 @@ class DBMolecules:
         shift: bool = True,
     ):
         """
-        Initialization of the Molecule Database Class
+        Initialization of the Molecule Database Class.
 
         Parameters
         ----------
         directory : str
-           the mol2/sdf directory file name
-        parallel : int
-           the number of cores used to generate the similarity score matrices
-        verbose : str
-           verbose mode, one of 'off'/'info'/'pedantic'
-        time : int
-           the maximum time in seconds used to perform the MCS search
-        ecrscore: float
-           the electrostatic score to be used (if != 0) if two molecule have
-           different charges
-        threed: bool
-           If true, symmetry-equivalent MCSes are filtered to prefer the one
-           with the best real-space alignment
-        max3d: float
-           The MCS is filtered to remove atoms which are further apart than
-           this threshold. The default of 1000 is effectively "no filter"
-        element_change: bool
-           Whether to allow changes in elements between two mappings.
-           Defaults to True
-        output : bool
-           a flag used to generate or not the output files
-        name : str
-           the file name prefix used to produce the output files
-        output_no_images : bool
-           a flag used to disable the generation of the output image files
-        output_no_graph : bool
-           a flag used to disable the generation of the output graph (.dot)
-           file
-        display : bool
-           a flag used to display or not a network made by using matplotlib
-        allow_tree: bool
-           if set, then the final graph does not need a cycle covering and will
-           be a tree
-        max : int
-           the maximum diameter of the resulting graph
-        cutoff : float
-           the Minimum Similarity Score (MSS) used to build the graph
-        links_file : str
-           the name of a file containing links to seed the graph with
-        known_actives_file : str
-           the name of a file containing mols whose activity is known
-        max_dist_from_actives : int
-            The maximum number of links from any molecule to an active
-        use_common_core: bool, optional
-            Whether to search among all input molecules for a common core to speed up pairwise MCS
-            calculations, default True
-        shift: bool, optional
-            When using 'threed' option, if to translate the two molecules to superimpose before checking real space
-            alignment, default True
+          Path to the directory containing mol2 and/or sdf input files.
+        parallel : int, default 1
+          Number of processes to use when computing the similarity matrices.
+        verbose : str, default 'off'
+          Logging verbosity; one of ``'off'``, ``'info'``, or ``'pedantic'``.
+        time : int, default 20
+          Maximum time in seconds allowed for each pairwise MCS search.
+        ecrscore : float, default 0.0
+          Electrostatic score override applied when two molecules have
+          different formal charges. A value of 0.0 disables cross-charge
+          comparisons.
+        threed : bool, default False
+          If ``True``, symmetry-equivalent MCSes are filtered to prefer
+          the one with the best real-space 3D alignment.
+        max3d : float, default 1000.0
+          MCS atom pairs further apart than this distance (Angstrom) are
+          removed. The default is effectively no filter.
+        element_change : bool, default True
+          If ``True``, allow element changes between mapped atoms.
+        output : bool, default False
+          If ``True``, write output files (graph, images, pickle).
+        name : str, default 'out'
+          File name prefix used when writing output files.
+        output_no_images : bool, default False
+          If ``True``, skip generation of 2D image output files.
+        output_no_graph : bool, default False
+          If ``True``, skip generation of the graph ``.dot`` file.
+        display : bool, default False
+          If ``True``, display the generated graph with Matplotlib.
+        allow_tree : bool, default False
+          If ``True``, the final graph does not require a cycle covering
+          and may be a tree.
+        max : int, default 6
+          Maximum diameter of the resulting graph.
+        cutoff : float, default 0.4
+          Minimum Similarity Score (MSS) used to build the graph.
+        radial : bool, default False
+          If ``True``, build a radial graph around the hub compound.
+        hub : str or None, default None
+          Name of the molecule to use as the hub in a radial graph.
+        fast : bool, default False
+          If ``True``, use fast graph building when a hub compound is set.
+        links_file : str or None, default None
+          Path to a file listing molecule pairs that should be seeded as
+          links in the graph.
+        known_actives_file : str or None, default None
+          Path to a file listing molecules whose activity is known.
+        max_dist_from_actives : int, default 2
+          Maximum number of graph edges separating any molecule from a
+          known active.
+        use_common_core : bool, default True
+          If ``True``, search for a common core across all input molecules
+          to seed and speed up pairwise MCS calculations.
+        shift : bool, default True
+          If ``True``, when ``threed`` is also ``True``, translate molecules
+          to maximise 3D overlap before evaluating the alignment.
         """
         # Set the Logging
         if verbose == "off":
@@ -312,18 +354,33 @@ class DBMolecules:
         # Empty pointer to the networkx graph
         self.Graph: nx.Graph = nx.Graph()
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Molecule]:
         """
-        Index generator
+        Return the iterator object (self).
+
+        Returns
+        -------
+        Iterator[Molecule]
+          This database instance as an iterator.
         """
         return self
 
-    def __next__(self):
+    def __next__(self) -> Molecule:
         return self.next()
 
-    def next(self):
+    def next(self) -> Molecule:
         """
-        Select the molecule during an iteration
+        Return the next molecule in the iteration sequence.
+
+        Returns
+        -------
+        Molecule
+          The next molecule in the database.
+
+        Raises
+        ------
+        StopIteration
+          When all molecules have been yielded.
         """
 
         if self._ci > len(self._list) - 1:
@@ -333,25 +390,38 @@ class DBMolecules:
             self._ci = self._ci + 1
             return self._list[self._ci - 1]
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int) -> Molecule:
         """
-        Slicing and index selection function
-        """
-
-        return self._list[index]
-
-    def __setitem__(self, index, molecule):
-        """
-        Index setting function
+        Return the molecule at the given index.
 
         Parameters
         ----------
         index : int
-           the molecule index
-        molecule : Molecule obj
-           the molecule to assign to the molecule database by selecting the index:
-           DB[index] = molecule
+          Zero-based position in the molecule list.
 
+        Returns
+        -------
+        Molecule
+          The molecule at position ``index``.
+        """
+
+        return self._list[index]
+
+    def __setitem__(self, index: int, molecule: Molecule) -> None:
+        """
+        Replace the molecule at the given index.
+
+        Parameters
+        ----------
+        index : int
+          Zero-based position in the molecule list.
+        molecule : Molecule
+          The molecule to store at position ``index``.
+
+        Raises
+        ------
+        ValueError
+          If ``molecule`` is not a :class:`Molecule` instance.
         """
 
         if not isinstance(molecule, Molecule):
@@ -359,14 +429,19 @@ class DBMolecules:
 
         self._list[index] = molecule
 
-    def __add__(self, molecule):
+    def __add__(self, molecule: Molecule) -> None:
         """
-        Add a new molecule to the molecule database
+        Append a molecule to the database.
 
         Parameters
         ----------
-        molecule : Molecule obj
-           the molecule to append into the molecule database
+        molecule : Molecule
+          The molecule to append.
+
+        Raises
+        ------
+        ValueError
+          If ``molecule`` is not a :class:`Molecule` instance.
         """
 
         if not isinstance(molecule, Molecule):
@@ -374,22 +449,30 @@ class DBMolecules:
 
         self._list.append(molecule)
 
-    def nums(self):
+    def nums(self) -> int:
         """
-        This function recovers the total number of molecules currently stored in
-        the molecule database
-        """
-        return len(self._list)
-
-    def read_molecule_files(self):
-        """
-        Read in all the mol2 or SDF files
+        Return the total number of molecules in the database.
 
         Returns
         -------
-        molid_list : list of Molecule objects
-           the container list of all the allocated Molecule objects
+        int
+          Number of molecules currently stored.
+        """
+        return len(self._list)
 
+    def read_molecule_files(self) -> list[Molecule]:
+        """
+        Read all mol2 and SDF files from the configured directory.
+
+        Returns
+        -------
+        list[Molecule]
+          All successfully loaded molecules, in sorted filename order.
+
+        Raises
+        ------
+        OSError
+          If the directory contains fewer than two mol2/sdf files.
         """
 
         # This list is used as container to handle all the molecules read in by using RdKit.
@@ -461,7 +544,24 @@ class DBMolecules:
 
         return molid_list
 
-    def parse_links_file(self, links_file):
+    def parse_links_file(self, links_file: str) -> None:
+        """
+        Parse a links file and register the specified molecule pairs.
+
+        Each line may have the form ``mol1 mol2``, ``mol1 mol2 score``, or
+        ``mol1 mol2 score force``.  The ``force`` keyword causes the link to be
+        included in the final graph regardless of its score.
+
+        Parameters
+        ----------
+        links_file : str
+          Path to the links file.
+
+        Raises
+        ------
+        OSError
+          If the file has a syntax error or references an unknown molecule name.
+        """
         try:
             with open(links_file) as lf:
                 for line in lf:
@@ -494,7 +594,23 @@ class DBMolecules:
                 'Filename within the links file "' + links_file + '" not found: ' + str(e)
             ) from None
 
-    def parse_known_actives_file(self, actives_file):
+    def parse_known_actives_file(self, actives_file: str) -> None:
+        """
+        Parse a known-actives file and mark the listed molecules as active.
+
+        All pairs of known actives are automatically added as prespecified
+        links with a score of 1.0 forced into the graph.
+
+        Parameters
+        ----------
+        actives_file : str
+          Path to the known-actives file (one molecule filename per line).
+
+        Raises
+        ------
+        OSError
+          If the file references an unknown molecule name.
+        """
         try:
             with open(actives_file) as lf:
                 for line in lf:
@@ -512,14 +628,46 @@ class DBMolecules:
             logging.info(f"Added prespecified link for {t}")
             self.prespecified_links[t] = -1
 
-    def set_MCSmap(self, i, j, MCmap):
+    def set_MCSmap(self, i: int, j: int, MCmap: str) -> None:
+        """
+        Store the MCS atom-index map string for a molecule pair.
+
+        The pair is stored with the lower index first so that
+        ``set_MCSmap(i, j, ...)`` and ``set_MCSmap(j, i, ...)`` address the
+        same entry.
+
+        Parameters
+        ----------
+        i : int
+          Index of the first molecule.
+        j : int
+          Index of the second molecule.
+        MCmap : str
+          Serialised MCS atom-index map between the two molecules.
+        """
         if i < j:
             idx = (i, j)
         else:
             idx = (j, i)
         self.mcs_map_store[idx] = MCmap
 
-    def get_MCSmap(self, i, j):
+    def get_MCSmap(self, i: int, j: int) -> str | None:
+        """
+        Retrieve the MCS atom-index map string for a molecule pair.
+
+        Parameters
+        ----------
+        i : int
+          Index of the first molecule.
+        j : int
+          Index of the second molecule.
+
+        Returns
+        -------
+        str or None
+          The stored MCS atom-index map string, or ``None`` if no map has
+          been stored for this pair.
+        """
         if i < j:
             idx = (i, j)
         else:
@@ -528,37 +676,37 @@ class DBMolecules:
             return self.mcs_map_store[idx]
         return None
 
-    def compute_mtx(self, a, b, strict_mtx, loose_mtx, true_strict_mtx, MCS_map):
+    def compute_mtx(
+        self,
+        a: int,
+        b: int,
+        strict_mtx: Any,
+        loose_mtx: Any,
+        true_strict_mtx: Any,
+        MCS_map: dict[tuple[int, int], str] | Any,
+    ) -> None:
         """
-        Compute a chunk of the similarity score matrices. The chunk is selected
-        by the start index a and the final index b. The matrices are indeed
-        treated as linear array
+        Compute a chunk of the similarity score matrices.
+
+        The chunk spans linear indices ``a`` to ``b`` (inclusive) of the
+        upper-triangle of the symmetric score matrix stored as a flat array.
 
         Parameters
         ----------
         a : int
-           the start index of the chunk
+          Start linear index of the chunk to compute.
         b : int
-           the final index of the chunk
-        strict_mtx: python multiprocessing array
-
-           strict similarity score matrix. This array is used as shared memory
-           array managed by the different allocated processes. Each process
-           operates on a separate chunk selected by the indexes a and b
-
-        loose_mtx: python multiprocessing array
-           loose similarity score matrix. This array is used as shared memory
-           array managed by the different allocated processes. Each process
-           operates on a separate chunk selected by the indexes a and b
-
-        true_strict_mtx: python multiprocessing array
-           Holds the strict score *before* that is potentially
-           modified by the prespecified link function (which sets the link score to 1.0).
-
-        MCS_map: dict (multiprocessing)
-            Holds a dict of (index tuple) -> string with the strings being the
-            MCS atom index map between the two molecules
-
+          End linear index (inclusive) of the chunk to compute.
+        strict_mtx : SMatrix or multiprocessing.Array
+          Flat array for strict similarity scores, shared across processes.
+        loose_mtx : SMatrix or multiprocessing.Array
+          Flat array for loose similarity scores, shared across processes.
+        true_strict_mtx : SMatrix or multiprocessing.Array
+          Flat array that stores the strict score before any forced-link
+          override is applied.
+        MCS_map : dict[tuple[int, int], str] or multiprocessing.managers.DictProxy
+          Mapping from molecule-index pairs to their MCS atom-index map
+          strings, shared across processes.
         """
 
         # name = multiprocessing.current_process().name
@@ -669,11 +817,18 @@ class DBMolecules:
 
         return
 
-    def build_matrices(self):
+    def build_matrices(self) -> tuple[SMatrix, SMatrix]:
         """
-        This function coordinates the calculation of the similarity score matrices
-        by distributing chunks of the matrices between the allocated processes
+        Compute the pairwise similarity score matrices for all loaded molecules.
 
+        Distributes work across processes according to the ``parallel`` option
+        set at construction time.
+
+        Returns
+        -------
+        tuple[SMatrix, SMatrix]
+          A pair ``(strict_mtx, loose_mtx)`` of symmetric score matrices stored
+          as flat :class:`SMatrix` arrays.
         """
 
         logging.info("\nMatrix scoring in progress....\n")
@@ -761,10 +916,18 @@ class DBMolecules:
 
         return self.strict_mtx, self.loose_mtx
 
-    def build_graph(self):
+    def build_graph(self) -> nx.Graph:
         """
-        This function coordinates the Graph generation
+        Build the perturbation network graph from the computed score matrices.
 
+        Uses the strict score matrix and the graph settings supplied at
+        construction time.  Optionally writes output files and displays the
+        graph.
+
+        Returns
+        -------
+        nx.Graph
+          The generated perturbation network graph.
         """
         logging.info("\nGenerating graph in progress....")
 
@@ -806,11 +969,17 @@ class DBMolecules:
 
         return self.Graph
 
-    def write_dic(self):
+    def write_dic(self) -> None:
         """
-        This function writes out a text file with the mapping between the
-        generated molecule indexes and the corresponding molecule file names
+        Write the molecule index-to-filename mapping to a text file.
 
+        The output file is named ``<name>.txt`` where ``name`` is the prefix
+        set at construction time.
+
+        Raises
+        ------
+        OSError
+          If the output file cannot be opened for writing.
         """
 
         try:
@@ -833,7 +1002,15 @@ class SMatrix(np.ndarray):
 
     """
 
-    def __new__(subtype, shape, dtype=float, buffer=None, offset=0, strides=None, order=None):
+    def __new__(
+        subtype: type[SMatrix],
+        shape: tuple[int, ...],
+        dtype: type = float,
+        buffer: np.ndarray | None = None,
+        offset: int = 0,
+        strides: tuple[int, ...] | None = None,
+        order: str | None = None,
+    ) -> SMatrix:
         if len(shape) > 2:
             raise ValueError("The matrix shape is greater than two")
 
@@ -852,21 +1029,32 @@ class SMatrix(np.ndarray):
 
         return obj
 
-    def __getitem__(self, *kargs):
+    def __getitem__(self, *kargs: Any) -> float | np.ndarray:
         """
-        This function retrieves the selected elements i,j from the symmetric
-        matrix A[i,j]
+        Retrieve one or more elements from the symmetric matrix.
+
+        Supports three calling forms:
+
+        * ``A[k]`` — linear index into the flat storage array.
+        * ``A[i:j]`` — slice of the flat storage array.
+        * ``A[i, j]`` — element at row ``i``, column ``j`` of the square
+          matrix (returns 0.0 when ``i == j``).
 
         Parameters
         ----------
-        *kargs : python tuples
-           the passed elements i,j
+        *kargs : int or slice or tuple[int, int]
+          Index, slice, or pair of row/column indices.
 
         Returns
         -------
-            : float
-            the selected element extracted from the allocated linear array
+        float or np.ndarray
+          Scalar element or array slice from the flat storage array.
 
+        Raises
+        ------
+        ValueError
+          If more than two matrix indices are provided, or if an index is
+          out of bounds.
         """
 
         if isinstance(kargs[0], int):
@@ -903,15 +1091,26 @@ class SMatrix(np.ndarray):
 
         return super().__getitem__(k)
 
-    def __setitem__(self, *kargs):
+    def __setitem__(self, *kargs: Any) -> None:
         """
-        This function set the matrix elements i,j to the passed value
+        Set one or more elements in the symmetric matrix.
+
+        Supports three calling forms:
+
+        * ``A[k] = v`` — set a single element by linear index.
+        * ``A[i:j] = v`` — set a slice of the flat storage array.
+        * ``A[i, j] = v`` — set the element at row ``i``, column ``j``.
 
         Parameters
         ----------
-        *kargs : python tuples
-           the passed elements i,j, value to set
+        *kargs : int or slice or tuple[int, int], followed by the value
+          Index/slice and the value to assign.
 
+        Raises
+        ------
+        ValueError
+          If more than two matrix indices are provided, or if an index is
+          out of bounds.
         """
 
         if isinstance(kargs[0], int):
@@ -947,17 +1146,15 @@ class SMatrix(np.ndarray):
             k = int((n * (n - 1) / 2) - (n - j) * ((n - j) - 1) / 2 + i - j - 1)
         super().__setitem__(k, value)
 
-    def to_numpy_2D_array(self):
+    def to_numpy_2D_array(self) -> np.ndarray:
         """
-        This function returns the symmetric similarity score numpy matrix
-        generated from the linear array
+        Expand the flat storage array into a full symmetric 2D numpy array.
 
         Returns
         -------
-        np_mat : numpy matrix
-           the symmetric similarity score numpy matrix built by using the linear
-           array
-
+        np.ndarray
+          Square symmetric matrix of shape ``(n, n)`` where ``n`` is the
+          number of molecules.
         """
 
         # Total number of elements in the corresponding bi-dimensional symmetric matrix
@@ -972,15 +1169,14 @@ class SMatrix(np.ndarray):
 
         return np_mat
 
-    def mat_size(self):
+    def mat_size(self) -> int:
         """
-        This function returns the size of the square similarity score matrix
+        Return the side length of the equivalent square matrix.
 
         Returns
         -------
-        n : int
-           the size of the similarity score matrix
-
+        int
+          Number of rows (and columns) in the corresponding square matrix.
         """
 
         # Total number of elements in the corresponding bi-dimensional symmetric matrix
@@ -997,21 +1193,24 @@ class Molecule:
 
     """
 
-    def __init__(self, molecule, mol_id, molname):
+    def __init__(self, molecule: Chem.rdchem.Mol, mol_id: int, molname: str) -> None:
         """
-        Initialization class function
+        Initialise a Molecule wrapper.
 
         Parameters
         ----------
-        molecule : Rdkit molecule object
-           the molecule
-
+        molecule : Chem.rdchem.Mol
+          The RDKit molecule object to wrap.
         mol_id : int
-           the molecule identification number
-
+          Unique integer identifier for this molecule.
         molname : str
-           the molecule file name
+          File name (basename) associated with this molecule.
 
+        Raises
+        ------
+        ValueError
+          If ``molecule`` is not an RDKit molecule or ``molname`` is not a
+          string.
         """
 
         # Check Inputs
@@ -1037,61 +1236,62 @@ class Molecule:
         # The variable is defined as private
         self.__active = False
 
-    def getID(self):
+    def getID(self) -> int:
         """
-        Get the molecule ID number
+        Return the molecule's integer identifier.
 
         Returns
         -------
-           : int
-           the molecule ID number
-
+        int
+          Unique identifier assigned to this molecule.
         """
         return self.__ID
 
-    def getMolecule(self):
+    def getMolecule(self) -> Chem.Mol:
         """
-        Get the Rdkit molecule object
+        Return a copy of the underlying RDKit molecule object.
 
         Returns
         -------
-        mol_copy : Rdkit molecule object
-           The copy of the RDkit molecule
-
+        Chem.Mol
+          A copy of the stored RDKit molecule.
         """
         mol_copy = Chem.Mol(self.__molecule)
         return mol_copy
 
-    def getName(self):
+    def getName(self) -> str:
         """
-        Get the molecule file name
+        Return the molecule's file name.
 
         Returns
         -------
-           : str
-           the molecule string file name
-
+        str
+          Basename of the file from which this molecule was loaded.
         """
 
         return self.__name
 
-    def isActive(self):
+    def isActive(self) -> bool:
         """
-        Get whether the molecule is active
+        Return whether this molecule is a known active.
 
         Returns
         -------
-           : bool
-           the molecule active status
-
+        bool
+          ``True`` if this molecule has been marked as a known active.
         """
 
         return self.__active
 
-    def setActive(self, active):
+    def setActive(self, active: bool) -> None:
         """
-        Set whether the molecule is active
+        Mark or unmark this molecule as a known active.
 
+        Parameters
+        ----------
+        active : bool
+          Pass ``True`` to mark the molecule as a known active, ``False``
+          to unmark it.
         """
 
         self.__active = active
@@ -1101,13 +1301,19 @@ class CheckDir(argparse.Action):
     # Classes used to check some of the passed user options in the main function
     # Class used to check the input directory
     @classmethod
-    def _check_directory(cls, directory):
+    def _check_directory(cls, directory: str) -> None:
         if not os.path.isdir(directory):
             raise argparse.ArgumentTypeError(f"The directory name is not a valid path: {directory}")
         if not os.access(directory, os.R_OK):
             raise argparse.ArgumentTypeError(f"The directory name is not readable: {directory}")
 
-    def __call__(self, parser, namespace, directory, option_string=None):
+    def __call__(
+        self,
+        parser: argparse.ArgumentParser,
+        namespace: argparse.Namespace,
+        directory: str,
+        option_string: str | None = None,
+    ) -> None:
         self._check_directory(directory)
         setattr(namespace, self.dest, directory)
 
@@ -1115,11 +1321,17 @@ class CheckDir(argparse.Action):
 class CheckPos(argparse.Action):
     # Class used to check the parallel, time and max user options
     @classmethod
-    def _check(cls, value):
+    def _check(cls, value: int) -> None:
         if value < 1:
             raise argparse.ArgumentTypeError(f"{value} is not a positive integer number")
 
-    def __call__(self, parser, namespace, value, option_string=None):
+    def __call__(
+        self,
+        parser: argparse.ArgumentParser,
+        namespace: argparse.Namespace,
+        value: int,
+        option_string: str | None = None,
+    ) -> None:
         self._check(value)
         setattr(namespace, self.dest, value)
 
@@ -1127,11 +1339,17 @@ class CheckPos(argparse.Action):
 class CheckCutoff(argparse.Action):
     # Class used to check the cutoff user option
     @classmethod
-    def _check(cls, value):
+    def _check(cls, value: float) -> None:
         if not isinstance(value, float) or value < 0.0:
             raise argparse.ArgumentTypeError(f"{value} is not a positive real number")
 
-    def __call__(self, parser, namespace, value, option_string=None):
+    def __call__(
+        self,
+        parser: argparse.ArgumentParser,
+        namespace: argparse.Namespace,
+        value: float,
+        option_string: str | None = None,
+    ) -> None:
         self._check(value)
         setattr(namespace, self.dest, value)
 
@@ -1139,18 +1357,24 @@ class CheckCutoff(argparse.Action):
 class CheckEcrscore(argparse.Action):
     # Class used to check the handicap user option
     @classmethod
-    def _check(cls, value):
+    def _check(cls, value: float) -> None:
         if not isinstance(value, float) or value < 0.0 or value > 1.0:
             raise argparse.ArgumentTypeError(
                 f"{value} is not a real number in the range [0.0, 1.0]"
             )
 
-    def __call__(self, parser, namespace, value, option_string=None):
+    def __call__(
+        self,
+        parser: argparse.ArgumentParser,
+        namespace: argparse.Namespace,
+        value: float,
+        option_string: str | None = None,
+    ) -> None:
         self._check(value)
         setattr(namespace, self.dest, value)
 
 
-def startup():
+def startup() -> None:
     # Emit user-facing warning that the CLI is deprecated and will be removed
     warnings.warn(
         "The dbmol CLI is deprecated and will be removed in the next major release. "
@@ -1190,30 +1414,30 @@ def startup():
 
 
 def _startup_inner(
-    directory,  # TODO: Should really constant out the CLI constants to keep this DRY
-    parallel=1,
-    verbose="info",
-    time=20,
-    ecrscore=0.0,
-    threed=False,
-    max3d=1000,
-    element_change=True,
-    output=True,
-    name="out",
-    output_no_images=False,
-    output_no_graph=False,
-    display=False,
-    allow_tree=False,
-    max=6,
-    max_dist_from_actives=2,
-    cutoff=0.4,
-    radial=False,
-    hub=None,
-    fast=False,
-    links_file="",
-    known_actives_file="",
-    common_core=True,
-):
+    directory: str,  # TODO: Should really constant out the CLI constants to keep this DRY
+    parallel: int = 1,
+    verbose: str = "info",
+    time: int = 20,
+    ecrscore: float = 0.0,
+    threed: bool = False,
+    max3d: float = 1000,
+    element_change: bool = True,
+    output: bool = True,
+    name: str = "out",
+    output_no_images: bool = False,
+    output_no_graph: bool = False,
+    display: bool = False,
+    allow_tree: bool = False,
+    max: int = 6,
+    max_dist_from_actives: int = 2,
+    cutoff: float = 0.4,
+    radial: bool = False,
+    hub: str | None = None,
+    fast: bool = False,
+    links_file: str = "",
+    known_actives_file: str = "",
+    common_core: bool = True,
+) -> None:
     # Inside function of CLI interface, for start of "library" like calling
 
     # Molecule DataBase initialized with the passed user options
