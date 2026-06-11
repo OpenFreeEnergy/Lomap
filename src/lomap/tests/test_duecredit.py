@@ -35,9 +35,7 @@ def require_duecredit():
 def two_smcs():
     data_path = importlib.resources.files("lomap.tests.basic")
     mols = [
-        gufe.SmallMoleculeComponent(
-            Chem.MolFromMol2File(str(data_path / f), removeHs=False)
-        )
+        gufe.SmallMoleculeComponent(Chem.MolFromMol2File(str(data_path / f), removeHs=False))
         for f in ("toluene.mol2", "2-methylnaphthalene.mol2")
     ]
     return mols
@@ -63,8 +61,8 @@ class TestDuecredit:
 
     @pytest.mark.skipif(not HAS_GUFE, reason="requires gufe")
     def test_mapper_citation(self, two_smcs):
-        from lomap._due import due
         from lomap import LomapAtomMapper
+        from lomap._due import due
 
         mapper = LomapAtomMapper()
         list(mapper.suggest_mappings(*two_smcs))
@@ -73,8 +71,8 @@ class TestDuecredit:
 
     @pytest.mark.skipif(not HAS_GUFE, reason="requires gufe")
     def test_network_generation_citation(self, two_smcs):
-        from lomap._due import due
         from lomap import LomapAtomMapper, default_lomap_score, generate_lomap_network
+        from lomap._due import due
 
         generate_lomap_network(
             ligands=two_smcs,

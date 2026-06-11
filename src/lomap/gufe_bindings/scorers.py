@@ -12,8 +12,8 @@ except ImportError:
 
 from lomap import dbmol as _dbmol
 from lomap import mcs as lomap_mcs
-from lomap.utils import requires_package
 from lomap._due import Doi, due
+from lomap.utils import requires_package
 
 DEFAULT_ANS_DIFFICULTY = {
     # H to element - not sure this has any effect currently
