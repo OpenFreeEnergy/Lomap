@@ -3,6 +3,7 @@ from __future__ import annotations
 import itertools
 import logging
 from collections.abc import Callable
+import warnings
 
 import networkx as nx
 import numpy as np
@@ -39,6 +40,7 @@ def generate_lomap_network(
     radial: bool = False,
     fast: bool = False,
     hub: SmallMoleculeComponent | None = None,
+    allow_disconnected: bool = False,
 ) -> LigandNetwork:
     """Generate a LigandNetwork according to Lomap's network creation rules
 
@@ -81,6 +83,8 @@ def generate_lomap_network(
       less optimal network.
     hub : SmallMoleculeComponent | None, default None
       If radial is ``True``, force this ligand to be the center/hub of the radial graph.
+    allow_disconnected : bool, default False
+      If ``True``, alow the creation of a disconnected network.
     """
     if not mappers:
         raise ValueError("At least one Mapper must be provided")
@@ -143,5 +147,12 @@ def generate_lomap_network(
         edges=[mps[i, j] for i, j in n.edges],
         nodes=ligands,
     )
+
+    if not ln.is_connected():
+        if not allow_disconnected:
+            errmsg = "Failed to create a connected network where all nodes are either directly or undirectly connected to each other."
+            raise RuntimeError(errmsg)
+        wmsg = "Could not generate a connected network - not all nodes are directly or undirectly connected to each other."
+        warnings.warn(wmsg)
 
     return ln
