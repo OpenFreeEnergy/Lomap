@@ -60,7 +60,6 @@ jobs:
           cache-downloads: true
           create-args: >-
             python=${{ matrix.python-version }}
-            duecredit
           init-shell: bash
 
       - name: "Install optional gufe"
