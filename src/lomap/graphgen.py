@@ -12,7 +12,7 @@ discovery efforts. However, applications of these techniques in discovery
 projects have been relatively few, partly because of the difficulty of planning
 and setting up calculations. The Lead Optimization Mapper (LOMAP) is an
 automated algorithm to plan efficient relative free energy calculations between
-potential ligands within a substantial set of compounds.
+potential molecules within a substantial set of molecules.
 
 """
 
@@ -135,15 +135,15 @@ class GraphGen:
           Indices for each molecule. Should be the same length as ``score_matrix``.
           These ids are used as the ``'ID'`` attribute in the resulting graph.
         names : list[str]
-          List of string identifiers for each ligand.
+          List of string identifiers for each molecule.
           These names are used as the ``'fname_comp'`` attribute in the resulting graph.
         max_path_length : int
-          The maximum allowed shortest path length between any two compounds in the graph.
+          The maximum allowed shortest path length between any two molecules in the graph.
         actives : list[bool]
-          For each ligand in input, whether it is considered active. Used in conjunction
+          For each molecule in input, whether it is considered active. Used in conjunction
           with the ``max_dist_from_active`` argument.
         max_dist_from_active : int
-          The maximum allowed shortest path length from any compound to the nearest active compound.
+          The maximum allowed shortest path length from any molecule to the nearest active molecule.
         similarity_cutoff : float
           The value above which edges must be to be considered viable. ``0.0`` would allow all edges.
         require_cycle_covering : bool
@@ -153,7 +153,7 @@ class GraphGen:
         fast : bool
           If ``True``, use the faster radial-only algorithm (requires ``radial=True``).
         hub : str, optional
-          The **name** of the ligand to use as the center of the hub.
+          The **name** of the molecule to use as the center of the hub.
         """
         self.score_matrix = score_matrix
         self.maxPathLength = max_path_length
@@ -247,12 +247,12 @@ class GraphGen:
 
     @staticmethod
     def pick_lead(hub: str | None, names: list[str], strict_mtx: np.ndarray) -> int | None:
-        """Pick a lead compound.
+        """Pick a lead molecule.
 
         Parameters
         ----------
         hub : str | None
-          The name of the desired hub compound, or ``None`` to auto-select.
+          The name of the desired hub molecule, or ``None`` to auto-select.
         names : list[str]
           Names of each molecule.
         strict_mtx : np.ndarray
@@ -261,7 +261,7 @@ class GraphGen:
         Returns
         -------
         int | None
-          The index of the lead compound, or ``None`` if no suitable hub was found.
+          The index of the lead molecule, or ``None`` if no suitable hub was found.
         """
         # TODO: remove support for "None" string for hub in next release
         if hub == "None":
@@ -273,20 +273,20 @@ class GraphGen:
             hub = None
 
         if hub is not None:
-            # hub radial option. Use the provided reference compound as a hub
+            # hub radial option. Use the provided reference molecule as a hub
             hub_index = None
             for i, nm in enumerate(names):
                 if os.path.basename(nm) == hub:
                     hub_index = i
             if hub_index is None:
                 logging.info(
-                    f"Warning: the specified center ligand {hub} is not in the "
-                    "ligand database, will not use the radial option."
+                    f"Warning: the specified center molecule {hub} is not in the "
+                    "molecule database, will not use the radial option."
                 )
             return hub_index
         else:
             # complete radial option.
-            # Pick the compound with the highest total similarity to all other compounds to use as a hub
+            # Pick the molecule with the highest total similarity to all other molecules to use as a hub
             N = len(names)
             all_sum_i = []
             for i in range(N):
@@ -310,7 +310,7 @@ class GraphGen:
     ) -> list[nx.Graph]:
         """
         Generate a starting graph with edges connecting all the
-        compounds with a positive strict similarity score.
+        molecules with a positive strict similarity score.
 
         Parameters
         ----------
@@ -325,7 +325,7 @@ class GraphGen:
         is_active : list[bool]
           For each molecule, whether it is active.
         lead_index : int | None
-          The index of the lead compound; cannot be ``None`` if ``fast_map`` is ``True``.
+          The index of the lead molecule; cannot be ``None`` if ``fast_map`` is ``True``.
 
         Returns
         -------
@@ -508,7 +508,7 @@ class GraphGen:
                 for edge in weightsList:
                     if self.lead_index is not None:
                         # Here the radial option is applied, will check if the remove_edge is connect to
-                        # the hub(lead) compound, if the edge is connected to the lead compound,
+                        # the hub(lead) molecule, if the edge is connected to the lead molecule,
                         # then add it back into the graph.
                         if self.lead_index not in [edge[0], edge[1]]:
                             subgraph.remove_edge(edge[0], edge[1])
@@ -551,19 +551,19 @@ class GraphGen:
         score_matrix : np.ndarray
           Matrix of similarity scores between molecules.
         lead_index : int
-          The index of the lead (hub) compound.
+          The index of the lead (hub) molecule.
         similarity_score_limit : float
           The minimum similarity score threshold for adding edges.
 
         Returns
         -------
         nx.Graph
-          The subgraph containing the lead compound, with surrounding edges added.
+          The subgraph containing the lead molecule, with surrounding edges added.
         """
         for subgraph in subgraphs:
             subgraph_nodes = subgraph.nodes()
             if lead_index in subgraph_nodes:
-                # here we only consider the subgraph with lead compound
+                # here we only consider the subgraph with lead molecule
                 self.nonCycleNodesSet = find_non_cyclic_nodes(subgraph)
                 self.nonCycleEdgesSet = find_non_cyclic_edges(subgraph)
                 for node in self.nonCycleNodesSet:
@@ -693,8 +693,8 @@ class GraphGen:
     @staticmethod
     def check_max_distance(subgraph: nx.Graph, max_path_length: int) -> bool:
         """
-        Check to see if the graph has paths from all compounds to all other
-        compounds within the specified limit.
+        Check to see if the graph has paths from all molecules to all other
+        molecules within the specified limit.
 
         Parameters
         ----------
@@ -722,7 +722,7 @@ class GraphGen:
     @staticmethod
     def count_distance_to_active_failures(subgraph: nx.Graph, max_dist_from_active: int) -> int:
         """
-        Count the number of compounds that don't have a minimum-length path to an active
+        Count the number of molecules that don't have a minimum-length path to an active
         within the specified limit.
 
         Parameters
@@ -730,7 +730,7 @@ class GraphGen:
         subgraph : nx.Graph
           The subgraph to check for distance to active nodes.
         max_dist_from_active : int
-          The maximum allowed shortest path length from any compound to the nearest active.
+          The maximum allowed shortest path length from any molecule to the nearest active.
 
         Returns
         -------
@@ -775,7 +775,7 @@ class GraphGen:
         distance_to_active_failures : int
           The current count of nodes that fail the distance-to-active check.
         max_distance_from_active : int
-          The maximum allowed shortest path length from any compound to the nearest active.
+          The maximum allowed shortest path length from any molecule to the nearest active.
 
         Returns
         -------
@@ -983,7 +983,7 @@ class GraphGen:
         dbase : DBMolecules
           The molecule database object.
         max_images : int
-          Max number of displayed chemical compound images as graph nodes.
+          Max number of displayed chemical molecule images as graph nodes.
         max_mol_size : float
           The maximum threshold distance in angstroms used to select if a molecule is depicted.
         edge_labels : bool
@@ -1034,7 +1034,7 @@ class GraphGen:
 
                 if max_dist < max_mol_size:
                     fname = os.path.join(directory_name, dbase[id_mol].getName() + ".png")
-                    # 1, modify here to calculate the 2D structure for ligands cannot remove Hydrogens by rdkit
+                    # 1, modify here to calculate the 2D structure for molecules cannot remove Hydrogens by rdkit
                     # 2, change the graph size to get better resolution
                     try:
                         mol = Chem.RemoveHs(mol)
@@ -1091,7 +1091,7 @@ class GraphGen:
         dbase : DBMolecules
           The molecule database object.
         """
-        # pass the lead compound index if the radial option is on and generate the
+        # pass the lead molecule index if the radial option is on and generate the
         # morph type of output required by FESetup
         if self.lead_index is not None:
             morph_txt = open(dbase.options["name"] + "_morph.txt", "w")
@@ -1131,7 +1131,7 @@ class GraphGen:
                     true_strict_similarity = dbase.true_strict_mtx[i, j]
                     if connected:
                         new_line = f"{str(i):<10},{str(j):<10},{Filename_i:<25},{Filename_j:<25},{true_strict_similarity:<15.5f},{strict_similarity:<15.5f},{loose_similarity:<15.5f},{'Yes':<10},{mapString}\n"
-                        # generate the morph type, and pick the start ligand based on the similarity
+                        # generate the morph type, and pick the start molecule based on the similarity
                         if self.lead_index is not None:
                             morph_i = Filename_i.split(".")[0]
                             morph_j = Filename_j.split(".")[0]
@@ -1140,8 +1140,8 @@ class GraphGen:
                             elif j == self.lead_index:
                                 morph_string = f"{morph_j} > {morph_i}, "
                             else:
-                                # compare i and j with the lead compound, and
-                                # pick the one with the higher similarity as the start ligand
+                                # compare i and j with the lead molecule, and
+                                # pick the one with the higher similarity as the start molecule
                                 similarity_i = dbase.strict_mtx[self.lead_index, i]
                                 similarity_j = dbase.strict_mtx[self.lead_index, j]
                                 if similarity_i > similarity_j:
@@ -1173,7 +1173,7 @@ class GraphGen:
     ) -> None:
         """
         Write the final generated NetworkX graph as ``.dot`` and the ``.ps`` files.
-        The mapping between molecule IDs and compounds name is saved as text file.
+        The mapping between molecule IDs and molecules name is saved as text file.
 
         Parameters
         ----------
@@ -1228,7 +1228,7 @@ class GraphGen:
         dbase : DBMolecules
           The molecule database object.
         max_images : int
-          Max number of displayed chemical compound images as graph nodes.
+          Max number of displayed chemical molecule images as graph nodes.
         max_nodes : int
           Max number of displayed nodes in the graph.
         edge_labels : bool
