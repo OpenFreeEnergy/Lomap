@@ -84,7 +84,7 @@ def generate_lomap_network(
     hub : SmallMoleculeComponent | None, default None
       If radial is ``True``, force this ligand to be the center/hub of the radial graph.
     allow_disconnected : bool, default False
-      If ``True``, alow the creation of a disconnected network.
+      If ``True``, allow the creation of a disconnected network.
     """
     if not mappers:
         raise ValueError("At least one Mapper must be provided")
