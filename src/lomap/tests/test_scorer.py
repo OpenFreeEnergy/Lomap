@@ -62,14 +62,27 @@ def test_nogufe_errors(method):
 
 
 @pytest.mark.skipif(not HAS_GUFE, reason="requires gufe installed")
-def test_unconnected_lomap_network(smcs):
-    network = lomap.generate_lomap_network(
-        molecules=smcs,
-        mappers=lomap.LomapAtomMapper(),
-        scorer=partial(lomap.default_lomap_score, charge_changes_score=0.0),
-    )
+def test_unconnected_lomap_network_warn(smcs):
+    with pytest.warns(UserWarning, match="Could not generate a connected network"):
+        network = lomap.generate_lomap_network(
+            molecules=smcs,
+            mappers=lomap.LomapAtomMapper(),
+            scorer=partial(lomap.default_lomap_score, charge_changes_score=0.0),
+            allow_disconnected=True,
+        )
 
     assert not network.is_connected()
+
+
+@pytest.mark.skipif(not HAS_GUFE, reason="requires gufe installed")
+def test_unconnected_lomap_network_error(smcs):
+    with pytest.raises(RuntimeError, match="Failed to create a connected network"):
+        network = lomap.generate_lomap_network(
+            molecules=smcs,
+            mappers=lomap.LomapAtomMapper(),
+            scorer=partial(lomap.default_lomap_score, charge_changes_score=0.0),
+            allow_disconnected=False,
+        )
 
 
 @pytest.mark.skipif(not HAS_GUFE, reason="requires gufe installed")

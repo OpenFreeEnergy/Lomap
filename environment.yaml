@@ -9,3 +9,7 @@ dependencies:
   - rdkit != 2024.03.4, != 2026.03.3
   - pytest
   - codecov
+  - gufe
+  - python=3.13
+  - mypy
+  - types-networkx

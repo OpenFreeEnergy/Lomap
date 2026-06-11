@@ -54,6 +54,7 @@ def test_generate_network_smoketest(basic):
             molecules=basic,
             mappers=lomap.LomapAtomMapper(),
             scorer=lomap.default_lomap_score,
+            allow_disconnected=True,
         )
 
         assert isinstance(network, gufe.LigandNetwork)
