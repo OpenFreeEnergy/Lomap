@@ -28,6 +28,7 @@ potential ligands within a substantial set of compounds.
 #
 # *****************************************************************************
 from __future__ import annotations
+
 import copy
 import logging
 import os.path
@@ -271,7 +272,7 @@ class GraphGen:
             warnings.warn(msg, DeprecationWarning)
             hub = None
 
-        if not hub is None:
+        if hub is not None:
             # hub radial option. Use the provided reference compound as a hub
             hub_index = None
             for i, nm in enumerate(names):
