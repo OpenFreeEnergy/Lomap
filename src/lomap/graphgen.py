@@ -102,7 +102,7 @@ def find_non_cyclic_edges(subgraph: nx.Graph) -> set[tuple[int, int]]:
 
 
 class GraphGen:
-    """This class is used to set and generate the graph used to plan binding free energy calculation
+    """This class is used to set and generate the graph used to plan binding free energy calculation.
 
     Notes
     -----
@@ -126,7 +126,6 @@ class GraphGen:
         hub: str | None = None,
     ):
         """
-
         Parameters
         ----------
         score_matrix : np.ndarray
@@ -154,6 +153,13 @@ class GraphGen:
           If ``True``, use the faster radial-only algorithm (requires ``radial=True``).
         hub : str, optional
           The **name** of the molecule to use as the center of the hub.
+
+        Attributes
+        ----------
+        resultGraph : nx.Graph
+          The generated Lomap graph.
+        lead_index : int | None
+          The index of the lead (central) molecule, if available.
         """
         self.score_matrix = score_matrix
         self.maxPathLength = max_path_length
