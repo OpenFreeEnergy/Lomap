@@ -35,7 +35,7 @@ import os
 import pickle
 import warnings
 from collections.abc import Iterator, Sequence
-from typing import Any
+from typing import Any, Literal
 
 import networkx as nx
 import numpy as np
@@ -52,8 +52,8 @@ def formal_charge(mol: Chem.Mol) -> float:
     """
     Compute the total formal charge of a molecule.
 
-    For mol2 files, sums the ``_TriposPartialCharge`` atom property; for SDF
-    files, sums RDKit formal charges.
+    For mol2 files, sums the ``_TriposPartialCharge`` atom property; for
+    other file types (e.g. SDF files), sums RDKit obtained ``GetFormalCharge()`` formal charges.
 
     Parameters
     ----------
@@ -162,7 +162,7 @@ class DBMolecules:
         self,
         directory: str,
         parallel: int = 1,
-        verbose: str = "off",
+        verbose: Literal["off", "info", "pedantic"] = "off",
         time: int = 20,
         ecrscore: float = 0.0,
         threed: bool = False,
@@ -193,7 +193,7 @@ class DBMolecules:
         directory : str
           Path to the directory containing mol2 and/or sdf input files.
         parallel : int, default 1
-          Number of processes to use when computing the similarity matrices.
+          Number of processes to use when computing the similarity score matrices.
         verbose : str, default 'off'
           Logging verbosity; one of ``'off'``, ``'info'``, or ``'pedantic'``.
         time : int, default 20
@@ -207,7 +207,7 @@ class DBMolecules:
           the one with the best real-space 3D alignment.
         max3d : float, default 1000.0
           MCS atom pairs further apart than this distance (Angstrom) are
-          removed. The default is effectively no filter.
+          removed. The default of 1000.0 is effectively no filter.
         element_change : bool, default True
           If ``True``, allow element changes between mapped atoms.
         output : bool, default False
@@ -232,7 +232,9 @@ class DBMolecules:
         hub : str or None, default None
           Name of the molecule to use as the hub in a radial graph.
         fast : bool, default False
-          If ``True``, use fast graph building when a hub compound is set.
+          If ``True``, use fast graph building when creating a radial graph.
+          If ``radial`` is not ``True`` and ``hub`` is not set, this
+          will be ignored.
         links_file : str or None, default None
           Path to a file listing molecule pairs that should be seeded as
           links in the graph.
@@ -356,7 +358,7 @@ class DBMolecules:
 
     def __iter__(self) -> Iterator[Molecule]:
         """
-        Return the iterator object (self).
+        Iterate through the database.
 
         Returns
         -------
@@ -370,7 +372,7 @@ class DBMolecules:
 
     def next(self) -> Molecule:
         """
-        Return the next molecule in the iteration sequence.
+        Return the next molecule in the database sequence.
 
         Returns
         -------
@@ -560,7 +562,7 @@ class DBMolecules:
         Raises
         ------
         OSError
-          If the file has a syntax error or references an unknown molecule name.
+          If the file has a syntax error or references an unknown molecule file.
         """
         try:
             with open(links_file) as lf:
@@ -609,7 +611,7 @@ class DBMolecules:
         Raises
         ------
         OSError
-          If the file references an unknown molecule name.
+          If the file references an unknown molecule file name.
         """
         try:
             with open(actives_file) as lf:
@@ -632,10 +634,6 @@ class DBMolecules:
         """
         Store the MCS atom-index map string for a molecule pair.
 
-        The pair is stored with the lower index first so that
-        ``set_MCSmap(i, j, ...)`` and ``set_MCSmap(j, i, ...)`` address the
-        same entry.
-
         Parameters
         ----------
         i : int
@@ -644,6 +642,12 @@ class DBMolecules:
           Index of the second molecule.
         MCmap : str
           Serialised MCS atom-index map between the two molecules.
+
+        Notes
+        -----
+        The pair is stored with the lower index first so that
+        ``set_MCSmap(i, j, ...)`` and ``set_MCSmap(j, i, ...)`` address the
+        same entry.
         """
         if i < j:
             idx = (i, j)
@@ -694,19 +698,21 @@ class DBMolecules:
         Parameters
         ----------
         a : int
-          Start linear index of the chunk to compute.
+          Start index of the chunk to compute.
         b : int
-          End linear index (inclusive) of the chunk to compute.
+          End index (inclusive) of the chunk to compute.
         strict_mtx : SMatrix or multiprocessing.Array
           Flat array for strict similarity scores, shared across processes.
-        loose_mtx : SMatrix or multiprocessing.Array
+          Can be ``multiprocessing.Array``.
+        loose_mtx : SMatrix | Any
           Flat array for loose similarity scores, shared across processes.
-        true_strict_mtx : SMatrix or multiprocessing.Array
+          Can be ``multiprocessing.Array``.
+        true_strict_mtx : SMatrix | Any
           Flat array that stores the strict score before any forced-link
-          override is applied.
-        MCS_map : dict[tuple[int, int], str] or multiprocessing.managers.DictProxy
+          override is applied. Can be ``multiprocecssing.Array``.
+        MCS_map : dict[tuple[int, int], str] | Any
           Mapping from molecule-index pairs to their MCS atom-index map
-          strings, shared across processes.
+          strings, shared across processes. Can be multiprocessing dict.
         """
 
         # name = multiprocessing.current_process().name
@@ -821,8 +827,7 @@ class DBMolecules:
         """
         Compute the pairwise similarity score matrices for all loaded molecules.
 
-        Distributes work across processes according to the ``parallel`` option
-        set at construction time.
+        Work will be distributed between ``self.parallel`` processes.
 
         Returns
         -------
@@ -920,9 +925,7 @@ class DBMolecules:
         """
         Build the perturbation network graph from the computed score matrices.
 
-        Uses the strict score matrix and the graph settings supplied at
-        construction time.  Optionally writes output files and displays the
-        graph.
+        Optionally writes output files and displays the graph.
 
         Returns
         -------
@@ -974,7 +977,7 @@ class DBMolecules:
         Write the molecule index-to-filename mapping to a text file.
 
         The output file is named ``<name>.txt`` where ``name`` is the prefix
-        set at construction time.
+        set at class construction time.
 
         Raises
         ------
@@ -1148,11 +1151,12 @@ class SMatrix(np.ndarray):
 
     def to_numpy_2D_array(self) -> np.ndarray:
         """
-        Expand the flat storage array into a full symmetric 2D numpy array.
+        Return a 2D numpy arrray of the symmetric similarity score from
+        the flat storage array.
 
         Returns
         -------
-        np.ndarray
+        np_mat : np.ndarray
           Square symmetric matrix of shape ``(n, n)`` where ``n`` is the
           number of molecules.
         """
@@ -1195,8 +1199,6 @@ class Molecule:
 
     def __init__(self, molecule: Chem.rdchem.Mol, mol_id: int, molname: str) -> None:
         """
-        Initialise a Molecule wrapper.
-
         Parameters
         ----------
         molecule : Chem.rdchem.Mol
@@ -1268,7 +1270,6 @@ class Molecule:
         str
           Basename of the file from which this molecule was loaded.
         """
-
         return self.__name
 
     def isActive(self) -> bool:
@@ -1280,7 +1281,6 @@ class Molecule:
         bool
           ``True`` if this molecule has been marked as a known active.
         """
-
         return self.__active
 
     def setActive(self, active: bool) -> None:
@@ -1293,7 +1293,6 @@ class Molecule:
           Pass ``True`` to mark the molecule as a known active, ``False``
           to unmark it.
         """
-
         self.__active = active
 
 
