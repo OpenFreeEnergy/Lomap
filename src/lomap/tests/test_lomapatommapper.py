@@ -49,7 +49,7 @@ def test_repr():
 
     assert repr(m) == (
         "<LomapAtomMapper (time=20, threed=True, max3d=1.0, "
-        "element_change=True, seed=None, shift=False)>"
+        "element_change=True, seed='None', shift=False)>"
     )
 
     m = LomapAtomMapper(time=15, seed="c1ccccc1")
