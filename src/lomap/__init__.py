@@ -15,48 +15,7 @@ Authors: Gaetano Calabro' <gcalabro@uci.edu>
 
 Licence: MIT
 
-URL: https://github.com/nividic/Lomap
-
-
-Using
------
-      Just write in Python
-
-      # Import Lomap
-      import lomap
-
-      # Generate the molecule database starting from
-      # a directory containing .mol2 files
-
-      db_mol = lomap.DBMolecules("lomap/test/basic", output=True)
-
-      # Calculate the similarity matrix between the database
-      # molecules. Two molecules are generated related to the
-      # scrict rule and loose rule
-
-      strict, loose = db_mol.build_matrices()
-
-      # Generate the NetworkX graph and output the results
-      nx_graph = db_mol.build_graph()
-
-
-      # Calculate the Maximum Common Subgraph (MCS) between
-      # the first two molecules in the molecule database
-      # ignoring hydrogens and depicting the mapping in a file
-
-      MC = lomap.MCS.getMapping(db_mol[0].getMolecule(), db_mol[1].getMolecule(), hydrogens=False, fname='mcs.png')
-
-
-      # Alchemical transformation are usually performed between molecules with
-      # the same charges. However, it is possible to allow these transformations
-      # manually setting the electrostatic score for the whole set of molecules
-      # producing a connected graph. The electrostatic scrore must be in the
-      # range [0,1]
-
-
-      db_mol = lomap.DBMolecules("python string pointing to a directory with mol2 files", output=True, ecrscore=0.1)
-      strict, loose = db_mol.build_matrices()
-      nx_graph = db_mol.build_graph()
+URL: https://github.com/OpenFreeEnergy/Lomap
 """
 
 from importlib.metadata import version
