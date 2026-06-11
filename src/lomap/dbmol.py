@@ -872,9 +872,10 @@ class DBMolecules:
             with multiprocessing.Manager() as manager:
                 # Shared memory array used by the different allocated processes
                 # At the moment we're using a combination of Array and Manager, which is nasty
-                strict_mtx = multiprocessing.Array("d", self.strict_mtx)
-                loose_mtx = multiprocessing.Array("d", self.loose_mtx)
-                true_strict_mtx = multiprocessing.Array("d", self.true_strict_mtx)
+                # Note: Ignore the call-overload typing issues for the next three. SMatrix & multiprocessing has odd typing.
+                strict_mtx = multiprocessing.Array("d", self.strict_mtx)  # type: ignore[call-overload]
+                loose_mtx = multiprocessing.Array("d", self.loose_mtx)  # type: ignore[call-overload]
+                true_strict_mtx = multiprocessing.Array("d", self.true_strict_mtx)  # type: ignore[call-overload]
                 MCS_map = manager.dict()  # type: ignore[assignment]
 
                 # Chopping the indexes redistributing the remainder
@@ -1012,7 +1013,7 @@ class SMatrix(np.ndarray):
         buffer: np.ndarray | None = None,
         offset: int = 0,
         strides: tuple[int, ...] | None = None,
-        order: str | None = None,
+        order: Literal['K', 'A', 'C', 'F'] | None = None,
     ) -> SMatrix:
         if len(shape) > 2:
             raise ValueError("The matrix shape is greater than two")
@@ -1028,11 +1029,12 @@ class SMatrix(np.ndarray):
         obj = np.ndarray.__new__(subtype, shape, dtype, buffer, offset, strides, order)
 
         # Array initialization
-        obj = obj * 0.0
+        # Note: ignore assignment typing issue - SMatrix is oddly typed
+        obj = obj * 0.0  # type: ignore[assignment]
 
         return obj
 
-    def __getitem__(self, *kargs: Any) -> float | np.ndarray:
+    def __getitem__(self, *kargs: Any) -> float | np.ndarray:  # type: ignore[override]
         """
         Retrieve one or more elements from the symmetric matrix.
 
@@ -1065,7 +1067,7 @@ class SMatrix(np.ndarray):
             return super().__getitem__(k)
 
         if isinstance(kargs[0], slice):
-            k = kargs[0]
+            k = kargs[0]  # type: ignore[assignment]
             return super().__getitem__(k)
 
         elif len(kargs[0]) > 2:
@@ -1310,7 +1312,7 @@ class CheckDir(argparse.Action):
         self,
         parser: argparse.ArgumentParser,
         namespace: argparse.Namespace,
-        directory: str,
+        directory: str,  # type: ignore[override]
         option_string: str | None = None,
     ) -> None:
         self._check_directory(directory)
@@ -1328,7 +1330,7 @@ class CheckPos(argparse.Action):
         self,
         parser: argparse.ArgumentParser,
         namespace: argparse.Namespace,
-        value: int,
+        value: int,  # type: ignore[override]
         option_string: str | None = None,
     ) -> None:
         self._check(value)
@@ -1346,7 +1348,7 @@ class CheckCutoff(argparse.Action):
         self,
         parser: argparse.ArgumentParser,
         namespace: argparse.Namespace,
-        value: float,
+        value: float,  # type: ignore[override]
         option_string: str | None = None,
     ) -> None:
         self._check(value)
@@ -1366,7 +1368,7 @@ class CheckEcrscore(argparse.Action):
         self,
         parser: argparse.ArgumentParser,
         namespace: argparse.Namespace,
-        value: float,
+        value: float,  # type: ignore[override]
         option_string: str | None = None,
     ) -> None:
         self._check(value)
@@ -1415,7 +1417,7 @@ def startup() -> None:
 def _startup_inner(
     directory: str,  # TODO: Should really constant out the CLI constants to keep this DRY
     parallel: int = 1,
-    verbose: str = "info",
+    verbose: Literal['off', 'info', 'pedantic'] = "info",
     time: int = 20,
     ecrscore: float = 0.0,
     threed: bool = False,
