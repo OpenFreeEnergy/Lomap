@@ -712,8 +712,8 @@ class GraphGen:
 
         for node in subgraph:
             eccentricity = nx.eccentricity(subgraph, node)
-            # eccentricity is {node: distance} so we take that value
-            if eccentricity[node] > max_path_length:
+            # eccentricity is int but mypy thinks int | dict[Any, int]
+            if eccentricity > max_path_length:  # type: ignore[operator]
                 withinMaxDistance = False
                 logging.info(f"Rejecting edge deletion on graph diameter for node {node}")
 
