@@ -7,6 +7,8 @@ try:
     from gufe.tests.test_tokenization import GufeTokenizableTestsMixin
     HAS_GUFE = True
 except ImportError:
+    # Fake assign to object to avoid issues
+    GufeTokenizableTestsMixin = object
     HAS_GUFE = False
 
 
@@ -22,11 +24,7 @@ class TestLomapAtomMapper(GufeTokenizableTestsMixin):
     key = None
     repr = (
         "<LomapAtomMapper (time=20, threed=True, max3d=1.0, "
-<<<<<<< Updated upstream
-        "element_change=True, seed='', shift=False)>"
-=======
         "element_change=True, seed='None', shift=False)>"
->>>>>>> Stashed changes
     )
 
     @pytest.fixture
