@@ -13,6 +13,7 @@ except ImportError:
 from lomap import dbmol as _dbmol
 from lomap import mcs as lomap_mcs
 from lomap.utils import requires_package
+from lomap._due import Doi, due
 
 DEFAULT_ANS_DIFFICULTY = {
     # H to element - not sure this has any effect currently
@@ -26,6 +27,14 @@ DEFAULT_ANS_DIFFICULTY = {
     # Br to element
     35: {53: 0.85},
 }
+
+
+due.cite(
+    Doi("https://doi.org/10.1007/s10822-013-9678-y"),
+    description="LOMAP",
+    path="lomap.gufe_bindings.scorers",
+    cite_module=True,
+)
 
 
 @requires_package("gufe")
