@@ -331,6 +331,11 @@ class GraphGen:
         -------
         initialSubgraphList : list[nx.Graph]
           The list of connected component graphs.
+
+        Raises
+        ------
+        ValueError
+          If ``lead_index`` is not defined and ``fast_map`` is ``True``.
         """
         compound_graph: nx.Graph = nx.Graph()
 
@@ -559,6 +564,11 @@ class GraphGen:
         -------
         nx.Graph
           The subgraph containing the lead molecule, with surrounding edges added.
+
+        Raises
+        ------
+        ValueError
+          If the ``lead_index`` is not in any subgraph.
         """
         for subgraph in subgraphs:
             subgraph_nodes = subgraph.nodes()
@@ -1183,6 +1193,11 @@ class GraphGen:
           If ``True``, do not generate image files.
         output_no_graph : bool
           If ``True``, do not generate the dot graph file.
+
+        Raises
+        ------
+        OSError
+          If database or image writing fails.
         """
 
         try:
