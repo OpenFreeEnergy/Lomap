@@ -123,7 +123,7 @@ class MCS:
         max3d: float = 1000.0,
         threed: bool = False,
         element_change: bool = True,
-        seed: str = "",
+        seed: str | None = None,
         shift: bool = True,
     ) -> None:
         """
@@ -149,9 +149,10 @@ class MCS:
           of elemental changes is minimised.
         element_change : bool, default True
           If ``True``, allow elemental changes in mappings.
-        seed : str, default ""
+        seed : str | None, default None
           SMARTS string to use as seed for MCS searches.  When used across an
           entire set of ligands, this can speed up calculations considerably.
+          If ``None`` an empty string (i.e. no seed) will be passed through.
         shift : bool, default True
           If ``True``, when ``threed`` is also ``True``, translate the
           molecules' coordinates to maximise 3D overlap.
@@ -169,7 +170,7 @@ class MCS:
             "max3d": max3d,
             "threed": threed,
             "element_change": element_change,
-            "seed": seed,
+            "seed": seed if seed is not None else "",
             "shift": shift,
         }
 
@@ -707,7 +708,7 @@ class MCS:
             ringMatchesRingOnly=True,
             completeRingsOnly=True,
             matchChiralTag=False,
-            seedSmarts=seed,
+            seedSmarts=self.options["seed"],  # type: ignore[arg-type]
         )
 
         # Note that we need matchChiralTag=False as we want to match chiral atoms with different

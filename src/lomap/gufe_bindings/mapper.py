@@ -24,7 +24,7 @@ class LomapAtomMapper(AtomMapper):
     threed: bool
     max3d: float
     element_change: bool
-    seed: str
+    seed: str | None
     shift: bool
 
     def __init__(
@@ -34,7 +34,7 @@ class LomapAtomMapper(AtomMapper):
         threed: bool = True,
         max3d: float = 1.0,
         element_change: bool = True,
-        seed: str = "",
+        seed: str | None = None,
         shift: bool = False,
     ):
         """Wraps the MCS atom mapper from Lomap.
@@ -54,9 +54,10 @@ class LomapAtomMapper(AtomMapper):
           allowed.
         element_change : bool, default True
           If ``True``, allow element changes in the mappings.
-        seed : str, default ""
+        seed : str | None, default None
           SMARTS string to use as seed for MCS searches.  When used across an
           entire set of ligands, this can speed up calculations considerably.
+          If ``None`` and empty string (no seed) will be passed through.
         shift : bool, default False
           If ``True``, translate the two molecules' MCS to minimize the
           RMSD. This can boost potential alignment when determining 3D overlap.
