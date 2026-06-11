@@ -8,4 +8,5 @@ dependencies:
   # https://github.com/rdkit/rdkit/issues/9335
   - rdkit != 2024.03.4, != 2026.03.3
   - pytest
+  - pytest-xdist
   - codecov
