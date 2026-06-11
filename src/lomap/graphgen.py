@@ -688,8 +688,8 @@ class GraphGen:
         This has been extended from the original algorithm. We not only care
         if the number of acyclic nodes has increased, but also if the number
         of acyclic edges (bridges) has increased.
-        If the number of acycclicc edges hasn't increased, then the number of
-        acyclic nodes hasn't eitherrr, so that test is included in the edges test.
+        If the number of acyclic edges hasn't increased, then the number of
+        acyclic nodes hasn't either, so that test is included in the edges test.
         """
         hasCovering = True
 
@@ -992,11 +992,11 @@ class GraphGen:
         ----------
         dbase : DBMolecules
           The molecule database object.
-        max_images : int
+        max_images : int, default 2000
           Max number of displayed chemical molecule images as graph nodes.
-        max_mol_size : float
+        max_mol_size : float, default 50.0
           The maximum threshold distance in angstroms used to select if a molecule is depicted.
-        edge_labels : bool
+        edge_labels : bool, default True
           If ``True``, add labels on edges.
         """
 
@@ -1242,11 +1242,11 @@ class GraphGen:
         ----------
         dbase : DBMolecules
           The molecule database object.
-        max_images : int
+        max_images : int, default 2000
           Max number of displayed chemical molecule images as graph nodes.
-        max_nodes : int
+        max_nodes : int, default 100
           Max number of displayed nodes in the graph.
-        edge_labels : bool
+        edge_labels : bool, default True
           If ``True``, add edge labels in the graph.
 
         Notes
