@@ -34,10 +34,10 @@ classifiers = [
 ]
 dynamic = [ "version" ]
 dependencies = [
+  "matplotlib",
   "networkx",
   "numpy",
   "rdkit",
-  "matplotlib",
 ]
 optional-dependencies.graphviz = [ "pygraphviz" ]
 optional-dependencies.test = [
