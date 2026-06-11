@@ -39,12 +39,12 @@ dependencies = [
   "numpy",
   "rdkit",
 ]
+optional-dependencies.credits = [ "duecredit" ]
 optional-dependencies.graphviz = [ "pygraphviz" ]
 optional-dependencies.test = [
   "codecov",
   "pytest",
 ]
-optional-dependencies.credits = [ "duecredit" ]
 urls = { Homepage = "https://github.com/OpenFreeEnergy/Lomap" }
 scripts.lomap = "lomap.dbmol:startup"
 
