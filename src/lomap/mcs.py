@@ -708,7 +708,7 @@ class MCS:
             ringMatchesRingOnly=True,
             completeRingsOnly=True,
             matchChiralTag=False,
-            seedSmarts=self.options["seed"],
+            seedSmarts=self.options["seed"],  # type: ignore[arg-type]
         )
 
         # Note that we need matchChiralTag=False as we want to match chiral atoms with different
