@@ -712,7 +712,8 @@ class GraphGen:
 
         for node in subgraph:
             eccentricity = nx.eccentricity(subgraph, node)
-            if eccentricity > max_path_length:
+            # eccentricity is {node: distance} so we take that value
+            if eccentricity[node] > max_path_length:
                 withinMaxDistance = False
                 logging.info(f"Rejecting edge deletion on graph diameter for node {node}")
 
@@ -746,7 +747,8 @@ class GraphGen:
         if not hasActives:
             return 0  # No actives, so don't bother checking
 
-        paths = nx.shortest_path(subgraph)
+        # Backwards compatible networkx support
+        paths = dict(nx.shortest_path(subgraph))
         for node in subgraph.nodes():
             if not subgraph.nodes[node]["active"]:
                 ok = False
@@ -808,7 +810,7 @@ class GraphGen:
           graph may have disconnected parts.
         """
 
-        finalGraph = nx.Graph()
+        finalGraph: nx.Graph = nx.Graph()
 
         for subgraph in working_subgraphs:
             finalGraph = nx.union(finalGraph, subgraph)
