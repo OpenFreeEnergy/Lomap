@@ -150,9 +150,9 @@ def generate_lomap_network(
 
     if not ln.is_connected():
         if not allow_disconnected:
-            errmsg = "Failed to create a connected network where all nodes are either directly or undirectly connected to each other."
+            errmsg = "Failed to create a connected network where all nodes are either directly or indirectly connected to each other."
             raise RuntimeError(errmsg)
-        wmsg = "Could not generate a connected network - not all nodes are directly or undirectly connected to each other."
+        wmsg = "Could not generate a connected network - not all nodes are directly or indirectly connected to each other."
         warnings.warn(wmsg)
 
     return ln
