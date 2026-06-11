@@ -34,7 +34,7 @@ import multiprocessing
 import os
 import pickle
 import warnings
-from collections.abc import Iterator
+from collections.abc import Iterator, Sequence
 from typing import Any
 
 import networkx as nx
@@ -480,7 +480,7 @@ class DBMolecules:
         molid_list = []
 
         # List of molecule that failed to load in
-        mol_error_list_fn = []
+        mol_error_list_fn: list[str] = []
 
         logging.info(30 * "-")
 
@@ -570,7 +570,7 @@ class DBMolecules:
                         raise OSError("Syntax error in links file parsing line:" + line)
                     indexa = self.inv_dic_mapping[mols[0]]
                     indexb = self.inv_dic_mapping[mols[1]]
-                    score = -2
+                    score = -2.0
                     if len(mols) > 2:
                         score = float(mols[2])
                     if len(mols) > 3:
@@ -842,7 +842,7 @@ class DBMolecules:
         elems = int(self.nums() * (self.nums() - 1) / 2)
 
         if self.options["parallel"] == 1:  # Serial execution
-            MCS_map = {}
+            MCS_map: dict[tuple[int, int], str] = {}
             self.compute_mtx(
                 0, elems - 1, self.strict_mtx, self.loose_mtx, self.true_strict_mtx, MCS_map
             )
@@ -870,7 +870,7 @@ class DBMolecules:
                 strict_mtx = multiprocessing.Array("d", self.strict_mtx)
                 loose_mtx = multiprocessing.Array("d", self.loose_mtx)
                 true_strict_mtx = multiprocessing.Array("d", self.true_strict_mtx)
-                MCS_map = manager.dict()
+                MCS_map = manager.dict()  # type: ignore[assignment]
 
                 # Chopping the indexes redistributing the remainder
                 for k in range(0, kmax):
@@ -882,7 +882,7 @@ class DBMolecules:
                         # Note: this loop structure assumes j will be defined
                         # in the first iteration where k == 0, it's not ideal and linters
                         # don't like it, but it should work
-                        i = j + 1  # noqa: F821
+                        i = j + 1  # type: ignore[has-type] # noqa: F821
 
                     if k != kmax - 1:
                         j = i + spc - 1
