@@ -5,6 +5,7 @@ from lomap import LomapAtomMapper
 try:
     import gufe
     from gufe.tests.test_tokenization import GufeTokenizableTestsMixin
+
     HAS_GUFE = True
 except ImportError:
     # Fake assign to object to avoid issues
@@ -17,6 +18,7 @@ def test_lomap_atommaper_no_gufe_error():
     msg = "gufe is required to use `LomapAtomMapper` but is not installed."
     with pytest.raises(ImportError, match=msg):
         _ = LomapAtomMapper()
+
 
 @pytest.mark.skipif(not HAS_GUFE, reason="requires gufe installed")
 class TestLomapAtomMapper(GufeTokenizableTestsMixin):
@@ -40,13 +42,13 @@ class TestLomapAtomMapper(GufeTokenizableTestsMixin):
             "seed": "CC",
             "shift": False,
         }
-    
+
         m = LomapAtomMapper(**ref_vals)
-    
+
         d = m.to_dict()
-    
+
         m2 = LomapAtomMapper.from_dict(d)
-    
+
         assert m2
         assert m2.time == ref_vals["time"]
         assert m2.threed == ref_vals["threed"]
