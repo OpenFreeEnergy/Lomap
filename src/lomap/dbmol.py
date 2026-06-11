@@ -1013,7 +1013,7 @@ class SMatrix(np.ndarray):
         buffer: np.ndarray | None = None,
         offset: int = 0,
         strides: tuple[int, ...] | None = None,
-        order: Literal['K', 'A', 'C', 'F'] | None = None,
+        order: Literal["K", "A", "C", "F"] | None = None,
     ) -> SMatrix:
         if len(shape) > 2:
             raise ValueError("The matrix shape is greater than two")
@@ -1417,7 +1417,7 @@ def startup() -> None:
 def _startup_inner(
     directory: str,  # TODO: Should really constant out the CLI constants to keep this DRY
     parallel: int = 1,
-    verbose: Literal['off', 'info', 'pedantic'] = "info",
+    verbose: Literal["off", "info", "pedantic"] = "info",
     time: int = 20,
     ecrscore: float = 0.0,
     threed: bool = False,
