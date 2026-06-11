@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import itertools
 import logging
-from collections.abc import Callable
 import warnings
+from collections.abc import Callable
 
 import networkx as nx
 import numpy as np
