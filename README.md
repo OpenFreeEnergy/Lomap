@@ -4,8 +4,8 @@
 # Lomap
 The Lead Optimization Mapper (LOMAP) is an automated algorithm for planning
 efficient relative free energy calculation networks across a set of ligands,
-built on freely available tools such as RDKit. 
-With the optional [`gufe`](https://github.com/OpenFreeEnergy/gufe) dependency installed, 
+built on freely available tools such as RDKit.
+With the optional [`gufe`](https://github.com/OpenFreeEnergy/gufe) dependency installed,
 it also integrates with the [Open Free Energy](https://openfree.energy) ecosystem.
 The method is described in the original
 [LOMAP publication](https://doi.org/10.1007/s10822-013-9678-y).
@@ -23,29 +23,29 @@ mamba install -c conda-forge lomap2
 ```
 
 ## Optional dependencies
- 
+
 `lomap` has optional dependencies that extend its capabilities:
- 
+
 ### gufe
- 
+
 The atom mapping, scoring, and network-planning API is provided through optional
 [`gufe`](https://gufe.openfree.energy/en/latest/) bindings, which let `lomap`
 interoperate seamlessly with the rest of the
 [Open Free Energy ecosystem](https://openfree.energy/projects):
- 
+
 ```bash
 conda install -c conda-forge gufe
 ```
- 
+
 See the [gufe bindings API
 documentation](https://lomap.readthedocs.io/en/latest/api.html#gufe-bindings-api)
 for how to use them.
- 
+
 ### pygraphviz
- 
+
 The `GraphGen` class can plot the network graph through its `draw()` method,
 which requires [pygraphviz](https://pygraphviz.github.io/):
- 
+
 ```bash
 conda install -c conda-forge pygraphviz
 # or
