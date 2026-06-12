@@ -80,7 +80,9 @@ jobs:
           micromamba list
 
       - name: Test the package
-        run: pytest -vv
+        env:
+          DUECREDIT_ENABLE: 'yes'
+        run: pytest -n auto -vv
 
       - name: Codecov
         uses: codecov/codecov-action@v5
