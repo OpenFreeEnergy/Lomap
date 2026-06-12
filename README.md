@@ -38,7 +38,7 @@ Quickstart
 ----------
 
 This example loads two ligands from SDF files and plans a perturbation network between
-them using LOMAP's default mapper and scorer.
+them using LOMAP's default atom mapper and scorer.
 
 ```python
 import importlib.resources
