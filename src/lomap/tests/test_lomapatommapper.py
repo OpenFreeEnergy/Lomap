@@ -4,9 +4,12 @@ from lomap import LomapAtomMapper
 
 try:
     import gufe
+    from gufe.tests.test_tokenization import GufeTokenizableTestsMixin
 
     HAS_GUFE = True
 except ImportError:
+    # Fake assign to object to avoid issues
+    GufeTokenizableTestsMixin = object
     HAS_GUFE = False
 
 
@@ -18,43 +21,46 @@ def test_lomap_atommaper_no_gufe_error():
 
 
 @pytest.mark.skipif(not HAS_GUFE, reason="requires gufe installed")
-def test_to_dict_roundtrip():
-    ref_vals = {
-        "time": 19,
-        "threed": False,
-        "max3d": 999.0,
-        "element_change": False,
-        "seed": "CC",
-        "shift": False,
-    }
-
-    m = LomapAtomMapper(**ref_vals)
-
-    d = m.to_dict()
-
-    m2 = LomapAtomMapper.from_dict(d)
-
-    assert m2
-    assert m2.time == ref_vals["time"]
-    assert m2.threed == ref_vals["threed"]
-    assert m2.max3d == ref_vals["max3d"]
-    assert m2.element_change == ref_vals["element_change"]
-    assert m2.seed == ref_vals["seed"]
-    assert m2.shift == ref_vals["shift"]
-
-
-@pytest.mark.skipif(not HAS_GUFE, reason="requires gufe installed")
-def test_repr():
-    m = LomapAtomMapper()
-
-    assert repr(m) == (
+class TestLomapAtomMapper(GufeTokenizableTestsMixin):
+    cls = LomapAtomMapper
+    key = None
+    repr = (
         "<LomapAtomMapper (time=20, threed=True, max3d=1.0, "
         "element_change=True, seed='None', shift=False)>"
     )
 
-    m = LomapAtomMapper(time=15, seed="c1ccccc1")
+    @pytest.fixture
+    def instance(self):
+        return LomapAtomMapper()
 
-    assert repr(m) == (
-        "<LomapAtomMapper (time=15, threed=True, max3d=1.0, "
-        "element_change=True, seed='c1ccccc1', shift=False)>"
-    )
+    def test_to_dict_roundtrip_different(self):
+        ref_vals = {
+            "time": 19,
+            "threed": False,
+            "max3d": 999.0,
+            "element_change": False,
+            "seed": "CC",
+            "shift": False,
+        }
+
+        m = LomapAtomMapper(**ref_vals)
+
+        d = m.to_dict()
+
+        m2 = LomapAtomMapper.from_dict(d)
+
+        assert m2
+        assert m2.time == ref_vals["time"]
+        assert m2.threed == ref_vals["threed"]
+        assert m2.max3d == ref_vals["max3d"]
+        assert m2.element_change == ref_vals["element_change"]
+        assert m2.seed == ref_vals["seed"]
+        assert m2.shift == ref_vals["shift"]
+
+    def test_repr_different(self):
+        m = LomapAtomMapper(time=15, seed="c1ccccc1")
+
+        assert repr(m) == (
+            "<LomapAtomMapper (time=15, threed=True, max3d=1.0, "
+            "element_change=True, seed='c1ccccc1', shift=False)>"
+        )
