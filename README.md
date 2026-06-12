@@ -2,112 +2,77 @@
 [![Documentation Status](https://readthedocs.org/projects/lomap/badge/?version=latest)](https://lomap.readthedocs.io/en/latest/?badge=latest)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8344248.svg)](https://doi.org/10.5281/zenodo.16898468)
 # Lomap
-Alchemical free energy calculations hold increasing promise
-as an aid to drug discovery efforts. However, applications of
-these techniques in discovery projects have been relatively
-rare, partly because of the difficulty of planning and setting up
-calculations. The lead optimization mapper (LOMAP) was
-introduced as an automated algorithm to plan efficient relative
-free energy calculations between potential ligands within
-a substantial set of compounds. The original LOMAP code was mainly
-based on commercial APIs such as OpenEye and Schrodinger. The aim
-of this project is to develop a new version of LOMAP based on freely
-available APIs such as RDKit offering the scientific community a
-free tool to plan in advance binding free energy calculations.
-
-## Prerequisites
-* RDKit Release > 2021
-* NetworkX
-* Matplotlib
-* python > 3.8
-
-Authors
--------
-
-See [AUTHORS.md](https://github.com/OpenFreeEnergy/Lomap/blob/main/AUTHORS.md)
-
+The Lead Optimization Mapper (LOMAP) is an automated algorithm for planning
+efficient relative free energy calculation networks across a set of ligands,
+built on freely available tools such as RDKit. 
+With the optional [`gufe`](https://github.com/OpenFreeEnergy/gufe) dependency installed, 
+it also integrates with the [Open Free Energy](https://openfree.energy) ecosystem. .
 
 ## Installation
 
 ### Latest Release
 
-You can install using conda (or mamba). Note the package name is `lomap2`:
-`conda install -c conda-forge lomap2`
+From conda-forge (note the package name is `lomap2`):
+
+```bash
+conda install -c conda-forge lomap2
+```
+
+The modern mapping and network API (see below) additionally requires
+[`gufe`](https://github.com/OpenFreeEnergy/gufe):
+
+```bash
+conda install -c conda-forge gufe
+```
 
 ### Development Version
 Alternatively, you can install the development version of `lomap` directly from the `main` branch of this repository.
 
-First install the package dependencies using conda (or mamba) in a virtual environment with:
-
 ```bash
 conda env create -f environment.yaml
 conda activate lomap-env
+pip install -e .
 ```
 
-Then install `lomap` locally with:
+Quickstart
+----------
 
-`pip install -e .`
-
-Usage
------
-As a command line tool, LOMAP can be simply used as:
-`
-lomap test/basic/
-`
-
-For a basic example run:
-`python examples/example.py`
-
-For generating radial graphs with a hub, run:
-`python examples/example_radial.py`
-
-If you would rather use the API directly, try:
+This example loads two ligands from SDF files and plans a perturbation network between 
+them using LOMAP's default mapper and scorer.
 
 ```python
+import importlib.resources
+
 import lomap
+from gufe import SmallMoleculeComponent
 
-# Generate the molecule database starting from a directory containing .mol2 files
+# Two example ligands ship with the package under lomap.tests.data
+data = importlib.resources.files("lomap.tests.data")
+ligands = [
+    SmallMoleculeComponent.from_sdf_file(data / name)
+    for name in ["lig_41.sdf", "lig_74.sdf"]
+]
 
-db_mol = lomap.DBMolecules("python string pointing to a directory with mol2 files", output=True)
-
-#More graphing options:
-# Use the complete radial graph option. The ligand with the most structural similarity to all of the others will be picked as the 'lead compound' and used as the central compound.
-db_mol = lomap.DBMolecules("python string pointing to a directory with mol2 files", output=True, radial=True)
-
-# Use a radial graph with a manually specified hub compound
-db_mol = lomap.DBMolecules("python string pointing to a directory with mol2 files", output=True, radial=True, hub=filename.mol2)
-
-# Use a radial graph with a manually specified hub compound and fast graphing option
-#the fast graphing option creates the initial graph by connecting the hub ligand with the possible surrounding ligands and adds surrounding edges based on the similarities across surrounding nodes
-db_mol = lomap.DBMolecules("python string pointing to a directory with mol2 files", output=True, radial=True, hub=filename.mol2, fast=True)
-
-# Calculate the similarity matrix between the database molecules. Two molecules are generated
-# related to the strict rule and loose rule
-
-strict, loose = db_mol.build_matrices()
-
-# Generate the NetworkX graph and output the results
-nx_graph = db_mol.build_graph()
-
-
-# Calculate the Maximum Common Subgraph (MCS) between
-# the first two molecules in the molecule database
-# ignoring hydrogens and depicting the mapping in a file
-
-MC = lomap.MCS.getMapping(db_mol[0].getMolecule(), db_mol[1].getMolecule(), hydrogens=False, fname='mcs.png')
-
-
-# Alchemical transformation are usually performed between molecules with
-# the same charges. However, it is possible to allow this transformation
-# manually setting the electrostatic score for the whole set of molecules
-# producing a connected graph. The electrostatic score must be in the
-# range [0,1]
-
-
-db_mol = lomap.DBMolecules("python string pointing to a directory with mol2 files", output=True, ecrscore=0.1)
-strict, loose = db_mol.build_matrices()
-nx_graph = db_mol.build_graph()
+# Build a LigandNetwork using LOMAP's scoring and network-construction rules
+network = lomap.generate_lomap_network(
+    ligands=ligands,
+    mappers=lomap.LomapAtomMapper(),
+    scorer=lomap.default_lomap_score,
+)
+print(f"{len(network.nodes)} ligands, {len(network.edges)} edges")
 ```
+
+## Deprecated APIs
+
+The legacy `DBMolecules` API and CLI are deprecated
+and will be removed in the next major release; new code should use
+`generate_lomap_network` instead. See
+[issue #138](https://github.com/OpenFreeEnergy/Lomap/issues/138) and the
+[legacy documentation](https://lomap.readthedocs.io/en/latest/legacy.html).
+
+## Authors
+
+See [AUTHORS.md](https://github.com/OpenFreeEnergy/Lomap/blob/main/AUTHORS.md).
 
 ## History
 
