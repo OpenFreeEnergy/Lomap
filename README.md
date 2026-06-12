@@ -4,8 +4,8 @@
 # Lomap
 The Lead Optimization Mapper (LOMAP) is an automated algorithm for planning
 efficient relative free energy calculation networks across a set of ligands,
-built on freely available tools such as RDKit. 
-With the optional [`gufe`](https://github.com/OpenFreeEnergy/gufe) dependency installed, 
+built on freely available tools such as RDKit.
+With the optional [`gufe`](https://github.com/OpenFreeEnergy/gufe) dependency installed,
 it also integrates with the [Open Free Energy](https://openfree.energy) ecosystem. .
 
 ## Installation
@@ -37,7 +37,7 @@ pip install -e .
 Quickstart
 ----------
 
-This example loads two ligands from SDF files and plans a perturbation network between 
+This example loads two ligands from SDF files and plans a perturbation network between
 them using LOMAP's default mapper and scorer.
 
 ```python
