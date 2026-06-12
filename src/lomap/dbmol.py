@@ -206,6 +206,13 @@ class DBMolecules:
             When using 'threed' option, if to translate the two molecules to superimpose before checking real space
             alignment, default True
         """
+        warnings.warn(
+            "The DBMolecules class and related API is deprecated and will be removed in the next major release. "
+            "Please let us know if keeping this functionality is important to you, "
+            "see https://github.com/OpenFreeEnergy/Lomap/issues/149 for more details.",
+            category=DeprecationWarning,
+        )
+
         # Set the Logging
         if verbose == "off":
             logging.basicConfig(format="%(message)s", level=logging.CRITICAL)
@@ -1154,7 +1161,7 @@ def startup():
     # Emit user-facing warning that the CLI is deprecated and will be removed
     warnings.warn(
         "The dbmol CLI is deprecated and will be removed in the next major release. "
-        "Please let us know if you keeping this CLI entry point is important to you, "
+        "Please let us know if keeping this CLI entry point is important to you, "
         "see https://github.com/OpenFreeEnergy/Lomap/issues/138 for more details.",
         category=DeprecationWarning,
     )
