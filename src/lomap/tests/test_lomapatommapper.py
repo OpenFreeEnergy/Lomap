@@ -49,7 +49,7 @@ class TestLomapAtomMapper(GufeTokenizableTestsMixin):
 
         m2 = LomapAtomMapper.from_dict(d)
 
-        assert m2
+        assert isinstance(m2, LomapAtomMapper)
         assert m2.time == ref_vals["time"]
         assert m2.threed == ref_vals["threed"]
         assert m2.max3d == ref_vals["max3d"]
