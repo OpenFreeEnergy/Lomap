@@ -6,9 +6,15 @@ Lomap is developed by:
 - Lester Hedges
 - Antonia S J S Mey
 - Jenke Scheen
-- Mike Henry
+- Mike M Henry
 - Richard J Gowers
 - Irfan Alibay
 - David Swenson
 - Nigel Palmer
 - Shuai Liu
+- Alyssa Travitz
+- Hannah Baumann
+- Shaochen Shi
+- Ashley Mitchell
+- Tom Ginsberg
+- Josh Horton
