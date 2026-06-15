@@ -15,6 +15,7 @@ Checklist
 * [ ] All new code is appropriately documented (user-facing code _must_ have complete docstrings).
 * [ ] Added a ``news`` entry, or the changes are not user-facing.
 * [ ] Ran pre-commit: you can run [pre-commit](https://pre-commit.com) locally or comment on this PR with `pre-commit.ci autofix`.
+* [ ] Add yourself to the AUTHORS.md list.
 
 ## Developers certificate of origin
 - [ ] I certify that this contribution is covered by the MIT License [here](https://github.com/OpenFreeEnergy/openfe/blob/main/LICENSE) and the **Developer Certificate of Origin** at <https://developercertificate.org/>.
