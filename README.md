@@ -12,62 +12,19 @@ The method is described in the original
 
 ## Installation
 
-### Latest Release
+`lomap` is available on conda-forge as the `lomap2` package. See the
+[installation documentation](https://lomap.readthedocs.io/en/latest/installation.html)
+for install instructions, including the development install and optional
+dependencies (`gufe` and `pygraphviz`).
 
-From conda-forge (note the package name is `lomap2`):
+## Quickstart
 
-```bash
-conda install -c conda-forge lomap2
-# or, equivalently
-mamba install -c conda-forge lomap2
-```
-
-## Optional dependencies
- 
-`lomap` has optional dependencies that extend its capabilities:
- 
-### gufe
- 
-The atom mapping, scoring, and network-planning API is provided through optional
-[`gufe`](https://gufe.openfree.energy/en/latest/) bindings, which let `lomap`
-interoperate seamlessly with the rest of the
-[Open Free Energy ecosystem](https://openfree.energy/projects):
- 
-```bash
-conda install -c conda-forge gufe
-```
- 
-See the [gufe bindings API
-documentation](https://lomap.readthedocs.io/en/latest/api.html#gufe-bindings-api)
-for how to use them.
- 
-### pygraphviz
- 
-The `GraphGen` class can plot the network graph through its `draw()` method,
-which requires [pygraphviz](https://pygraphviz.github.io/):
- 
-```bash
-conda install -c conda-forge pygraphviz
-# or
-python -m pip install pygraphviz
-```
-
-### Development Version
-Alternatively, you can install the development version of `lomap` directly from the `main` branch of this repository.
-
-```bash
-conda env create -f environment.yaml
-conda activate lomap-env
-pip install -e .
-```
-
-Quickstart
-----------
-
-This example loads two ligands from SDF files and plans a perturbation network between
-them using LOMAP's default atom mapper and scorer.
+This example uses LOMAP's optional `gufe` bindings to load two example ligands
+bundled with the package and plan a perturbation network between them with the
+default mapper and scorer.
 
 ```python
+# requires the optional `gufe` dependency (see Installation)
 import importlib.resources
 
 import lomap
@@ -89,13 +46,8 @@ network = lomap.generate_lomap_network(
 print(f"{len(network.nodes)} ligands, {len(network.edges)} edges")
 ```
 
-## Deprecated APIs
-
-The legacy `DBMolecules` API and CLI are deprecated
-and will be removed in the next major release; new code should use
-`generate_lomap_network` instead. See
-[issue #138](https://github.com/OpenFreeEnergy/Lomap/issues/138) and the
-[legacy documentation](https://lomap.readthedocs.io/en/latest/legacy.html).
+For proposing individual mappings, customising edge scores, and the full set of
+network options, see the [documentation](https://lomap.readthedocs.io).
 
 ## Authors
 
