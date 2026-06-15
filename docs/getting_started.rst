@@ -40,6 +40,7 @@ if the ligands share no suitable common substructure.
     from lomap import LomapAtomMapper
 
     mapper = LomapAtomMapper()
+    # suggest_mappings is a generator, so wrap it in list() to pull out all the possible mappings
     mappings = list(mapper.suggest_mappings(ligands[0], ligands[1]))
 
     mapping = mappings[0]
@@ -66,6 +67,11 @@ ring sizes, and net-charge differences.
 
     score = default_lomap_score(mapping)
     print(f"{score:.3f}")
+
+The score of ``0.095`` for this pair is expected. ``lig_41`` and ``lig_74``
+differ at both ends; fused ring system is created on one end and the
+heteroaryl head changes, leaving a relatively small shared core, along with
+element and hybridization changes.
 
 The sub-scores live in ``lomap.gufe_bindings.scorers`` if you need a custom
 scorer.
