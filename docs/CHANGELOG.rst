@@ -86,7 +86,7 @@ v2.3.0
 
 **Added:**
 
-* Added shift option to MCS and cli (-s or --shift), this defaults to ``True``. 
+* Added shift option to MCS and cli (-s or --shift), this defaults to ``True``.
   In combination with ``threed``/``-3`` this option controls if the two
   structures are shifted on top of each other (using only translation and no rotation) before
   geometric mismatch is judged.  This was always used as default until now.
