@@ -40,7 +40,7 @@ class TestLomapAtomMapper(GufeTokenizableTestsMixin):
             "max3d": 999.0,
             "element_change": False,
             "seed": "CC",
-            "shift": False,
+            "shift": True,
         }
 
         m = LomapAtomMapper(**ref_vals)
