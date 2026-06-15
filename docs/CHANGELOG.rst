@@ -20,7 +20,7 @@ its next major release.
   are at least indirectly connected to each other. This behaviour
   can be controlled using the ``allow_disconnected`` keyword
   (`PR #154 <https://github.com/OpenFreeEnergy/Lomap/pull/154>`_).
-* The `gufe` package is now an optional dependency of Lomap
+* The ``gufe`` package is now an optional dependency of Lomap
   (`PR #134 <https://github.com/OpenFreeEnergy/Lomap/pull/134>`_).
 * Minimum tested Python version has been raised to Python 3.11 and gufe
   raised to v1.0 (`PR #124 <https://github.com/OpenFreeEnergy/Lomap/pull/124>`_).
@@ -37,9 +37,9 @@ its next major release.
 * The ``fp`` module and associated ``Figureprint`` class are deprecated
   and will be removed in the next release of Lomap
   (`Issue #129 <https://github.com/OpenFreeEnergy/Lomap/issues/129>`_).
-* Deprecated the use of `str(None)` as an input to the `hub` keyword argument
-  in `graphgen.GraphGen.pick_lead`. This option will be removed in the next release
-  of Lomap, please use `None` instead
+* Deprecated the use of ``str(None)`` as an input to the ``hub`` keyword argument
+  in ``graphgen.GraphGen.pick_lead``. This option will be removed in the next release
+  of Lomap, please use ``None`` instead
   (`PR #125 <https://github.com/OpenFreeEnergy/Lomap/pull/125>`_).
 
 **Removed:**
@@ -56,7 +56,7 @@ its next major release.
 * Improvements to the optional ``pygraphviz`` dependency
   (`PR #141 <https://github.com/OpenFreeEnergy/Lomap/pull/141>`_).
 * Various historical typing issues, including modernizing various
-  `rdkit.Chem.AllChem` calls
+  ``rdkit.Chem.AllChem`` calls
   (`PR #125 <https://github.com/OpenFreeEnergy/Lomap/pull/125>`_).
 
 
