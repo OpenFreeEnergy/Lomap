@@ -22,7 +22,7 @@ its next major release.
   (`PR #154 <https://github.com/OpenFreeEnergy/Lomap/pull/154>`_).
 * The `gufe` package is now an optional dependency of Lomap
   (`PR #134 <https://github.com/OpenFreeEnergy/Lomap/pull/134>`_).
-* Minimum tested Python version has been raised on Python 3.11 and gufe
+* Minimum tested Python version has been raised to Python 3.11 and gufe
   raised to v1.0 (`PR #124 <https://github.com/OpenFreeEnergy/Lomap/pull/124>`_).
 * The ``seed`` argument to ``LomapAtomMapper`` and ``MCS`` is now
   ``None`` by default, which has the same behaviour as the
@@ -130,7 +130,7 @@ v2.0.0
 
 **Changed:**
 
-* Replaced usage of of ``argparse.Namespace`` as input to class ``inits``
+* Replaced usage of ``argparse.Namespace`` as input to class ``inits``
   (e.g. ``MCS``) in favour of dicts.
 * Renamed various dunderscore variables to single underscore.
 * Rewrote tests in pytest, using fixtures to iterate over cases.
