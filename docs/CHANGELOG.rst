@@ -25,9 +25,9 @@ its next major release.
 * Minimum tested Python version has been raised on Python 3.11 and gufe
   raised to v1.0 (`PR #124 <https://github.com/OpenFreeEnergy/Lomap/pull/124>`_).
 * The ``seed`` argument to ``LomapAtomMapper`` and ``MCS`` is now
-  ``None`` by default, which has the same behaviour as the the
+  ``None`` by default, which has the same behaviour as the
   previous default ``""`` (an empty string - which means no seed).
-  This is purely an asthetic change to make the code more Pythonic.
+  This is purely an aesthetic change to make the code more Pythonic.
   (`PR #156 <https://github.com/OpenFreeEnergy/Lomap/pull/156>`_).
 
 **Deprecated:**
@@ -50,8 +50,8 @@ its next major release.
 **Fixed:**
 
 * The gufe bindings for the MNCAR score, which encodes the "minimum number of
-  common atoms rule", incorrectly compared the common atoms threadshol ``ths``
-  as `>` instead of `>=`. This is now fixed
+  common atoms rule", incorrectly compared the common atoms threshold ``ths``
+  as ``>`` instead of ``>=``. This is now fixed.
   (`Issue #147 <https://github.com/OpenFreeEnergy/Lomap/issues/147>`_).
 * Improvements to the optional ``pygraphviz`` dependency
   (`PR #141 <https://github.com/OpenFreeEnergy/Lomap/pull/141>`_).
@@ -91,7 +91,7 @@ v2.3.0
   structures are shifted on top of each other (using only translation and no rotation) before
   geometric mismatch is judged.  This was always used as default until now.
   In cases where bad symmetric options are being chosen, using ``shift=False`` might resolve issues
-  (``Issue #26 <https://github.com/OpenFreeEnergy/Lomap/issues/26>`_).
+  (`Issue #26 <https://github.com/OpenFreeEnergy/Lomap/issues/26>`_).
 
 
 
@@ -102,11 +102,11 @@ v2.2.0
 
 * Added ``use_common_core`` option to ``DBMolecules`` and ``-C`` / ``--common-core`` option to CLI.
   This is on by default and speeds up network creation by 10-50x
-  (``PR #25 <https://github.com/OpenFreeEnergy/Lomap/pull/25>`_).
+  (`PR #25 <https://github.com/OpenFreeEnergy/Lomap/pull/25>`_).
 
 **Fixed:**
 
-* Fixed ``DBMolecules`` iteation in Python v3 (``PR #18 <https://github.com/OpenFreeEnergy/Lomap/pull/18>`_).
+* Fixed ``DBMolecules`` iteration in Python v3 (`PR #18 <https://github.com/OpenFreeEnergy/Lomap/pull/18>`_).
 
 
 
