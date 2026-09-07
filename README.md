@@ -33,8 +33,7 @@ from gufe import SmallMoleculeComponent
 # Two example ligands ship with the package under lomap.tests.data
 data = importlib.resources.files("lomap.tests.data")
 ligands = [
-    SmallMoleculeComponent.from_sdf_file(data / name)
-    for name in ["lig_41.sdf", "lig_74.sdf"]
+    SmallMoleculeComponent.from_sdf_file(data / name) for name in ["lig_41.sdf", "lig_74.sdf"]
 ]
 
 # Build a LigandNetwork using LOMAP's scoring and network-construction rules
