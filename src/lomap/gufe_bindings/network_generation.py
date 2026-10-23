@@ -18,16 +18,16 @@ try:
 except ImportError:
     pass
 
-from lomap._due import Doi, due
+from lomap._due import BibTeX, due
 from lomap.graphgen import GraphGen
-from lomap.utils import deprecated_kwargs, requires_package
+from lomap.utils import _LOMAP_BIBTEX, deprecated_kwargs, requires_package
 
 logger = logging.getLogger(__name__)
 
 
 @requires_package("gufe")
 @deprecated_kwargs(name_mappings={"molecules": "ligands"})
-@due.dcite(Doi("https://doi.org/10.1007/s10822-013-9678-y"), description="LOMAP")
+@due.dcite(BibTeX(_LOMAP_BIBTEX), description="LOMAP")
 def generate_lomap_network(
     ligands: list[SmallMoleculeComponent],
     mappers: AtomMapper | list[AtomMapper],
