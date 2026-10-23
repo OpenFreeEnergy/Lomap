@@ -1,6 +1,6 @@
 [workspace]
 channels = ["conda-forge"]
-name = "Lomap"
+name = "lomap2"
 platforms = ["linux-64", "osx-64", "osx-arm64"]
 
 [tasks]
