@@ -5,6 +5,7 @@ import warnings
 from collections.abc import Callable
 from typing import Any
 
+# define this manually, since the bibtex fetched from doi.org has "month=Sept" (no brackets), which breaks duecredit's parsing
 _LOMAP_BIBTEX = """@article{Liu_2013, title={Lead optimization mapper: automating free energy calculations for lead optimization}, volume={27}, ISSN={1573-4951}, url={http://dx.doi.org/10.1007/s10822-013-9678-y}, DOI={10.1007/s10822-013-9678-y}, number={9}, journal={Journal of Computer-Aided Molecular Design}, publisher={Springer Science and Business Media LLC}, author={Liu, Shuai and Wu, Yujie and Lin, Teng and Abel, Robert and Redmann, Jonathan P. and Summa, Christopher M. and Jaber, Vivian R. and Lim, Nathan M. and Mobley, David L.}, year={2013}, month={Sept}, pages={755–770} }"""
 
 
