@@ -14,8 +14,8 @@ channels = ["https://conda.anaconda.org/conda-forge"]
 
 [environments.docs.dependencies]
 python = "3.12.*"
-gufe = ">=1.11"
-sphinx = "7.*"
+gufe = ">=1.6.1"
+sphinx = "=9"
 sphinx-toolbox = "*"
 
 [environments.docs.pypi-dependencies]
