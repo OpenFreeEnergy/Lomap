@@ -12,7 +12,7 @@ no-default-feature = true
 channels = ["https://conda.anaconda.org/conda-forge"]
 
 [environments.docs.dependencies]
-python = "3.12.*"
+python = "3.13.*"
 gufe = ">=1.6.1"
 sphinx = "=9"
 sphinx-toolbox = "*"
