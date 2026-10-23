@@ -11,3 +11,4 @@ dependencies:
   - pytest-xdist
   - codecov
   - duecredit
+  - citeproc-py <0.10.3  # the default harvard1 style used by duecredit was changed in 0.10.3, this avoids needing an extra dependency on citeproc-py-styles
