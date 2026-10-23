@@ -7,3 +7,22 @@ version = "0.1.0"
 [tasks]
 
 [dependencies]
+
+[environments.docs]
+no-default-feature = true
+channels = ["https://conda.anaconda.org/conda-forge"]
+
+[environments.docs.dependencies]
+python = "3.12.*"
+gufe = ">=1.11"
+sphinx = "7.*"
+sphinx-toolbox = "*"
+
+[environments.docs.pypi-dependencies]
+sphinx-design = "*"
+sphinx-toolbox = "*"
+ofe-sphinx-theme = { git = "https://github.com/OpenFreeEnergy/ofe-sphinx-theme", rev = "v0.3.1" }
+lomap2 = { path = ".", editable = true }
+
+[environments.docs.tasks]
+docs-build = { cmd = "sphinx-build -T -b html . _build/html", cwd = "docs" , description = "Build docs as html with sphinx."}

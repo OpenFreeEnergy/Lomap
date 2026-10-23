@@ -10,4 +10,4 @@ dependencies:
 - pip:
   - sphinx-design
   - sphinx-toolbox
-  - git+https://github.com/OpenFreeEnergy/ofe-sphinx-theme@v0.3.1
+  - ofe-sphinx-theme @ git+https://github.com/OpenFreeEnergy/ofe-sphinx-theme@v0.3.1
