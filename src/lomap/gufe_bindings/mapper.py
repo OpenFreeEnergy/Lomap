@@ -14,8 +14,8 @@ except ImportError:
     AtomMapper = object
 
 from lomap import mcs as lomap_mcs
-from lomap._due import Doi, due
-from lomap.utils import requires_package
+from lomap._due import BibTeX, due
+from lomap.utils import _LOMAP_BIBTEX, requires_package
 
 
 @requires_package("gufe")
@@ -94,7 +94,7 @@ class LomapAtomMapper(AtomMapper):
             f"seed='{self.seed}', shift={self.shift})>"
         )
 
-    @due.dcite(Doi("https://doi.org/10.1007/s10822-013-9678-y"), description="LOMAP")
+    @due.dcite(BibTeX(_LOMAP_BIBTEX), description="LOMAP")
     def suggest_mappings(
         self, componentA: SmallMoleculeComponent, componentB: SmallMoleculeComponent
     ) -> Iterable[LigandAtomMapping]:

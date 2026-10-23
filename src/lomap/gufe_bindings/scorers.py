@@ -12,8 +12,8 @@ except ImportError:
 
 from lomap import dbmol as _dbmol
 from lomap import mcs as lomap_mcs
-from lomap._due import Doi, due
-from lomap.utils import requires_package
+from lomap._due import BibTeX, due
+from lomap.utils import _LOMAP_BIBTEX, requires_package
 
 DEFAULT_ANS_DIFFICULTY = {
     # H to element - not sure this has any effect currently
@@ -30,7 +30,7 @@ DEFAULT_ANS_DIFFICULTY = {
 
 
 due.cite(
-    Doi("https://doi.org/10.1007/s10822-013-9678-y"),
+    BibTeX(_LOMAP_BIBTEX),
     description="LOMAP",
     path="lomap.gufe_bindings.scorers",
     cite_module=True,

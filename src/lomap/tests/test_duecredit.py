@@ -13,7 +13,7 @@ except ImportError:
     HAS_GUFE = False
 
 
-LOMAP_DOI = "https://doi.org/10.1007/s10822-013-9678-y"
+LOMAP_KEY = "Liu_2013"
 
 
 def _skip_if_duecredit_disabled():
@@ -50,7 +50,7 @@ class TestDuecredit:
     @pytest.mark.parametrize(
         "module, doi",
         [
-            ("lomap.gufe_bindings.scorers", LOMAP_DOI),
+            ("lomap.gufe_bindings.scorers", LOMAP_KEY),
         ],
     )
     def test_module_citations(self, module, doi):
@@ -67,7 +67,7 @@ class TestDuecredit:
         mapper = LomapAtomMapper()
         list(mapper.suggest_mappings(*two_smcs))
 
-        assert ("lomap.gufe_bindings.mapper:suggest_mappings", LOMAP_DOI) in due.citations
+        assert ("lomap.gufe_bindings.mapper:suggest_mappings", LOMAP_KEY) in due.citations
 
     @pytest.mark.skipif(not HAS_GUFE, reason="requires gufe")
     def test_network_generation_citation(self, two_smcs):
@@ -82,5 +82,5 @@ class TestDuecredit:
 
         assert (
             "lomap.gufe_bindings.network_generation:generate_lomap_network",
-            LOMAP_DOI,
+            LOMAP_KEY,
         ) in due.citations
