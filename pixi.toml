@@ -1,0 +1,27 @@
+[workspace]
+channels = ["conda-forge"]
+name = "lomap2"
+platforms = ["linux-64", "osx-64", "osx-arm64"]
+
+[tasks]
+
+[dependencies]
+
+[environments.docs]
+no-default-feature = true
+channels = ["https://conda.anaconda.org/conda-forge"]
+
+[environments.docs.dependencies]
+python = "3.13.*"
+gufe = ">=1.6.1"
+sphinx = "=9"
+sphinx-toolbox = "*"
+
+[environments.docs.pypi-dependencies]
+sphinx-design = "*"
+sphinx-toolbox = "*"
+ofe-sphinx-theme = { git = "https://github.com/OpenFreeEnergy/ofe-sphinx-theme", rev = "v0.3.1" }
+lomap2 = { path = ".", editable = true }
+
+[environments.docs.tasks]
+docs-build = { cmd = "sphinx-build -T -b html . _build/html", cwd = "docs" , description = "Build docs as html with sphinx."}
